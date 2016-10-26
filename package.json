@@ -18,6 +18,7 @@
   "homepage": "https://github.com/avw1987/Matcha#readme",
   "dependencies": {
 	  "express": "*",
-	  "neo4j-driver": "*"
+	  "neo4j-driver": "*",
+	  "connect": "*"
   }
 }
