@@ -9,7 +9,7 @@ Requirements:
 
 Get required packages:
 	'npm install' from the root directory of the project
-	NOTE: node_modules has been ignored from git, so it will not be pushed. This is intentional; it's a big folder. Include any new packages in the packages.json and inform the team of the new required packages
+	NOTE: node_modules has been ignored from git, so it will not be pushed. This is intentional: it's a big folder. Include any new packages in the packages.json and inform the team of the new required packages
 
 Start the server:
-	'./bin/www' from the root directory of the project
+	'npm start' from the root directory of the project
