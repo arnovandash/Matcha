@@ -1,6 +1,5 @@
 # Matcha
 
-
 Requirements:
 	node:	(Mac)	brew install node
 	 		(Linux)	sudo apt install nodejs
@@ -13,4 +12,4 @@ Get required packages:
 	NOTE: node_modules has been ignored from git, so it will not be pushed. This is intentional; it's a big folder. Include any new packages in the packages.json and inform the team of the new required packages
 
 Start the server:
-	'node server/server.js' from the root directory of the project
+	'./bin/www' from the root directory of the project
