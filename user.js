@@ -32,7 +32,7 @@ function users() {
 	apoc.query('MATCH (n:Person) RETURN n').exec(server.server).then(function(result) {
 		console.log(util.inspect(result, { depth: null }));
 //		console.log(result[0].data[0].row);
-//		console.log(util.inspect(result[0].data[0].row[0].password, { depth: null }));
+		console.log(util.inspect(JSON.parse(result[0].data[0].row[0].password, { depth: null })));
 	}, function(fail) {
 		console.log(fail);
 	});

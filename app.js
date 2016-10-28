@@ -59,6 +59,6 @@ app.use(function(err, req, res, next) {
 
 
 user.add('yolo2', 'Yolo', 'Swaggins', 0, '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
-user.users();
+//user.users();
 
 module.exports = app;
