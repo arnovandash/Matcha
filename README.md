@@ -1,5 +1,7 @@
 # Matcha
 
+First note: for the Macs, you have to create the project folder in a local folder, so the goinfre, otherwise neo4j can't access the database. linux shouldn't have this problem
+
 Requirements:
 	node:	(Mac)	brew install node
 	 		(Linux)	sudo apt install nodejs
@@ -9,15 +11,13 @@ Requirements:
 
 Config changes:
 	Neo4j:
-		Change default location of the database to inside the project folder.
-			(Hopefully we don't get any merge conflicts)
 		Config file: neo4j.conf
 			Mac: ~/.brew/Cellar/neo4j/3.0.6/libexec/conf/neo4j.conf
-			Linux: /etc/neo4j/conf/neo4j.conf
-		Uncomment line 6, change it to:
-			dbms.active_database=matcha.db
-		Uncomment line 9, change the location to where ever the project file is:
-			eg: dbms.directories.data=/nfs/zfs-student-6/users/adippena/Documents/matcha
+			Linux: /etc/neo4j/conf/neo4j.conf (not nessessarry to change this)
+		Uncomment line 9, change the location (not inside the project folder, this will create merge issues, rather export csv to sync databases):
+			eg: dbms.directories.data=/nfs/zfs-student-6/users/adippena/goinfre/matcha_db
+
+		When you log into neo4j for the first time, it will ask you to change the password, change it to 'sparewheel'. That way all of us have the same login for the database
 
 Get required packages:
 	'npm install' from the root directory of the project
@@ -27,4 +27,4 @@ Get required packages:
 Start the server:
 	make sure that apache is stopped
 	'npm start' or 'npm test' (server restarts when files change) from the root directory of the project
-	'npm start' from the root directory of the project
+	'npm start' from the root directory of the project (you will need to install nodemon: 'npm install -g nodemon')
