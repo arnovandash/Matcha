@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var hbs = require('express-handlebars');
 
 var routes = require('./routes/index');
+var user = require('./user');
 
 var app = express();
 
@@ -56,5 +57,8 @@ app.use(function(err, req, res, next) {
   });
 });
 
+
+user.add('yolo2', 'Yolo', 'Swaggins', 0, '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
+user.users();
 
 module.exports = app;
