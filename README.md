@@ -1,5 +1,7 @@
 # Matcha
 
+First note: for the Macs, you have to create the project folder in a local folder, so the goinfre, otherwise neo4j can't access the database. linux shouldn't have this problem
+
 Requirements:
 	node:	(Mac)	brew install node
 	 		(Linux)	sudo apt install nodejs
@@ -17,7 +19,7 @@ Config changes:
 		Uncomment line 6, change it to:
 			dbms.active_database=matcha.db
 		Uncomment line 9, change the location to where ever the project file is:
-			eg: dbms.directories.data=/nfs/zfs-student-6/users/adippena/Documents/matcha
+			eg: dbms.directories.data=/nfs/zfs-student-6/users/adippena/goinfre/matcha
 
 Get required packages:
 	'npm install' from the root directory of the project
