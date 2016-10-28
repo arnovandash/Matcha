@@ -1,9 +1,22 @@
 var express = require('express');
+var session = require('express-sesison');
 var router = express.Router();
+
+var sess;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express', user: false, info: {likes: 1, dislikes: 2, liked: 3}, numbers: [1, 2, 3, 4, 5] });
+	sess = req.session;
+    res.render('index', {
+        title: 'Express',
+        user: false,
+        info: {
+            likes: 1,
+            dislikes: 2,
+            liked: 3
+        },
+        numbers: [1, 2, 3, 4, 5]
+    });
 });
 
 /* GET users listing. */
