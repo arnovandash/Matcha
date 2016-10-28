@@ -9,7 +9,9 @@ Requirements:
 
 Get required packages:
 	'npm install' from the root directory of the project
-	NOTE: node_modules has been ignored from git, so it will not be pushed. This is intentional: it's a big folder. Include any new packages in the packages.json and inform the team of the new required packages
+
+	NOTE: node_modules has been ignored from git, so it will not be pushed. This is intentional: it's a big folder. Include any new packages in the packages.json and inform the team of the new required packages. use --save with any new packages to save them to the package file automatically. Please try and use express versions of the packages if possible
 
 Start the server:
-	'npm start' from the root directory of the project
+	make sure that apache is stopped
+	'npm start' or 'npm test' (server restarts when files change) from the root directory of the project
