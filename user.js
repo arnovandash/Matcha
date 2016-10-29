@@ -52,13 +52,23 @@ function login(username, password, callback) {
         })
         .exec(server)
 		.then(function(result) {
-			var user = result[0].data[0].row[0];
-			var hashSalt = JSON.parse(user.password);
-			if (hash.checkHash(hashSalt, password)) {
-				console.log('User: ' + user.username + ' logged in');
-				callback({ username: user.username });
+			console.log('result: ' + result[0].data[0]);
+			if (result[0].data[0] !== undefined) {
+				var user = result[0].data[0].row[0];
+				console.log('got back: ' + user);
+				if (user.password !== undefined) {
+					var hashSalt = JSON.parse(user.password);
+					if (hash.checkHash(hashSalt, password)) {
+						console.log('User: ' + user.username + ' logged in');
+						callback({ username: user.username });
+					} else {
+						callback(null);
+					}
+				} else {
+					callback(null);
+				}
 			} else {
-				return callback(false);
+				callback(null);
 			}
 		}, function(fail) {
 			console.log('Error');
