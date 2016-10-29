@@ -1,29 +1,44 @@
 <!DOCTYPE html>
-<h1>{{ title }}</h1>
-<p>
-	Welcome to {{ title }}
-</p>
+<html ng-controller="matcha__" ng-app="matcha">
 
-{{# if user}}
-	<p>User exists!</p>
-{{ else }}
-	<p>Please log in</p>
-{{/if}}
+<head>
+	<title>{{ title }}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="/stylesheets/style.css">
+	<link rel="stylesheet" href="/material/angular-material.css">
+</head>
 
-<ul>
-	{{# each info as |value key| }}
-		<li>{{ key }}: {{ value }}</li>
-	{{/each}}
-</ul>
+<body ng-cloak layout="column">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<a href="/">
+				<img src="/images/matcha.png" class="home-icon"/>
+			</a>
+			<span flex></span>
+			<div layout="column">
+				<form class="login-form">
+					<input type="text" ng-model="username" placeholder="Username">
+					<input type="password" ng-model="password" placeholder="Password">
+					<md-button type="submit" style="min-width: inherit" aria-label="login" ng-click="login()">Login</md-button>
+				</form>
+				<a class="reset-password" href="/reset-password">Reset password</a>
+			</div>
+		</div>
+	</md-toolbar>
 
-<ol>
-	{{# each numbers}}
-		<li>{{ this }}</li>
-	{{/each}}
-</ol>
+	<ng-view></ng-view>
 
-<form action="http://localhost:8080/login" method="post">
-	<input type="text" name="username" placeholder="Username" /><br />
-	<input type="password" name="password" placeholder="Password" /><br />
-	<input type="submit" value="OK" />
-</form>
+	<script src="/material/angular.js" charset="utf-8"></script>
+	<script src="/material/angular-animate.js" charset="utf-8"></script>
+	<script src="/material/angular-aria.js" charset="utf-8"></script>
+	<script src="/material/angular-messages.js" charset="utf-8"></script>
+	<script src="/material/angular-route.js" charset="utf-8"></script>
+	<script src="/material/angular-storage.js" charset="utf-8"></script>
+	<script src="/material/angular-material.js" charset="utf-8"></script>
+	<script src="/javascripts/matcha.js" charset="utf-8"></script>
+	<script src="/javascripts/routes.js" charset="utf-8"></script>
+	<script src="/javascripts/home.js" charset="utf-8"></script>
+</body>
+
+</html>
