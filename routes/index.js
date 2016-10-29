@@ -24,7 +24,10 @@ router.get('/', function(req, res, next) {
 router.get('/users', function(req, res, next) {
   res.send('respond with a resource');
 });
-
 */
+
+router.post('/login', function(req, res) {
+	sess = req.session;
+});
 
 module.exports = router;

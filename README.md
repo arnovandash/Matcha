@@ -27,4 +27,4 @@ Get required packages:
 Start the server:
 	make sure that apache is stopped
 	'npm start' or 'npm test' (server restarts when files change) from the root directory of the project
-	'npm start' from the root directory of the project (you will need to install nodemon: 'npm install -g nodemon')
+	'npm test' from the root directory of the project (you will need to install nodemon: 'npm install -g nodemon')
