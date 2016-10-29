@@ -1,12 +1,13 @@
 var express = require('express');
-var session = require('express-sesison');
+var session = require('express-session');
+var user = require('../user');
 var router = express.Router();
 
 var sess;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	sess = req.session;
+    sess = req.session;
     res.render('index', {
         title: 'Express',
         user: false,
@@ -26,8 +27,29 @@ router.get('/users', function(req, res, next) {
 });
 */
 
+router.get('/home', function(req, res) {
+    sess = req.session;
+    if (sess.user) {
+        res.render('home', {
+            user: sess.user
+        });
+    } else {
+        res.redirect('/');
+    }
+});
+
 router.post('/login', function(req, res) {
-	sess = req.session;
+    sess = req.session;
+    user.login(req.body.username, req.body.password, function(result) {
+		sess.user = result;
+		if (result) {
+	        res.redirect('/home');
+	    } else {
+	        res.redirect('/');
+	    }
+	});
+	console.log(sess.user);
+
 });
 
 module.exports = router;
