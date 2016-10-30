@@ -22,10 +22,13 @@ app.controller('login__', function($http, $scope, $location, $sessionStorage, pa
 });
 
 app.config(function($mdThemingProvider) {
+	$mdThemingProvider.theme('default')
+		.primaryPalette('deep-purple');
+
 	$mdThemingProvider.theme('loginDark', 'default')
-	.primaryPalette('pink')
-	.backgroundPalette('deep-purple')
-	.dark();
+		.primaryPalette('pink')
+		.backgroundPalette('deep-purple')
+		.dark();
 });
 
 /******************************************************************************/
