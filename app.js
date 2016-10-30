@@ -5,7 +5,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var bodyParser = require('body-parser');
-var hbs = require('express-handlebars');
+var util = require('util');
+var hbs = require('express-handlebars').create({
+	extname: '.hbs'
+});
 
 var routes = require('./routes');
 var user = require('./user');
@@ -13,12 +16,8 @@ var user = require('./user');
 var app = express();
 
 // view engine setup
-app.engine('hbs', hbs({
-    extname: 'hbs'//,  DON'T REMOVE
-    //defaultLayout: 'layout',  DON'T REMOVE
-    //layoutsDir: __dirname + '/views/layouts/' DON'T REMOVE
-}));
-app.set('views', path.join(__dirname, 'views'));
+app.engine('hbs', hbs.engine);
+//app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public

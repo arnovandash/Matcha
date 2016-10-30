@@ -8,6 +8,10 @@ app.config(function($routeProvider, $locationProvider) {
 			templateUrl: 'partials/account',
 			controller: 'account__'
 		})
+		.when('/license', {
+			templateUrl: 'partials/license',
+			controller: 'home__'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});

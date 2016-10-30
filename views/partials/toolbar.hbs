@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<a href="/">
+			<img src="/images/matcha.png" class="home-icon" />
+		</a>
+		<span flex></span>
+		{{#if user}}
+		<div lauout="row">
+			<h3>{{ user.username }}</h3>
+			<md-button aria-label="logout">
+				<i class="material-icons">power_setting_new</i>
+			</md-button>
+		</div>
+		{{/if}}
+	</div>
+</md-toolbar>

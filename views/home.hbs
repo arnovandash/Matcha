@@ -1,29 +1,5 @@
 <!DOCTYPE html>
-<md-toolbar>
-	<div class="md-toolbar-tools">
-		<a href="/">
-			<img src="/images/matcha.png" class="home-icon" />
-		</a>
-		<span flex></span>
-		{{#if user}}
-		<div lauout="row">
-			<h3>{{ user.username }}</h3>
-			<md-button class="md-fab md-mini" aria-label="logout">
-				<i class="material-icons">power</i>
-			</md-button>
-		</div>
-		{{#else}}
-		<div layout="column">
-			<form class="login-form">
-				<input type="text" ng-model="username" placeholder="Username">
-				<input type="password" ng-model="password" placeholder="Password">
-				<md-button type="submit" style="min-width: inherit" aria-label="login" ng-click="login()">Login</md-button>
-			</form>
-			<a class="reset-password" href="/reset-password">Reset password</a>
-		</div>
-		{{/if}}
-	</div>
-</md-toolbar>
+{{> toolbar}}
 <md-content layout-padding layout-wrap>
     <h1>Welcome {{ user.username }}</h1>
 </md-content>

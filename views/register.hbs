@@ -1,4 +1,25 @@
 <!DOCTYPE html>
+{{> toolbar}}
+<md-content layout-padding layout-wrap layout="column">
+    <h3>Login</h3>
+	<div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
+		<form layout="row" layout-sm="column" ng-controller="login__">
+			<md-input-container>
+				<label>Username</label>
+				<input type="text" ng-model="username">
+			</md-input-container>
+			<md-input-container>
+				<label>Password</label>
+				<input type="text" ng-model="password">
+			</md-input-container>
+			<md-button type="submit" class="md-raised md-primary" style="margin: auto 0" aria-label="login" ng-click="login()">Login</md-button>
+		</form>
+		<a class="reset-password" href="/reset-password">Reset password</a>
+	</div>
+</md-content>
+
+<h2>OR</h2>
+
 <md-content layout-padding layout-wrap>
-    <h1>Register plox</h1>
+    <h3>Register</h3>
 </md-content>

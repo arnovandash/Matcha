@@ -7,12 +7,13 @@ var sess;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('index');
+	res.render('index', {
+		title: '{{ title }}'
+	});
 });
 
 router.get('/partials/home', function(req, res, next) {
     sess = req.session;
-	console.log(sess);
 	if (sess.user) {
 		res.render('home', {
 			user: sess.user
@@ -20,6 +21,10 @@ router.get('/partials/home', function(req, res, next) {
 	} else {
 		res.render('register');
 	}
+});
+
+router.get('/partials/license', function(req, res) {
+	res.render('license');
 });
 
 router.post('/api/login', function(req, res) {
