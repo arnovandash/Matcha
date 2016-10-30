@@ -5,14 +5,14 @@
 			<img src="/images/matcha.png" class="home-icon" />
 		</a>
 		<span flex></span>
-		{{#if user}}
+		{{#if user }}
 		<div lauout="row">
 			<h3>{{ user.username }}</h3>
 			<md-button class="md-fab md-mini" aria-label="logout">
 				<i class="material-icons">power</i>
 			</md-button>
 		</div>
-		{{#else}}
+		{{#else }}
 		<div layout="column">
 			<form class="login-form">
 				<input type="text" ng-model="username" placeholder="Username">
@@ -21,9 +21,6 @@
 			</form>
 			<a class="reset-password" href="/reset-password">Reset password</a>
 		</div>
-		{{/if}}
+		{{/if }}
 	</div>
 </md-toolbar>
-<md-content layout-padding layout-wrap>
-    <h1>Welcome {{ user.username }}</h1>
-</md-content>

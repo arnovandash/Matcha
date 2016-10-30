@@ -26,5 +26,5 @@ function createHash(password) {
 }
 
 function checkHash(hashSalt, password) {
-    return (sha512(password, hashSalt.salt).hash == hashSalt.hash) ? true : false;
+    return (sha512(password, hashSalt.salt).hash === hashSalt.hash) ? true : false;
 }

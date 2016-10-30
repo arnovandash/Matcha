@@ -7,7 +7,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var hbs = require('express-handlebars');
 
-var routes = require('./routes/index');
+var routes = require('./routes');
 var user = require('./user');
 
 var app = express();
@@ -34,7 +34,12 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/javascripts', express.static(path.join(__dirname, 'public/javascripts')));
+app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
+app.use('/material', express.static(path.join(__dirname, 'public/material')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 app.use('/', routes);
 
