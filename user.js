@@ -1,7 +1,8 @@
 module.exports = {
     add: add,
     users: users,
-    login: login
+    login: login,
+	checkUsername: checkUsername
 };
 
 var apoc = require('apoc');
@@ -75,4 +76,21 @@ function login(username, password, callback) {
 			console.log('Error');
 			console.log(util.inspect(fail, { depth: null }));
 		});
+}
+
+function checkUsername(username) {
+	apoc.query("MATCH (n:Person) WHERE n.username='`username`' RETURN nodes:collect(n) AS count", {}, {
+		username: username
+	}).exec(server).then(function(result) {
+        console.log(util.inspect(result, {
+            depth: null
+        }));
+        //		console.log(result[0].data[0].row);
+        console.log(util.inspect(JSON.parse(result[0].data[0].row[0].count, {
+            depth: null
+        })));
+		return result;
+    }, function(fail) {
+        console.log(fail);
+    });
 }

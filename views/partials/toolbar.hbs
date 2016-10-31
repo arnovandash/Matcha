@@ -6,9 +6,9 @@
 		</a>
 		<span flex></span>
 		{{#if user}}
-		<div lauout="row">
+		<div layout="row" ng-controller="logout__">
 			<h3>{{ user.username }}</h3>
-			<md-button aria-label="logout">
+			<md-button aria-label="logout" ng-click="logout()">
 				<i class="material-icons">power_setting_new</i>
 			</md-button>
 		</div>

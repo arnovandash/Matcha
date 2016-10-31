@@ -41,4 +41,16 @@ router.post('/api/logout', function(req, res) {
 	res.json(true);
 });
 
+router.post('/api/user_exists', function(req, res) {
+	if (req.body.username) {
+		user.checkUsername(req.body.username, function(result) {
+			res.json(reslut);
+		});
+	} else {
+		console.log('No username field');
+		console.log(req);
+		res.json(false);
+	}
+});
+
 module.exports = router;
