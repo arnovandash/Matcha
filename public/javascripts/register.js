@@ -1,27 +1,51 @@
 app.controller('register__', function($scope, $http, partial) {
 	$scope.register = function() {
-//        $http.post('/api/register', {
-        console.log({
-		    username: $scope.register.username,
-			firstname: $scope.register.firstname,
-			lastname: $scope.register.lastname,
-			gender: $scope.register.gender,
+		var reg = $scope.reg;
+		var send = {
+			username: reg.username,
+			firstname: reg.firstname,
+			lastname: reg.lastname,
+			gender: reg.gender,
 			lookingFor: {
-				male: $scope.register.interested.male,
-				female: $scope.register.interested.female,
-				other: $scope.register.interested.othermail
+				male: reg.interestedMale,
+				female: reg.interestedFemale,
+				other: reg.interestedOther
 			},
-			birthdate: $scope.register.birthdate,
-			email: $scope.register.email,
-            password: $scope.register.password
-		});
-/*        }).success(function(data, status, headers, config) {
+			birthdate: {
+				day: reg.birthdate.getUTCDate() + 1,
+				month: reg.birthdate.getUTCMonth() + 1,
+				year: reg.birthdate.getUTCFullYear()
+			},
+			email: reg.email,
+            password: reg.password
+		};
+		if (send.gender === undefined) {
+			send.gender = 'O';
+		}
+		if (!send.lookingFor.male && !send.lookingFor.female && !send.lookingFor.other) {
+			console.log("Don't worry, it's just a phase, but you'll probably end up gay. Please be sure to update your profile when you realise this");
+			send.lookingFor = {
+				male: true,
+				female: true,
+				other: false
+			};
+		} else {
+			if (send.lookingFor.male === undefined) {
+				send.lookingFor.male = false;
+			}
+			if (send.lookingFor.female === undefined) {
+				send.lookingFor.female = false;
+			}
+			if (send.lookingFor.other === undefined) {
+				send.lookingFor.other = false;
+			}
+		}
+		console.log(send);
+        $http.post('/api/register', send).success(function(data) {
             console.log(data);
-            $sessionStorage.user = data;
-			partial.reload();
-        }).error(function(data, status, headers, config) {
+        }).error(function(data) {
             console.log('Error ' + data);
-        }); */
+        });
     };
 
 	$scope.checkUsername = function() {

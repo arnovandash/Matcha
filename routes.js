@@ -55,6 +55,15 @@ router.post('/api/check_username', function(req, res) {
 	}
 });
 
+router.post('/api/register', function(req, res) {
+	console.log(req.body);
+	var r = req.body;
+	user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function(result) {
+		res.json(result);
+	});
+//	res.json(true);
+});
+
 /******************************************************************************/
 /*    Has to be last route. do not put any code under this                    */
 /******************************************************************************/
