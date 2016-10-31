@@ -51,8 +51,7 @@ function login(username, password, callback) {
 	console.log('Username: ' + username + '\nPassword: ' + password);
     apoc.query("MATCH (n:Person) WHERE n.username = '`username`' RETURN n", {}, {
             username: username
-        })
-        .exec(server)
+        }).exec(server)
 		.then(function(result) {
 			console.log('result: ' + result[0].data[0]);
 			if (result[0].data[0] !== undefined) {
@@ -78,18 +77,16 @@ function login(username, password, callback) {
 		});
 }
 
-function checkUsername(username) {
-	apoc.query("MATCH (n:Person) WHERE n.username='`username`' RETURN nodes:collect(n) AS count", {}, {
+function checkUsername(username, callback) {
+	apoc.query("MATCH (n:Person) WHERE n.username='`username`' RETURN count(n)", {}, {
 		username: username
-	}).exec(server).then(function(result) {
+	}).exec(server)
+	.then(function(result) {
         console.log(util.inspect(result, {
             depth: null
         }));
-        //		console.log(result[0].data[0].row);
-        console.log(util.inspect(JSON.parse(result[0].data[0].row[0].count, {
-            depth: null
-        })));
-		return result;
+        console.log(result[0].data[0].row[0]);
+		callback(result[0].data[0].row[0]);
     }, function(fail) {
         console.log(fail);
     });

@@ -15,10 +15,10 @@ app.controller('login__', function($http, $scope, $sessionStorage, partial) {
 
 app.config(function($mdThemingProvider) {
 	$mdThemingProvider.theme('default')
-		.primaryPalette('deep-purple')
-		.backgroundPalette('deep-purple');
+		.primaryPalette('deep-purple');
 
 	$mdThemingProvider.theme('loginDark', 'default')
 		.primaryPalette('pink')
+		.backgroundPalette('deep-purple')
 		.dark();
 });

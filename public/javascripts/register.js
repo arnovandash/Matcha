@@ -20,7 +20,21 @@ app.controller('register__', function($scope, $http, partial) {
             $sessionStorage.user = data;
 			partial.reload();
         }).error(function(data, status, headers, config) {
-            console.log('Error' + data);
+            console.log('Error ' + data);
         }); */
     };
+
+	$scope.checkUsername = function() {
+		if ($scope.register.username !== undefined) {
+			$http.post('/api/check_username', {
+				username: $scope.register.username
+			}).success(function(data, status, headers, config) {
+				console.log(data);
+			}).error(function(data, status, headers, config) {
+				console.log('Error ' + data);
+			});
+		} else {
+			console.log('No username');
+		}
+	};
 });

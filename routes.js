@@ -5,14 +5,14 @@ var router = express.Router();
 
 var sess;
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-	res.render('index', {
-		title: '{{ title }}'
+router.get('/partials/account', function(req, res) {
+	sess = req.session;
+	res.render('account', {
+		user: sess.user
 	});
 });
 
-router.get('/partials/home', function(req, res, next) {
+router.get('/partials/home', function(req, res) {
     sess = req.session;
 	if (sess.user) {
 		res.render('home', {
@@ -41,16 +41,25 @@ router.post('/api/logout', function(req, res) {
 	res.json(true);
 });
 
-router.post('/api/user_exists', function(req, res) {
+/******************************************************************************/
+/*    Returns true if username is free, false if username exists              */
+/******************************************************************************/
+router.post('/api/check_username', function(req, res) {
 	if (req.body.username) {
 		user.checkUsername(req.body.username, function(result) {
-			res.json(reslut);
+			res.json((result === 1) ? false : true);
 		});
 	} else {
 		console.log('No username field');
-		console.log(req);
 		res.json(false);
 	}
+});
+
+/******************************************************************************/
+/*    Has to be last route. do not put any code under this                    */
+/******************************************************************************/
+router.get('*', function(req, res) {
+	res.render('index');
 });
 
 module.exports = router;

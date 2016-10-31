@@ -1,8 +1,6 @@
 app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage']);
 
 app.controller('matcha__', function($http, $scope, $location, $sessionStorage) {
-    $scope.title = 'Matcha';
-
 
 });
 

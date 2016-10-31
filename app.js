@@ -6,21 +6,17 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var util = require('util');
-var hbs = require('express-handlebars').create({
+var exphbs = require('express-handlebars');
+var routes = require('./routes');
+var user = require('./user');
+var app = express();
+var hbs = exphbs.create({
 	extname: '.hbs'
 });
 
-var routes = require('./routes');
-var user = require('./user');
-
-var app = express();
-
-// view engine setup
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(session({
     secret: 'Ilivellamas',
@@ -33,46 +29,14 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use('/javascripts', express.static(path.join(__dirname, 'public/javascripts')));
 app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
 app.use('/material', express.static(path.join(__dirname, 'public/material')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
-
 app.use('/', routes);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
-
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});
-
-
-//user.add('yolo2', 'Yolo', 'Swaggins', 0, '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
+//user.add('yolo2', 'Yolo', 'Swaggins', 'O', '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
 //user.users();
 //user.login('yolo21', 'asdf');
 
