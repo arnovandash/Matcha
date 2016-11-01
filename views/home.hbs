@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 {{> toolbar}}
-<md-content layout-padding layout-wrap>
+<md-content layout-padding layout-wrap ng-controller="locate__">
     <h1>Welcome {{ user.username }}</h1>
+    <md-button class="md-primary md-raised" ng-click="locate()" >
+      Test Geolocation
+    </md-button>
 </md-content>
