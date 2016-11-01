@@ -49,9 +49,9 @@ app.controller('register__', function($scope, $http, partial) {
     };
 
 	$scope.checkUsername = function() {
-		if ($scope.register.username !== undefined) {
+		if ($scope.reg.username !== undefined) {
 			$http.post('/api/check_username', {
-				username: $scope.register.username
+				username: $scope.reg.username
 			}).success(function(data, status, headers, config) {
 				console.log(data);
 			}).error(function(data, status, headers, config) {
@@ -59,6 +59,20 @@ app.controller('register__', function($scope, $http, partial) {
 			});
 		} else {
 			console.log('No username');
+		}
+	};
+
+	$scope.checkEmail = function() {
+		if ($scope.reg.email !== undefined) {
+			$http.post('/api/check_email', {
+				email: $scope.reg.email
+			}).success(function(data) {
+				console.log(data);
+			}).error(function(data) {
+				console.log('Error ' + data);
+			});
+		} else {
+			console.log('No email');
 		}
 	};
 });

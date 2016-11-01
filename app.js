@@ -9,6 +9,7 @@ var util = require('util');
 var exphbs = require('express-handlebars');
 var routes = require('./routes');
 var user = require('./user');
+var email = require('./email');
 var app = express();
 var hbs = exphbs.create({
 	extname: '.hbs'
@@ -39,5 +40,9 @@ app.use('/', routes);
 //user.add('yolo2', 'Yolo', 'Swaggins', 'O', '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
 //user.users();
 //user.login('yolo21', 'asdf');
+//email.send('yoloswaggins@mailinator.com', 'sup nigga', '<h1>You say what? MOFO?</h1>');
+/*email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', function(reply) {
+	console.log(`The reply is: '${reply}'`);
+}); */
 
 module.exports = app;

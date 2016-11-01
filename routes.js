@@ -41,9 +41,9 @@ router.post('/api/logout', function(req, res) {
 	res.json(true);
 });
 
-/******************************************************************************/
-/*    Returns true if username is free, false if username exists              */
-/******************************************************************************/
+/**
+ * Returns true if username is free, false if username exists
+ */
 router.post('/api/check_username', function(req, res) {
 	if (req.body.username) {
 		user.checkUsername(req.body.username, function(result) {
@@ -55,18 +55,33 @@ router.post('/api/check_username', function(req, res) {
 	}
 });
 
+router.post('/api/check_email', function(req, res) {
+	if (req.body.email) {
+		user.checkEmail(req.body.email, function(result) {
+			res.json((result === 1) ? false : true);
+		});
+	} else {
+		console.log('No email field');
+		res.json(false);
+	}
+});
+
 router.post('/api/register', function(req, res) {
 	console.log(req.body);
 	var r = req.body;
 	user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function(result) {
 		res.json(result);
 	});
-//	res.json(true);
 });
 
-/******************************************************************************/
-/*    Has to be last route. do not put any code under this                    */
-/******************************************************************************/
+router.post('/api/confirm', function(req, res) {
+	console.log(req.body);
+	user.confirm(req.body);
+});
+
+/**
+ * Has to be last route. Do not put any code under this
+ */
 router.get('*', function(req, res) {
 	res.render('index');
 });
