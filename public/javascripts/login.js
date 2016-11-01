@@ -30,10 +30,14 @@ app.controller('locate__', function($http, $scope, $sessionStorage, partial){
       console.log(lng);
     };
 
-    function on_error(error) {
+    function on_error(error){
     	console.log("GPS activation failure!");
-    	//fallback on wifi and call tower location
-    };
+      console.log("Location falling back on Cell towers");
+      $http.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBjCZRwFkhJpKNqq_HNxJfDeNOWBFE5Ijc"
+    )}//.success 
+
+      console.log()
+
 });
 
 app.config(function($mdThemingProvider) {
