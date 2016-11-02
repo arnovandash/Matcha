@@ -35,10 +35,11 @@ app.controller('locate__', function($http, $scope, $sessionStorage, partial){
       console.log("Location falling back on Cell towers");
       var location = $http.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBjCZRwFkhJpKNqq_HNxJfDeNOWBFE5Ijc")
       .success(function(){console.log("SUCESS!!"),
-    console.log("Lat: " + location.$$state.value.data.location.lat),
-  console.log("Long: " + location.$$state.value.data.location.lng),
-  console.log('Gotcha bi*ch!')})
-      .error(function(error){console.log("Failure")}
+      console.log("Lat: " + location.$$state.value.data.location.lat),
+      console.log("Long: " + location.$$state.value.data.location.lng),
+      console.log('Gotcha bi*ch!')})
+      .error(function(error){console.log("Failure.. retrying"),
+      on_error(error)}
     );
   };
 });
