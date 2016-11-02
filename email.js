@@ -28,7 +28,6 @@ function sendEmail(to, subject, html, callback) {
 		subject: subject,
 		html: html
 	}, function(err, reply) {
-		console.log('Email sent');
 		if (callback !== undefined) {
 			callback(reply);
 		}
@@ -49,6 +48,5 @@ function sendConfirmEmail(emailTo, username, href, callback) {
 			<h4>Please click the link below to confirm your email address and activate your account</h4>
 			<a href="${href}">Activate</a>
 		</body>`;
-	console.log(send);
 	sendEmail(emailTo, 'Please confirm your email address for Matcha', send, callback);
 }

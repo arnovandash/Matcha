@@ -41,8 +41,6 @@ app.use('/', routes);
 //user.users();
 //user.login('yolo21', 'asdf');
 //email.send('yoloswaggins@mailinator.com', 'sup nigga', '<h1>You say what? MOFO?</h1>');
-/*email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', function(reply) {
-	console.log(`The reply is: '${reply}'`);
-}); */
+//email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', null);
 
 module.exports = app;

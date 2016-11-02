@@ -13,20 +13,20 @@ var server = require('./database').server;
 var email = require('./email');
 
 /**
- * Adds a new user to the database, all parameters
+ * Adds a new user to the database, all parameters are required
  * @param	{string}	username	User's username
  * @param	{string}	firstname	User's firstname
  * @param	{string}	lastname	User's lastname
  * @param	{char}		gender		User's gender, 'M', 'F', 'O' accepted
  * @param	{array}		lookingFor	User's sexual attraction, array: {male: true|false, female: true|false, other: true|false}
- * @param	{array}		birthdate	User's birthdate, array: {day: [1-31], month: [1-12], year:[0-9]{4}}
+ * @param	{array}		birthdate	User's birthdate, array: {day: [1-31], month: [1-12], year: [0-9]{4}}
  * @param	{string}	email		User's email address
  * @param	{string}	password	User's password
  * @param	{Function}	callback	Callback function for when the database returns
  */
 function add(username, firstname, lastname, gender, lookingFor, birthdate, email, password, callback) {
 /**
- * checks that all the inputs are not undefined
+ * Checks that all the inputs are not undefined
  */
     if (username === undefined ||
 		firstname === undefined ||
@@ -71,7 +71,7 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
  *  created if not exists).
  * The node is matched and the relationship created seperately because neo4j
  *  handles a merge specifying a node and a relationship as unique in each case,
- *  and a new node is created. matching separatly solves this issue.
+ *  and a new node is created. Matching separatly solves this issue.
  * Then the relationship is created with another MERGE. The relationships are
  *  made with MERGEs so that there's no accidental possibiility to make multiple
  *  relationships of the same kind.
@@ -128,7 +128,7 @@ function users() {
  * Attemps to login with the provided credentials
  * @param	{string}	username	Username crediential
  * @param	{string}	password	Password crediential
- * @param	{Function}	callback	callback function called when database returns
+ * @param	{Function}	callback	Callback function called when database returns
  * @return	{null}
  */
 function login(username, password, callback) {
@@ -169,7 +169,7 @@ function login(username, password, callback) {
  * Checks if the username exists in the database
  * @param	{string}	username	The username needed checking
  * @param	{Function}	callback	Function to call when the database returns
- * @return	{string}				returns the number of nodes containing the username, should be 1 or 0
+ * @return	{int}					Returns the number of nodes containing the username, should be 1 or 0
  */
 function checkUsername(username, callback) {
     apoc.query("MATCH (n:Person {username: '`username`'}) RETURN count(n)", {}, {
@@ -190,7 +190,7 @@ function checkUsername(username, callback) {
  * Checks if the email address exists in the database
  * @param	{string}	email		The email address needed checking
  * @param	{Function}	callback	Function to call when the database returns
- * @return	{string}				returns the number of nodes containing the email, should be 1 or 0
+ * @return	{int}					Returns the number of nodes containing the email, should be 1 or 0
  */
 function checkEmail(email, callback) {
 	apoc.query("MATCH (n:Person {email: '`email`'}) RETURN count(n)", {}, {
