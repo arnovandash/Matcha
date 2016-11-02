@@ -23,7 +23,8 @@ app.controller('register__', function($scope, $http, partial) {
 			send.gender = 'O';
 		}
 		if (!send.lookingFor.male && !send.lookingFor.female && !send.lookingFor.other) {
-			console.log("Don't worry, it's just a phase, but you'll probably end up gay. Please be sure to update your profile when you realise this");
+			console.log("Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this");
+			console.log("Damn Angus we were just joking about adding this!")
 			send.lookingFor = {
 				male: true,
 				female: true,

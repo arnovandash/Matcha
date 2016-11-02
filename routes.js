@@ -29,6 +29,7 @@ router.get('/partials/license', function(req, res) {
 
 router.post('/api/login', function(req, res) {
     sess = req.session;
+		console.log("TEST"+sess);
     user.login(req.body.username, req.body.password, function(result) {
 		sess.user = result;
 		console.log('session user: ' + sess.user);
