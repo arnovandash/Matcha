@@ -14,16 +14,16 @@ app.controller('locate__', function($http, $scope, $sessionStorage, partial){
       console.log(lng);
     };
 
-    function on_error(error){
+    function on_error(){
     	console.log("GPS activation failure!");
       console.log("Location falling back on Cell towers");
       var location = $http.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBjCZRwFkhJpKNqq_HNxJfDeNOWBFE5Ijc")
-      .success(function(){console.log("SUCESS!!"),
+      .success(function(){console.log("SUCCESS!!"),
       console.log("Lat: " + location.$$state.value.data.location.lat),
       console.log("Long: " + location.$$state.value.data.location.lng),
       console.log('Gotcha bi*ch!')})
       .error(function(error){console.log("Failure.. retrying"),
-      on_error(error)}
-    );
+      setTimeout(on_error, 5000)
+    });
   };
 });
