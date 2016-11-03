@@ -38,7 +38,7 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/', routes);
 
 //user.add('yolo2', 'Yolo', 'Swaggins', 'O', '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
-//user.users();
+user.users();
 //user.login('yolo21', 'asdf');
 //email.send('yoloswaggins@mailinator.com', 'sup nigga', '<h1>You say what? MOFO?</h1>');
 //email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', null);

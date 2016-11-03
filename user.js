@@ -11,6 +11,10 @@ var util = require('util');
 var hash = require('./hashsalt');
 var server = require('./database').server;
 var email = require('./email');
+var mongo = require('mongodb');
+var assert = require('assert');
+
+var url= 'mongodb://localhost:27017/test';
 
 /**
  * Adds a new user to the database, all parameters are required
@@ -28,28 +32,43 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
 /**
  * Checks that all the inputs are not undefined
  */
-    if (username === undefined ||
-		firstname === undefined ||
-		lastname === undefined ||
-		gender === undefined ||
-		lookingFor === undefined ||
-		birthdate === undefined ||
-		email === undefined ||
-		password === undefined ||
-		birthdate.day === undefined ||
-		birthdate.month === undefined ||
-		birthdate.year === undefined ||
-		lookingFor.male === undefined ||
-		lookingFor.female === undefined ||
-		lookingFor.other === undefined) {
-        callback('undefined field');
+    if (typeof username !== 'string' ||
+		typeof firstname !== 'string' ||
+		typeof lastname !== 'string' ||
+		(typeof gender !== 'string' && gender.length() !== 1) ||
+		typeof lookingFor !== 'object' ||
+		typeof birthdate !== 'object' ||
+		typeof email !== 'string' ||
+		typeof password !== 'string' ||
+		typeof birthdate.day !== 'number' ||
+		typeof birthdate.month !== 'number' ||
+		typeof birthdate.year !== 'number' ||
+		typeof lookingFor.male !== 'boolean' ||
+		typeof lookingFor.female !== 'boolean' ||
+		typeof lookingFor.other !== 'boolean') {
+        callback('field of incorrect type');
         return true;
     }
 /**
  * Converts birthdate in year, month, date array into epoch time
  */
     birthdate = parseInt(new Date(birthdate.year, birthdate.month, birthdate.day).getTime() / 1000);
-    apoc.query("CREATE (n:Person { username: '`user`', firstname: '`first`', lastname: '`last`', birthdate: `birthdate`, email: '`email`', password: '`password`' }) RETURN n", {}, {
+	mongo.connect(url, function(err, db) {
+		assert.equal(null, err);
+		db.collection('users').insertOne({
+			username: username,
+			firstname: firstname,
+			lastname: lastname,
+			birthdate: birthdate,
+			email: email,
+			password: hash.createHash(password)
+		}, function(err, result) {
+			assert.equal(null, err);
+			console.log('User created mongo: ' + result);
+			db.close();
+		});
+	});
+/*    apoc.query("CREATE (n:Person { username: '`user`', firstname: '`first`', lastname: '`last`', birthdate: `birthdate`, email: '`email`', password: '`password`' }) RETURN n", {}, {
             user: username,
             first: firstname,
             last: lastname,
@@ -76,7 +95,7 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
  *  made with MERGEs so that there's no accidental possibiility to make multiple
  *  relationships of the same kind.
  */
-			var query = "MATCH (a:Person {username: '`username`'}) MERGE (g:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(g)";
+/*			var query = "MATCH (a:Person {username: '`username`'}) MERGE (g:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(g)";
 			if (lookingFor.male) {
 				query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
 			}
@@ -104,7 +123,7 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
             console.log(fail);
             callback(fail);
             return true;
-        });
+        }); */
 }
 
 /**
@@ -112,7 +131,19 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
  * @return {null}
  */
 function users() {
-    apoc.query('MATCH (n:Person) RETURN n').exec(server).then(function(result) {
+	var result = [];
+	mongo.connect(url, function(err, db) {
+		assert.equal(null, err);
+		var cursor = db.collection('users').find();
+		cursor.forEach(function(doc, err) {
+			assert.equal(null, err);
+			result.push(doc);
+		}, function() {
+			db.close();
+			console.log(util.inspect(result, {depth: null}));
+		});
+	});
+/*    apoc.query('MATCH (n:Person) RETURN n').exec(server).then(function(result) {
         console.log(util.inspect(result, {
             depth: null
         }));
@@ -121,7 +152,7 @@ function users() {
         })));
     }, function(fail) {
         console.log(fail);
-    });
+    }); */
 }
 
 /**
