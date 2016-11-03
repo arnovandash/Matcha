@@ -133,7 +133,7 @@ function users() {
  */
 function login(username, password, callback) {
     console.log('Username: ' + username + '\nPassword: ' + password);
-    apoc.query("MATCH (n:Person) WHERE n.username = '`username`' RETURN n", {}, {
+    apoc.query("MATCH (n:Person {username: '`username`'}) RETURN n", {}, {
             username: username
         }).exec(server)
         .then(function(result) {
