@@ -2,7 +2,6 @@ var express = require('express');
 var session = require('express-session');
 var user = require('./user');
 var router = express.Router();
-
 var sess;
 
 router.get('/partials/account', function(req, res) {
@@ -41,13 +40,13 @@ router.post('/api/logout', function(req, res) {
 	res.json(true);
 });
 
-/**
- * Returns true if username is free, false if username exists
- */
+/**************************************************************
+ * Returns true if username is free, false if username exists *
+ **************************************************************/
 router.post('/api/check_username', function(req, res) {
 	if (req.body.username) {
 		user.checkUsername(req.body.username, function(result) {
-			res.json((result === 1) ? false : true);
+			res.json(result);
 		});
 	} else {
 		console.log('No username field');
@@ -79,9 +78,9 @@ router.post('/api/confirm', function(req, res) {
 	user.confirm(req.body);
 });
 
-/**
- * Has to be last route. Do not put any code under this
- */
+/********************************************************
+ * Has to be last route. Do not put any code under this *
+ ********************************************************/
 router.get('*', function(req, res) {
 	res.render('index');
 });
