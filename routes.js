@@ -26,6 +26,10 @@ router.get('/partials/license', function(req, res) {
 	res.render('license');
 });
 
+router.get('/partials/confirm', function(req, res) {
+	res.json('waiting');
+});
+
 router.post('/api/login', function(req, res) {
     sess = req.session;
     user.login(req.body.username, req.body.password, function(result) {
@@ -75,7 +79,9 @@ router.post('/api/register', function(req, res) {
 
 router.post('/api/confirm', function(req, res) {
 	console.log(req.body);
-	user.confirm(req.body);
+	user.confirmEmail(req.body.link, function(result) {
+		res.json(result);
+	});
 });
 
 /********************************************************

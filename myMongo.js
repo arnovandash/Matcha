@@ -1,14 +1,16 @@
 module.exports = {
-	insertOne: insertOne,
-	find: find,
-	findSort: findSort,
-	insertUser: insertUser
+    insertOne: insertOne,
+    find: find,
+    findSort: findSort,
+    update: update,
+    insertUser: insertUser
 };
 
 var mongo = require('mongodb');
 var assert = require('assert');
 var util = require('util');
 var email = require('./email');
+var hash = require('./hashsalt');
 var url = 'mongodb://localhost:27017/matcha';
 
 /*****************************************************************************************
@@ -20,14 +22,14 @@ var url = 'mongodb://localhost:27017/matcha';
  * @return {null}                                                                        *
  *****************************************************************************************/
 function insertOne(collection, data, callback) {
-	mongo.connect(url, function(err, db) {
-		assert.equal(null, err);
-		db.collection(collection).insertOne(data, function(err, result) {
-			assert.equal(null, err);
-			db.close();
-			callback( (result.insertedCount === 1) ? result.insertedId : null );
-		});
-	});
+    mongo.connect(url, function(err, db) {
+        assert.equal(null, err);
+        db.collection(collection).insertOne(data, function(err, result) {
+            assert.equal(null, err);
+            db.close();
+            callback((result.insertedCount === 1) ? result.insertedId : null);
+        });
+    });
 }
 
 /*******************************************************************************
@@ -39,18 +41,18 @@ function insertOne(collection, data, callback) {
  * @return	{null}                                                             *
  *******************************************************************************/
 function find(collection, data, callback) {
-	var result = [];
-	mongo.connect(url, function(err, db) {
-		assert.equal(null, err);
-		var cursor = db.collection(collection).find(data);
-		cursor.forEach(function(doc, err) {
-			assert.equal(null, err);
-			result.push(doc);
-		}, function() {
-			db.close();
-			callback(result);
-		});
-	});
+    var result = [];
+    mongo.connect(url, function(err, db) {
+        assert.equal(null, err);
+        var cursor = db.collection(collection).find(data);
+        cursor.forEach(function(doc, err) {
+            assert.equal(null, err);
+            result.push(doc);
+        }, function() {
+            db.close();
+            callback(result);
+        });
+    });
 }
 
 /*********************************************************************************************
@@ -63,18 +65,38 @@ function find(collection, data, callback) {
  * @return  {null}                                                                           *
  *********************************************************************************************/
 function findSort(collection, find, sort, callback) {
-	var result = [];
-	mongo.connect(url, function(err, db) {
-		assert.equal(null, err);
-		var cursor = db.collection(collection).find(find).sort(sort);
-		cursor.forEach(function(doc, err) {
-			assert.equal(null, err);
-			result.push(doc);
-		}, function() {
-			db.close();
-			callback(result);
-		});
-	});
+    var result = [];
+    mongo.connect(url, function(err, db) {
+        assert.equal(null, err);
+        var cursor = db.collection(collection).find(find).sort(sort);
+        cursor.forEach(function(doc, err) {
+            assert.equal(null, err);
+            result.push(doc);
+        }, function() {
+            db.close();
+            callback(result);
+        });
+    });
+}
+
+/***************************************************************************************************
+ * Finds and updates the the collection to the values specified by the set object                  *
+ * @method update                                                                                  *
+ * @param  {String}   collection The collection to run the update on                               *
+ * @param  {Object}   find       Object that defines the document to update                        *
+ * @param  {Object}   set        Object that defines what values need to be updated in the datasbe *
+ * @param  {Function} callback   Function called when the database returns                         *
+ * @return {null}                                                                                  *
+ ***************************************************************************************************/
+function update(collection, find, set, callback) {
+    mongo.connect(url, function(err, db) {
+        assert.equal(null, err);
+        db.collection(collection).updateOne(find, set, function(err, result) {
+            assert.equal(null, err);
+            db.close();
+            callback((result.matchedCount === 1 && result.modifiedCount === 1));
+        });
+    });
 }
 
 /****************************************************************************************************************
@@ -85,26 +107,45 @@ function findSort(collection, find, sort, callback) {
  * @return  {Object}                ok: {True | False} if insert fails, id: {String}, err: {String}             *
  ****************************************************************************************************************/
 function insertUser(data, callback) {
-	find('users', {$or: [{username: data.username}, {email: data.email}]}, function(result) {
-		if (Object.keys(result).length === 0) {
-			insertOne('users', data, function(id) {
-				if (id !== null) {
-					callback({
-						ok: true,
-						id: id,
-						err: null});
-				} else {
-					callback({
-						ok: false,
-						id: null,
-						err: 'user not inserted'});
-				}
-			});
-		} else {
-			callback({
-				ok: false,
-				id: null,
-				err: 'username or email exists'});
-		}
-	});
+    find('users', {
+        $or: [{
+            username: data.username
+        }, {
+            email: data.email
+        }]
+    }, function(result) {
+        if (Object.keys(result).length === 0) {
+			data.token = {
+				email: hash.saltGen(16)
+			};
+            insertOne('users', data, function(id) {
+                if (id !== null) {
+					email.sendConfirm(data.email, data.username, `http://localhost:8080/confirm/${data.token.email}`, function(result) {
+						console.log(result);
+						callback({
+	                        ok: true,
+	                        id: id,
+	                        err: null
+	                    });
+					});
+                } else {
+                    callback({
+                        ok: false,
+                        id: null,
+                        err: 'user not inserted'
+                    });
+                }
+            });
+        } else {
+            callback({
+                ok: false,
+                id: null,
+                err: 'username or email exists'
+            });
+        }
+    });
+}
+
+function insertBio(data, callback) {
+
 }

@@ -3,7 +3,8 @@ module.exports = {
     listAll: users,
     login: login,
     checkUsername: checkUsername,
-    checkEmail: checkEmail
+    checkEmail: checkEmail,
+	confirmEmail: confirmEmail
 };
 
 var apoc = require('apoc');
@@ -165,4 +166,15 @@ function checkEmail(email, callback) {
 	mongo.find('users', {email: email}, function(result) {
 		callback((result.length === 0));
 	});
+}
+
+/*******************************************************************************************
+ * Gets the link from the confirmation email and removes the restriction from the database *
+ * @method confirmEmail                                                                    *
+ * @param  {String}     link     The link sent in the email                                *
+ * @param  {Function}   callback Called when the database returns, true|false              *
+ * @return {null}                                                                          *
+ *******************************************************************************************/
+function confirmEmail(link, callback) {
+	mongo.update('users', {'token.email': link}, {$set: {'token.email': null}}, callback);
 }

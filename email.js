@@ -44,7 +44,7 @@ function sendEmail(to, subject, html, callback) {
  ****************************************************************************************/
 function sendConfirmEmail(emailTo, username, href, callback) {
 	var send = `<body>
-			<h2>Welcome to Matcha &copy</h2>
+			<h2>Welcome to Matcha!</h2>
 			<h4>Please click the link below to confirm your email address and activate your account</h4>
 			<a href="${href}">Activate</a>
 		</body>`;

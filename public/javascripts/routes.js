@@ -12,6 +12,10 @@ app.config(function($routeProvider, $locationProvider) {
 			templateUrl: 'partials/license',
 			controller: 'home__'
 		})
+		.when('/confirm/:link', {
+			templateUrl: 'partials/confirm',
+			controller: 'confirm__'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});
