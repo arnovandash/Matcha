@@ -29,8 +29,8 @@ app.controller('locate__', function($http, $scope, $sessionStorage, partial) {
       console.log('Gotcha bi*ch!');
     })
     .error(function (error) {
-      console.log('Failure.. retrying');
-      setTimeout(on_error, 5000);
+      console.log('Failure..');// retrying');
+      //setTimeout(on_error, 5000);
     });
   }
 });
