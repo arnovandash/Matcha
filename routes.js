@@ -26,6 +26,9 @@ router.get('/partials/license', function(req, res) {
 	res.render('license');
 });
 
+/***************************
+ * NEED A PAGE FOR THIS!!! *
+ ***************************/
 router.get('/partials/confirm', function(req, res) {
 	res.json('waiting...');
 });
