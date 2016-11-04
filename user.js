@@ -129,9 +129,7 @@ function users() {
 function login(username, password, callback) {
 	mongo.find('users', {username: username}, function(result) {
 		if (result.length === 1) {
-			console.log(util.inspect(result, {depth: null}));
-			console.log(typeof result[0].password);
-			if (hash.checkHash(result[0].password, password)) {
+			if (result[0].token.email !== null && hash.checkHash(result[0].password, password)) {
 				callback({
 					username: result[0].username
 				});
