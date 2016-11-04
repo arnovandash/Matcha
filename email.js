@@ -30,7 +30,7 @@ function sendEmail(to, subject, html, callback) {
 		html: html
 	}, function(err, reply) {
 		if (callback !== undefined) {
-			callback((reply === '221 Bye'));
+			callback((reply.trim() === '221 Bye'));
 		}
 	});
 }
