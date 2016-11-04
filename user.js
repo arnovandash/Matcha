@@ -4,7 +4,9 @@ module.exports = {
     login: login,
     checkUsername: checkUsername,
     checkEmail: checkEmail,
-	confirmEmail: confirmEmail
+	confirmEmail: confirmEmail,
+	sendReset: sendReset,
+	confirmReset: confirmReset
 };
 
 var apoc = require('apoc');
@@ -175,4 +177,34 @@ function checkEmail(email, callback) {
  *******************************************************************************************/
 function confirmEmail(link, callback) {
 	mongo.update('users', {'token.email': link}, {$set: {'token.email': null}}, callback);
+}
+
+/**************************************************************************
+ * Sends the password reset email                                         *
+ * @method sendReset                                                      *
+ * @param  {String}   usernameEmail Username or email address of the user *
+ * @param  {Function} callback      Called when the email is sent         *
+ **************************************************************************/
+function sendReset(usernameEmail, callback) {
+	var token = hash.saltGen(16);
+	mongo.update('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, {$set: {'token.reset': token}}, function(result) {
+		if (result) {
+			mongo.find('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, function(findRes) {
+				console.log(findRes);
+				email.sendReset(findRes[0].email, findRes[0].username, `http://localhost:8080/reset/${token}`, callback);
+			});
+		} else {
+			callback(false);
+		}
+	});
+}
+
+/*************************************************************************************
+ * Confirms the password reset request                                               *
+ * @method confirmReset                                                              *
+ * @param  {String}     link     Link sent in the email to reset the user's password *
+ * @param  {Function}   callback called when the database returns                    *
+ *************************************************************************************/
+function confirmReset(link, password, callback) {
+	mongo.update('users', {'token.reset': link}, {$set: {'token.reset': null, password: hash.createHash(password)}}, callback);
 }

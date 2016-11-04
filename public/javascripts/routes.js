@@ -16,6 +16,14 @@ app.config(function($routeProvider, $locationProvider) {
 			templateUrl: 'partials/confirm',
 			controller: 'confirm__'
 		})
+		.when('/send_reset', {
+			templateUrl: 'partials/send_reset',
+			controller: 'sendReset__'
+		})
+		.when('/reset/:link', {
+			templateUrl: 'partials/reset',
+			controller: 'confirmReset__'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});

@@ -1,16 +1,17 @@
 module.exports = {
 	send: sendEmail,
-	sendConfirm: sendConfirmEmail
+	sendConfirm: sendConfirmEmail,
+	sendReset: sendResetEmail
 };
 
 var sendmail = require('sendmail')({
-	logger: {
-		debug:	console.log,
-		info:	console.info,
-		warn:	console.warn,
-		error:	console.error
-	},
-	silent: false
+//	logger: {
+//		debug:	console.log,
+//		info:	console.info,
+//		warn:	console.warn,
+//		error:	console.error
+//	},
+	silent: true
 });
 
 /************************************************************************************************
@@ -29,7 +30,7 @@ function sendEmail(to, subject, html, callback) {
 		html: html
 	}, function(err, reply) {
 		if (callback !== undefined) {
-			callback(reply);
+			callback((reply === '221 Bye'));
 		}
 	});
 }
@@ -49,4 +50,21 @@ function sendConfirmEmail(emailTo, username, href, callback) {
 			<a href="${href}">Activate</a>
 		</body>`;
 	sendEmail(emailTo, 'Please confirm your email address for Matcha', send, callback);
+}
+
+/***********************************************************************************
+ * Sends an email to the user to reset their password                              *
+ * @method sendResetEmail                                                          *
+ * @param  {String}       emailTo  email address of the recipiant                  *
+ * @param  {String}       username username of the recipiant                       *
+ * @param  {String}       href     link they need to click to reset their password *
+ * @param  {Function}     callback function to call when the email is sent         *
+ ***********************************************************************************/
+function sendResetEmail(emailTo, username, href, callback) {
+	var send = `<body>
+			<h2>Matcha password reset</h2>
+			<h4>Please click the link below to reset the password on your account</h4>
+			<a href="${href}">Reset</a>
+		</body>`;
+	sendEmail(emailTo, 'Matcha password reset', send, callback);
 }

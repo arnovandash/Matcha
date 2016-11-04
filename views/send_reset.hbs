@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+{{> toolbar}}
+<md-content layout-padding layout-wrap layout="column">
+    <h3>Reset Password</h3>
+	<div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
+		<form layout="row" layout-sm="column" ng-controller="sendReset__">
+			<md-input-container>
+				<label>Username or Email address</label>
+				<input type="text" ng-model="reset.username">
+			</md-input-container>
+			<md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="send reset" ng-click="sendReset()">Send Reset</md-button>
+		</form>
+	</div>
+</md-content>

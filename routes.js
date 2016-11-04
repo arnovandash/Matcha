@@ -27,7 +27,15 @@ router.get('/partials/license', function(req, res) {
 });
 
 router.get('/partials/confirm', function(req, res) {
-	res.json('waiting');
+	res.json('waiting...');
+});
+
+router.get('/partials/send_reset', function(req, res) {
+	res.render('send_reset');
+});
+
+router.get('/partials/reset', function(req, res) {
+	res.render('reset');
 });
 
 router.post('/api/login', function(req, res) {
@@ -80,6 +88,18 @@ router.post('/api/register', function(req, res) {
 router.post('/api/confirm', function(req, res) {
 	console.log(req.body);
 	user.confirmEmail(req.body.link, function(result) {
+		res.json(result);
+	});
+});
+
+router.post('/api/send_reset', function(req, res) {
+	user.sendReset(req.body.usernameEmail, function(result) {
+		res.json(result);
+	});
+});
+
+router.post('/api/reset', function(req, res) {
+	user.confirmReset(req.body.link, req.body.password, function(result) {
 		res.json(result);
 	});
 });
