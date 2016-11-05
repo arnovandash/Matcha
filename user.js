@@ -171,7 +171,7 @@ function modify(update, callback) {
     mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
 		console.log(`UDPATE: ${result}`);
         if (result === true) {
-            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s";
+            var query = "MATCH (a:Person {id: '`id`'}) SET a.username = '`username`' MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s";
 			query += " MERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
             if (update.seeking.male === true) {
                 query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
@@ -184,6 +184,7 @@ function modify(update, callback) {
             }
             apoc.query(query, {}, {
                     id: update.id,
+					username: update.username,
                     gender: update.gender
                 })
                 .exec(server)
@@ -279,19 +280,20 @@ function get(id, callback) {
             delete user._id;
             delete user.password;
             delete user.token;
-            apoc.query("MATCH (p:Person {id: '`id`'})-[:GENDER]->(g) MATCH (p)-[:SEEKING]->(s) RETURN g.gender, s.gender", {}, {
+            apoc.query("MATCH (p:Person {id: '`id`'}) MATCH (p)-[:GENDER]->(g:Gender) MATCH (p)-[:SEEKING]->(s:Gender) RETURN g.gender, COLLECT(s.gender)", {}, {
                     id: user.id
                 })
                 .exec(server)
                 .then(function(gender) {
-                    gender = gender[0].data;
-                    user.gender = gender[0].row[0];
+					console.log(require('util').inspect(gender, { depth: null }));
+                    gender = gender[0].data[0].row;
+                    user.gender = gender[0];
                     user.seeking = {
                         male: false,
                         female: false,
                         other: false
                     };
-                    gender[1].row.forEach(function(value) {
+                    gender[1].forEach(function(value) {
                         switch (value) {
                             case 'M':
                                 user.seeking.male = true;
