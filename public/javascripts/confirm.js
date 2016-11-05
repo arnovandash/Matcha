@@ -4,8 +4,11 @@ app.controller('confirm__', function($scope, $http, $routeParams) {
             link: $routeParams.link
         }).success(function(data) {
             console.log(data);
+			if (data === true) {
+				window.location.replace('/');
+			}
         }).error(function(data) {
-            console.log('Error' + data);
+            console.log(`Error: ${data}`);
         });
 	}
 });

@@ -41,6 +41,9 @@ app.use('/', routes);
 //user.add('yolo2', 'Yolo', 'Swaggins', 'O', '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
 //user.listAll();
 //user.login('yolo21', 'asdf');
+/*user.get('581df7beec34b159a4cb1870', function(result) {
+	console.log(result);
+}); */
 //mongo.update('users', {username: 'nigel23'}, {$set: {username: 'nigel2'}}, function(result) {console.log(result);});
 //email.send('yoloswaggins@mailinator.com', 'sup nigga', '<h1>You say what? MOFO?</h1>');
 //email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', null);

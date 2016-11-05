@@ -121,7 +121,6 @@ function insertUser(data, callback) {
             insertOne('users', data, function(id) {
                 if (id !== null) {
 					email.sendConfirm(data.email, data.username, `http://localhost:8080/confirm/${data.token.email}`, function(result) {
-						console.log(result);
 						callback({
 	                        ok: true,
 	                        id: id,
@@ -144,8 +143,4 @@ function insertUser(data, callback) {
             });
         }
     });
-}
-
-function insertBio(data, callback) {
-
 }

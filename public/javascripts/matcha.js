@@ -1,7 +1,14 @@
 app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage']);
 
-app.controller('matcha__', function($http, $scope, $location, $sessionStorage) {
-
+app.controller('matcha__', function($http, $scope, $sessionStorage) {
+	$http.post('/api/whoami')
+	.success(function(data) {
+		$sessionStorage.user = data;
+		console.log(data);
+	})
+	.error(function(data) {
+		console.log(`Error: ${data}`);
+	});
 });
 
 /******************************************************************************

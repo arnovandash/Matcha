@@ -1,15 +1,16 @@
 module.exports = {
     add: add,
+	modify: modify,
     listAll: users,
     login: login,
-	find: find,
-	get: get,
+    find: find,
+    get: get,
     checkUsername: checkUsername,
     checkEmail: checkEmail,
-	confirmEmail: confirmEmail,
-	sendReset: sendReset,
-	confirmReset: confirmReset,
-	setLocation: setLocation
+    confirmEmail: confirmEmail,
+    sendReset: sendReset,
+    confirmReset: confirmReset,
+    setLocation: setLocation
 };
 
 var apoc = require('apoc');
@@ -20,39 +21,63 @@ var email = require('./email');
 var mongo = require('./myMongo');
 var ObjectId = require('mongodb').ObjectId;
 
+
+/**********************************************************
+ * Tests input for add user and modify user               *
+ * @method testInput                                      *
+ * @param  {Object}   input    Object of the input        *
+ * @param  {Function} callback Called if a function fails *
+ * @return {Boolean}           true if failed             *
+ **********************************************************/
+function testInput(input, callback) {
+    if (typeof input.username !== 'string' ||
+        typeof input.firstname !== 'string' ||
+        typeof input.lastname !== 'string' ||
+        (typeof input.gender !== 'string' && input.gender.length() !== 1) ||
+        typeof input.seeking !== 'object' ||
+        typeof input.birthdate !== 'object' ||
+        typeof input.email !== 'string' ||
+        typeof input.password !== 'string' ||
+        typeof input.birthdate.day !== 'number' ||
+        typeof input.birthdate.month !== 'number' ||
+        typeof input.birthdate.year !== 'number' ||
+        typeof input.seeking.male !== 'boolean' ||
+        typeof input.seeking.female !== 'boolean' ||
+        typeof input.seeking.other !== 'boolean') {
+        callback('field of incorrect type');
+		console.log('Input error');
+		console.log(input);
+        return true;
+    }
+    return false;
+}
+
 /*******************************************************************************************************************************
  * Adds a new user to the database, all parameters are required                                                                *
  * @param   {string}    username    User's username                                                                            *
  * @param   {string}    firstname   User's firstname                                                                           *
  * @param   {string}    lastname    User's lastname                                                                            *
  * @param   {char}      gender      User's gender, 'M', 'F', 'O' accepted                                                      *
- * @param   {array}     lookingFor  User's sexual attraction, array: {male: true|false, female: true|false, other: true|false} *
+ * @param   {array}     seeking     User's sexual attraction, array: {male: true|false, female: true|false, other: true|false} *
  * @param   {array}     birthdate   User's birthdate, array: {day: [1-31], month: [1-12], year: [0-9]{4}}                      *
  * @param   {string}    email       User's email address                                                                       *
  * @param   {string}    password    User's password                                                                            *
  * @param   {Function}  callback    Callback function for when the database returns                                            *
  *******************************************************************************************************************************/
-function add(username, firstname, lastname, gender, lookingFor, birthdate, email, password, callback) {
-    /******************************************************
-     * Checks that all the inputs are of the correct type *
-     ******************************************************/
-    if (typeof username !== 'string' ||
-        typeof firstname !== 'string' ||
-        typeof lastname !== 'string' ||
-        (typeof gender !== 'string' && gender.length() !== 1) ||
-        typeof lookingFor !== 'object' ||
-        typeof birthdate !== 'object' ||
-        typeof email !== 'string' ||
-        typeof password !== 'string' ||
-        typeof birthdate.day !== 'number' ||
-        typeof birthdate.month !== 'number' ||
-        typeof birthdate.year !== 'number' ||
-        typeof lookingFor.male !== 'boolean' ||
-        typeof lookingFor.female !== 'boolean' ||
-        typeof lookingFor.other !== 'boolean') {
-        callback('field of incorrect type');
+function add(username, firstname, lastname, gender, seeking, birthdate, email, password, callback) {
+    if (testInput({
+            username: username,
+            firstname: firstname,
+            lastname: lastname,
+            gender: gender,
+            seeking: seeking,
+            birthdate: birthdate,
+            email: email,
+            password: password
+        }, callback)) {
         return true;
     }
+
     /*****************************************************************
      * Converts birthdate in year, month, date array into epoch time *
      *****************************************************************/
@@ -71,46 +96,109 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
         password: hash.createHash(password)
     }, function(result) {
         if (result.ok === true) {
-			id = result.id;
-			/*********************************************************************************
-		     * First, the user's node gets created, the relationships to the genders need    *
-		     *  to be created                                                                *
-		     *                                                                               *
-		     * For the SEEKING relationship, a node is first MERGEd (so found if exists or   *
-		     *  created if not exists).                                                      *
-		     * The node is matched and the relationship created seperately because neo4j     *
-		     *  handles a merge specifying a node and a relationship as unique in each case, *
-		     *  and a new node is created. Matching separatly solves this issue.             *
-		     * Then the relationship is created with another MERGE. The relationships are    *
-		     *  made with MERGEs so that there's no accidental possibiility to make multiple *
-		     *  relationships of the same kind.                                              *
-		     *********************************************************************************/
-		    var query = "CREATE (a:Person {id: '`id`'}) MERGE (g:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(g)";
-		    if (lookingFor.male === true) {
-		        query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
-		    }
-		    if (lookingFor.female === true) {
-		        query += " MERGE (f:Gender {gender: 'F'}) MERGE (a)-[:SEEKING]->(f)";
-		    }
-		    if (lookingFor.other === true) {
-		        query += " MERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
-		    }
-		    apoc.query(query, {}, {
-		            id: id,
-		            gender: gender
-		        })
-		        .exec(server)
-		        .then(function(result) {
-		            callback(false);
-		            return false;
-		        }, function(fail) {
-		            console.log(fail);
-		            callback(fail);
-		            return true;
-		        });
+            id = result.id;
+            /*********************************************************************************
+             * First, the user's node gets created, the relationships to the genders need    *
+             *  to be created                                                                *
+             *                                                                               *
+             * For the SEEKING relationship, a node is first MERGEd (so found if exists or   *
+             *  created if not exists).                                                      *
+             * The node is matched and the relationship created seperately because neo4j     *
+             *  handles a merge specifying a node and a relationship as unique in each case, *
+             *  and a new node is created. Matching separatly solves this issue.             *
+             * Then the relationship is created with another MERGE. The relationships are    *
+             *  made with MERGEs so that there's no accidental possibiility to make multiple *
+             *  relationships of the same kind.                                              *
+             *********************************************************************************/
+            var query = "CREATE (a:Person {id: '`id`', username: '`username`'}) MERGE (g:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(g)";
+            if (seeking.male === true) {
+                query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
+            }
+            if (seeking.female === true) {
+                query += " MERGE (f:Gender {gender: 'F'}) MERGE (a)-[:SEEKING]->(f)";
+            }
+            if (seeking.other === true) {
+                query += " MERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
+            }
+            apoc.query(query, {}, {
+                    id: id,
+					username: username,
+                    gender: gender
+                })
+                .exec(server)
+                .then(function(result) {
+                    callback(true);
+                    return false;
+                }, function(fail) {
+                    console.log(fail);
+                    callback(fail);
+                    return true;
+                });
         } else {
-			console.log('Error creating user in Mongo: ' + result.err);
-		}
+            console.log('Error creating user in Mongo: ' + result.err);
+			callback(result.err);
+        }
+    });
+}
+
+/**************************************************************************
+ * Updates user profile                                                   *
+ * @method modify                                                         *
+ * @param  {Object}   update   Contains all the data that needs updating  *
+ * @param  {Function} callback Called when the update is complete         *
+ * @return {Boolean}           true if error occured, false if successful *
+ **************************************************************************/
+function modify(update, callback) {
+	console.log(`UPDATE: ${update}`);
+    if (testInput(update, callback)) {
+        return true;
+    }
+
+	update.birthdate = parseInt(new Date(update.birthdate.year, update.birthdate.month, update.birthdate.day).getTime() / 1000);
+
+    var id = null;
+	var set = {
+		username: update.username,
+		firstname: update.firstname,
+		lastname: update.lastname,
+		birthdate: update.birthdate,
+		email: update.email,
+		bio: update.bio
+	};
+	if (update.password !== undefined) {
+		set.password = hash.createHash(update.password);
+	}
+    mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
+		console.log(`UDPATE: ${result}`);
+        if (result === true) {
+            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s";
+			query += " MERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
+            if (update.seeking.male === true) {
+                query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
+            }
+            if (update.seeking.female === true) {
+                query += " MERGE (f:Gender {gender: 'F'}) MERGE (a)-[:SEEKING]->(f)";
+            }
+            if (update.seeking.other === true) {
+                query += " MERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
+            }
+            apoc.query(query, {}, {
+                    id: update.id,
+                    gender: update.gender
+                })
+                .exec(server)
+                .then(function(result) {
+                    callback(true);
+                    return false;
+                }, function(fail) {
+                    console.log(fail);
+                    callback(fail);
+                    return true;
+                });
+        } else {
+            console.log('Error creating user in Mongo: ' + result.err);
+			callback('Mongo error');
+        }
     });
 }
 
@@ -119,9 +207,11 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
  * @return {null}                                                                                 *
  **************************************************************************************************/
 function users() {
-	mongo.find('users', {}, function(result) {
-		console.log(util.inspect(result, {depth: null}));
-	});
+    mongo.find('users', {}, function(result) {
+        console.log(util.inspect(result, {
+            depth: null
+        }));
+    });
 }
 
 /**************************************************************************************
@@ -132,20 +222,22 @@ function users() {
  * @return  {null}                                                                    *
  **************************************************************************************/
 function login(username, password, callback) {
-	mongo.find('users', {username: username}, function(result) {
-		if (result.length === 1) {
-			if (result[0].token.email === null && hash.checkHash(result[0].password, password)) {
-				callback({
-					id: result[0]._id,
-					username: result[0].username
-				});
-			} else {
-				callback(null);
-			}
-		} else {
-			callback(null);
-		}
-	});
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result.length === 1) {
+            if (result[0].token.email === null && hash.checkHash(result[0].password, password)) {
+                callback({
+                    id: result[0]._id,
+                    username: result[0].username
+                });
+            } else {
+                callback(null);
+            }
+        } else {
+            callback(null);
+        }
+    });
 }
 
 /**************************************************************************
@@ -156,16 +248,18 @@ function login(username, password, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function find(id, callback) {
-	mongo.find('users', {_id: new ObjectId(id)}, function(result) {
-		if (result.length === 1) {
-			callback({
-				id: result._id,
-				username: result.username
-			});
-		} else {
-			callback(false);
-		}
-	});
+    mongo.find('users', {
+        _id: new ObjectId(id)
+    }, function(result) {
+        if (result.length === 1) {
+            callback({
+                id: result._id,
+                username: result.username
+            });
+        } else {
+            callback(false);
+        }
+    });
 }
 
 /**************************************************************************
@@ -176,26 +270,66 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
-	mongo.find('users', {_id: new ObjectId(id)}, function(result) {
-		if (result.length === 1) {
-			result.password = null;
-			callback(result);
-		} else {
-			callback(false);
-		}
-	});
+    mongo.find('users', {
+        _id: new ObjectId(id)
+    }, function(user) {
+        if (user.length === 1) {
+            user = user[0];
+            user.id = user._id;
+            delete user._id;
+            delete user.password;
+            delete user.token;
+            apoc.query("MATCH (p:Person {id: '`id`'})-[:GENDER]->(g) MATCH (p)-[:SEEKING]->(s) RETURN g.gender, s.gender", {}, {
+                    id: user.id
+                })
+                .exec(server)
+                .then(function(gender) {
+                    gender = gender[0].data;
+                    user.gender = gender[0].row[0];
+                    user.seeking = {
+                        male: false,
+                        female: false,
+                        other: false
+                    };
+                    gender[1].row.forEach(function(value) {
+                        switch (value) {
+                            case 'M':
+                                user.seeking.male = true;
+                                break;
+                            case 'F':
+                                user.seeking.female = true;
+                                break;
+                            case 'O':
+                                user.seeking.other = true;
+                        }
+                    });
+					console.log(`USER: ${user}`);
+                    callback(user);
+                }, function(fail) {
+                    console.log(fail);
+                    callback(fail);
+                });
+        } else {
+            callback(false);
+        }
+    });
 }
 
-/**
- * Sets the location of the user in the database
- * @method setLocation
- * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}
- * @param  {String}    username    Username of the user to add the location to
- * @param  {Function}  callback    Returns the vaue from the update function
- */
+/*******************************************************************************
+ * Sets the location of the user in the database                               *
+ * @method setLocation                                                         *
+ * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}   *
+ * @param  {String}    username    Username of the user to add the location to *
+ * @param  {Function}  callback    Returns the vaue from the update function   *
+ *******************************************************************************/
 function setLocation(coordinates, username, callback) {
-	mongo.update('users', {username: username},
-		{$set: {location: coordinates}}, callback);
+    mongo.update('users', {
+        username: username
+    }, {
+        $set: {
+            location: coordinates
+        }
+    }, callback);
 }
 
 /*************************************************************************************************************
@@ -205,9 +339,11 @@ function setLocation(coordinates, username, callback) {
  * @return  {int}                   Returns the number of nodes containing the username, should be 1 or 0    *
  *************************************************************************************************************/
 function checkUsername(username, callback) {
-	mongo.find('users', {username: username}, function(result) {
-		callback((result.length === 0));
-	});
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        callback((result.length === 0));
+    });
 }
 
 /**********************************************************************************************************
@@ -217,9 +353,11 @@ function checkUsername(username, callback) {
  * @return  {int}                   Returns the number of nodes containing the email, should be 1 or 0    *
  **********************************************************************************************************/
 function checkEmail(email, callback) {
-	mongo.find('users', {email: email}, function(result) {
-		callback((result.length === 0));
-	});
+    mongo.find('users', {
+        email: email
+    }, function(result) {
+        callback((result.length === 0));
+    });
 }
 
 /*******************************************************************************************
@@ -230,7 +368,13 @@ function checkEmail(email, callback) {
  * @return {null}                                                                          *
  *******************************************************************************************/
 function confirmEmail(link, callback) {
-	mongo.update('users', {'token.email': link}, {$set: {'token.email': null}}, callback);
+    mongo.update('users', {
+        'token.email': link
+    }, {
+        $set: {
+            'token.email': null
+        }
+    }, callback);
 }
 
 /**************************************************************************
@@ -240,16 +384,32 @@ function confirmEmail(link, callback) {
  * @param  {Function} callback      Called when the email is sent         *
  **************************************************************************/
 function sendReset(usernameEmail, callback) {
-	var token = hash.saltGen(16);
-	mongo.update('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, {$set: {'token.reset': token}}, function(result) {
-		if (result) {
-			mongo.find('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, function(findRes) {
-				email.sendReset(findRes[0].email, findRes[0].username, `http://localhost:8080/reset/${token}`, callback);
-			});
-		} else {
-			callback(false);
-		}
-	});
+    var token = hash.saltGen(16);
+    mongo.update('users', {
+        $or: [{
+            username: usernameEmail
+        }, {
+            email: usernameEmail
+        }]
+    }, {
+        $set: {
+            'token.reset': token
+        }
+    }, function(result) {
+        if (result) {
+            mongo.find('users', {
+                $or: [{
+                    username: usernameEmail
+                }, {
+                    email: usernameEmail
+                }]
+            }, function(findRes) {
+                email.sendReset(findRes[0].email, findRes[0].username, `http://localhost:8080/reset/${token}`, callback);
+            });
+        } else {
+            callback(false);
+        }
+    });
 }
 
 /*************************************************************************************
@@ -259,5 +419,12 @@ function sendReset(usernameEmail, callback) {
  * @param  {Function}   callback called when the database returns                    *
  *************************************************************************************/
 function confirmReset(link, password, callback) {
-	mongo.update('users', {'token.reset': link}, {$set: {'token.reset': null, password: hash.createHash(password)}}, callback);
+    mongo.update('users', {
+        'token.reset': link
+    }, {
+        $set: {
+            'token.reset': null,
+            password: hash.createHash(password)
+        }
+    }, callback);
 }

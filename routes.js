@@ -16,26 +16,30 @@ router.get('/partials/home', function(req, res) {
 });
 
 router.get('/partials/account/:id?', function(req, res) {
-	console.log(req.params.id);
-	if (req.params.id === undefined) {
-		sess = req.session;
+    console.log(req.params.id);
+    if (req.params.id === undefined) {
+        sess = req.session;
         if (sess.user === undefined || sess.user === null) {
-			res.sendStatus(403);
-		} else {
-			user.find(sess.user.id, function(result) {
-				result.mine = true;
-	            res.render('user_account', result).json(result);
-			});
+            res.send("Error: You need to be logged in");
+        } else {
+            user.find(sess.user.id, function(result) {
+                result.mine = true;
+                res.render('user_account', result);
+            });
         }
     } else {
-        user.find(req.params.id, function(result) {
-            if (result) {
-                result.mine = false;
-                res.render('user_account', result);
-            } else {
-                res.json('no user of that id');
-            }
-        });
+        if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
+            res.send("Error: no user of that id");
+        } else {
+            user.find(req.params.id, function(result) {
+                if (result) {
+                    result.mine = false;
+                    res.render('user_account', result);
+                } else {
+                    res.json('no user of that id');
+                }
+            });
+        }
     }
 });
 
@@ -63,6 +67,10 @@ router.post('/api/login', function(req, res) {
         req.session.user = result;
         res.json(result);
     });
+});
+
+router.post('/api/whoami', function(req, res) {
+    res.json(req.session.user);
 });
 
 router.post('/api/logout', function(req, res) {
@@ -135,25 +143,30 @@ router.post('/api/set_location', function(req, res) {
 });
 
 router.post('/api/get_user', function(req, res) {
-	if (req.body.id === undefined) {
-		res.json(false);
-	} else {
-		user.get(req.body.id, function(result) {
-			res.json(result);
-		});
-	}
+    if (req.body.id === undefined) {
+        res.json(false);
+    } else {
+        if (!req.body.id.match(/[0-9A-Fa-f]{24}/)) {
+            res.json(false);
+        } else {
+            user.get(req.body.id, function(result) {
+                res.json(result);
+            });
+        }
+    }
 });
 
-router.post('/api/update_user', function(req, res) {
-	var values = req.body.update;
-	sess = req.session;
-	if (sess.user === undefined || sess.user === null || values === undefined) {
-		res.json(false);
-	} else {
-		user.update('users', {username: sess.user.username}, {$set: values}, function(result) {
-			res.json(reuslt);
-		});
-	}
+router.post('/api/modify', function(req, res) {
+    var values = req.body.update;
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null || values === undefined) {
+        res.json('Values undefined');
+    } else {
+        values.id = sess.user.id;
+        user.modify(values, function(result) {
+            res.json(result);
+        });
+    }
 });
 
 /********************************************************
