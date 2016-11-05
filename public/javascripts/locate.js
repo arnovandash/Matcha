@@ -3,7 +3,6 @@ app.controller('locate__', function($http, $scope) {
     var lat;
     var lng;
 
-
     $scope.locate = function() {
         console.log('Activating GPS...');
         navigator.geolocation.getCurrentPosition(on_success, on_error, {
@@ -17,6 +16,7 @@ app.controller('locate__', function($http, $scope) {
         lng = position.coords.longitude;
         console.log('Lat: ' + lat);
         console.log('Long: ' + lng);
+        post_latlng(lat, lng);
     }
 
     function on_error() {
@@ -30,6 +30,7 @@ app.controller('locate__', function($http, $scope) {
                 console.log('Lat: ' + lat);
                 console.log('Long: ' + lng);
                 console.log('Gotcha bi*ch!');
+                post_latlng(lat, lng);
             })
             .error(function() {
                 console.log('Failure, retrying...');
@@ -38,5 +39,16 @@ app.controller('locate__', function($http, $scope) {
                     retryCount++;
                 }
             });
+    }
+
+    function post_latlng(lat, lng) {
+        $http.post('/api/set_location', {
+            latitude: lat,
+            longitude: lng
+        }).success(function(data) {
+            console.log(data);
+        }).error(function(data) {
+            console.log('Error ' + data);
+        });
     }
 });

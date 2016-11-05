@@ -107,6 +107,18 @@ router.post('/api/reset', function(req, res) {
 	});
 });
 
+router.post('/api/set_location', function(req, res) {
+	sess = req.session;
+	var r = req.body;
+	var location = {
+		latitude: r.latitude,
+		longitude: r.longitude
+	};
+	user.setLocation(location, sess.user.username, function(result) {
+		res.json(result);
+	});
+});
+
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/
