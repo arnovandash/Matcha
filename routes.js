@@ -4,126 +4,163 @@ var user = require('./user');
 var router = express.Router();
 var sess;
 
-router.get('/partials/account', function(req, res) {
-	sess = req.session;
-	res.render('account', {
-		user: sess.user
-	});
-});
+
 
 router.get('/partials/home', function(req, res) {
     sess = req.session;
-	if (sess.user) {
-		res.render('home', {
-			user: sess.user
-		});
-	} else {
-		res.render('register');
-	}
+    if (sess.user !== undefined && sess.user !== null) {
+        res.render('home', sess.user);
+    } else {
+        res.render('register');
+    }
+});
+
+router.get('/partials/account/:id?', function(req, res) {
+	console.log(req.params.id);
+	if (req.params.id === undefined) {
+		sess = req.session;
+        if (sess.user === undefined || sess.user === null) {
+			res.sendStatus(403);
+		} else {
+			user.find(sess.user.id, function(result) {
+				result.mine = true;
+	            res.render('user_account', result).json(result);
+			});
+        }
+    } else {
+        user.find(req.params.id, function(result) {
+            if (result) {
+                result.mine = false;
+                res.render('user_account', result);
+            } else {
+                res.json('no user of that id');
+            }
+        });
+    }
 });
 
 router.get('/partials/license', function(req, res) {
-	res.render('license');
+    res.render('license');
 });
 
 /***************************
  * NEED A PAGE FOR THIS!!! *
  ***************************/
 router.get('/partials/confirm', function(req, res) {
-	res.json('waiting...');
+    res.json('waiting...');
 });
 
 router.get('/partials/send_reset', function(req, res) {
-	res.render('send_reset');
+    res.render('send_reset');
 });
 
 router.get('/partials/reset', function(req, res) {
-	res.render('reset');
+    res.render('reset');
 });
 
 router.post('/api/login', function(req, res) {
-    sess = req.session;
     user.login(req.body.username, req.body.password, function(result) {
-		sess.user = result;
-		console.log('session user: ' + sess.user);
-		res.json(result);
-	});
+        req.session.user = result;
+        res.json(result);
+    });
 });
 
 router.post('/api/logout', function(req, res) {
-	req.session.user = null;
-	res.json(true);
+    req.session.user = null;
+    res.json(true);
 });
 
 /**************************************************************
  * Returns true if username is free, false if username exists *
  **************************************************************/
 router.post('/api/check_username', function(req, res) {
-	if (req.body.username) {
-		user.checkUsername(req.body.username, function(result) {
-			res.json(result);
-		});
-	} else {
-		console.log('No username field');
-		res.json(false);
-	}
+    if (req.body.username) {
+        user.checkUsername(req.body.username, function(result) {
+            res.json(result);
+        });
+    } else {
+        console.log('No username field');
+        res.json(false);
+    }
 });
 
 router.post('/api/check_email', function(req, res) {
-	if (req.body.email) {
-		user.checkEmail(req.body.email, function(result) {
-			res.json((result === 1) ? false : true);
-		});
-	} else {
-		console.log('No email field');
-		res.json(false);
-	}
+    if (req.body.email) {
+        user.checkEmail(req.body.email, function(result) {
+            res.json((result === 1) ? false : true);
+        });
+    } else {
+        console.log('No email field');
+        res.json(false);
+    }
 });
 
 router.post('/api/register', function(req, res) {
-	console.log(req.body);
-	var r = req.body;
-	user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function(result) {
-		res.json(result);
-	});
+    console.log(req.body);
+    var r = req.body;
+    user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function(result) {
+        res.json(result);
+    });
 });
 
 router.post('/api/confirm', function(req, res) {
-	console.log(req.body);
-	user.confirmEmail(req.body.link, function(result) {
-		res.json(result);
-	});
+    console.log(req.body);
+    user.confirmEmail(req.body.link, function(result) {
+        res.json(result);
+    });
 });
 
 router.post('/api/send_reset', function(req, res) {
-	user.sendReset(req.body.usernameEmail, function(result) {
-		res.json(result);
-	});
+    user.sendReset(req.body.usernameEmail, function(result) {
+        res.json(result);
+    });
 });
 
 router.post('/api/reset', function(req, res) {
-	user.confirmReset(req.body.link, req.body.password, function(result) {
-		res.json(result);
-	});
+    user.confirmReset(req.body.link, req.body.password, function(result) {
+        res.json(result);
+    });
 });
 
 router.post('/api/set_location', function(req, res) {
+    sess = req.session;
+    var r = req.body;
+    var location = {
+        latitude: r.latitude,
+        longitude: r.longitude
+    };
+    user.setLocation(location, sess.user.username, function(result) {
+        res.json(result);
+    });
+});
+
+router.post('/api/get_user', function(req, res) {
+	if (req.body.id === undefined) {
+		res.json(false);
+	} else {
+		user.get(req.body.id, function(result) {
+			res.json(result);
+		});
+	}
+});
+
+router.post('/api/update_user', function(req, res) {
+	var values = req.body.update;
 	sess = req.session;
-	var r = req.body;
-	var location = {
-		latitude: r.latitude,
-		longitude: r.longitude
-	};
-	user.setLocation(location, sess.user.username, function(result) {
-		res.json(result);
-	});
+	if (sess.user === undefined || sess.user === null || values === undefined) {
+		res.json(false);
+	} else {
+		user.update('users', {username: sess.user.username}, {$set: values}, function(result) {
+			res.json(reuslt);
+		});
+	}
 });
 
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/
 router.get('*', function(req, res) {
-	res.render('index');
+    res.render('index');
 });
 
 module.exports = router;

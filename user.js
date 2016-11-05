@@ -2,6 +2,8 @@ module.exports = {
     add: add,
     listAll: users,
     login: login,
+	find: find,
+	get: get,
     checkUsername: checkUsername,
     checkEmail: checkEmail,
 	confirmEmail: confirmEmail,
@@ -16,6 +18,7 @@ var hash = require('./hashsalt');
 var server = require('./database').server;
 var email = require('./email');
 var mongo = require('./myMongo');
+var ObjectId = require('mongodb').ObjectId;
 
 /*******************************************************************************************************************************
  * Adds a new user to the database, all parameters are required                                                                *
@@ -130,10 +133,10 @@ function users() {
  **************************************************************************************/
 function login(username, password, callback) {
 	mongo.find('users', {username: username}, function(result) {
-		console.log(result);
 		if (result.length === 1) {
 			if (result[0].token.email === null && hash.checkHash(result[0].password, password)) {
 				callback({
+					id: result[0]._id,
 					username: result[0].username
 				});
 			} else {
@@ -145,6 +148,51 @@ function login(username, password, callback) {
 	});
 }
 
+/**************************************************************************
+ * Finds a user and returns their information in the same format as login *
+ * @method find                                                           *
+ * @param  {String}   id       Database ID of the user                    *
+ * @param  {Function} callback Called when the database returns           *
+ * @return {null}                                                         *
+ **************************************************************************/
+function find(id, callback) {
+	mongo.find('users', {_id: new ObjectId(id)}, function(result) {
+		if (result.length === 1) {
+			callback({
+				id: result._id,
+				username: result.username
+			});
+		} else {
+			callback(false);
+		}
+	});
+}
+
+/**************************************************************************
+ * Gets a user all their information apart from the password              *
+ * @method get                                                            *
+ * @param  {String}   id       Database ID of the user                    *
+ * @param  {Function} callback Called when the database returns           *
+ * @return {null}                                                         *
+ **************************************************************************/
+function get(id, callback) {
+	mongo.find('users', {_id: new ObjectId(id)}, function(result) {
+		if (result.length === 1) {
+			result.password = null;
+			callback(result);
+		} else {
+			callback(false);
+		}
+	});
+}
+
+/**
+ * Sets the location of the user in the database
+ * @method setLocation
+ * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}
+ * @param  {String}    username    Username of the user to add the location to
+ * @param  {Function}  callback    Returns the vaue from the update function
+ */
 function setLocation(coordinates, username, callback) {
 	mongo.update('users', {username: username},
 		{$set: {location: coordinates}}, callback);

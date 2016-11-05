@@ -5,9 +5,9 @@
 			<img src="/images/matcha.png" class="home-icon" />
 		</a>
 		<span flex></span>
-		{{#if user}}
+		{{#if username}}
 		<div layout="row" ng-controller="logout__">
-			<h3>{{ user.username }}</h3>
+			<a ng-href="/account"><h3>{{ username }}</h3></a>
 			<md-button aria-label="logout" ng-click="logout()">
 				<i class="material-icons">power_setting_new</i>
 			</md-button>

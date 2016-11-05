@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+{{> toolbar}}
+
+<md-content class="profile-page" layout-padding layout-wrap layout="column">
+	<h2>{{ username }}</h2>
+	<div layout="row">
+		<div class="profile-pic-main">
+			<img src="images/no_pic_male_black_512.png"/>
+		</div>
+		<div layout="column">
+			<md-input-container>
+				<label>Firstname</label>
+				<input ng-model="account.firstname" />
+			</md-input-container>
+			<md-input-container>
+				<label>Lastname</label>
+				<input ng-model="account.lastname" />
+			</md-input-container>
+		</div>
+	</div>
+	<div layout="row" layout-wrap>
+		<md-input-container>
+			<label>Username</label>
+			<input ng-model="account.username" />
+		</md-input-container>
+		<md-input-container>
+			<label>Email address</label>
+			<input ng-model="account.email" />
+		</md-input-container>
+	</div>
+	<div layout="column">
+		<md-input-container>
+			<label>Bio</label>
+			<textarea ng-model="account.bio" md-maxlength="150" maxlength="150" />
+		</md-input-container>
+		<md-input-container>
+			<label>Birthdate</label>
+			<md-datepicker ng-model="account.birthdate"></md-datepicker>
+		</md-input-container>
+		<div>
+			<label>Gender</label>
+			<md-radio-group ng-model="account.gender">
+				<md-radio-button value="M">Male</md-radio-button>
+				<md-radio-button value="F">Female</md-radio-button>
+				<md-radio-button value="O">Uncategorised mail</md-radio-button>
+			</md-radio-group>
+		</div>
+		<div>
+			<label>Interested in</label>
+			<div layout="row">
+				<md-checkbox ng-model="account.interestedMale">Male</md-checkbox>
+				<md-checkbox ng-model="account.interestedFemale">Female</md-checkbox>
+				<md-checkbox ng-model="account.interestedOther">Uncategorised mail</md-checkbox>
+			</div>
+		</div>
+	</div>
+</md-content>
