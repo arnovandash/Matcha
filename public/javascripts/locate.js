@@ -43,7 +43,6 @@ app.controller('locate__', function($http, $scope, $sessionStorage) {
 
   function post_latlng(lat, lng) {
     $http.post('/api/set_location', {
-      username: $sessionStorage.user,
       latitude: lat,
       longitude: lng
     }).success(function (data) {
