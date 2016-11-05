@@ -6,7 +6,8 @@ module.exports = {
     checkEmail: checkEmail,
 	confirmEmail: confirmEmail,
 	sendReset: sendReset,
-	confirmReset: confirmReset
+	confirmReset: confirmReset,
+	setLocation: setLocation
 };
 
 var apoc = require('apoc');
@@ -145,6 +146,13 @@ function login(username, password, callback) {
 			callback(null);
 		}
 	});
+}
+
+function setLocation(coordinates, username, callback) {
+	mongo.update('users', {username: username},
+		{$set: {location: coordinates}}, function (result) {
+			callback(result)
+		});
 }
 
 /*************************************************************************************************************
