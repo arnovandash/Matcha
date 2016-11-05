@@ -150,9 +150,7 @@ function login(username, password, callback) {
 
 function setLocation(coordinates, username, callback) {
 	mongo.update('users', {username: username},
-		{$set: {location: coordinates}}, function (result) {
-			callback(result)
-		});
+		{$set: {location: coordinates}}, callback);
 }
 
 /*************************************************************************************************************

@@ -113,9 +113,9 @@ router.post('/api/set_location', function(req, res) {
 		latitude: r.latitude,
 		longitude: r.longitude
 	};
-	user.setLocation( location, r.username, function(result) {
+	user.setLocation(location, r.username, function(result) {
 		res.json(result);
-	})
+	});
 });
 
 /********************************************************
