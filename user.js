@@ -97,7 +97,6 @@ function add(username, firstname, lastname, gender, lookingFor, birthdate, email
 		        })
 		        .exec(server)
 		        .then(function(result) {
-		            console.log('"Gender" relationships created');
 		            callback(false);
 		            return false;
 		        }, function(fail) {
@@ -132,8 +131,6 @@ function login(username, password, callback) {
 	mongo.find('users', {username: username}, function(result) {
 		console.log(result);
 		if (result.length === 1) {
-			console.log(result[0].token.email);
-			console.log(hash.checkHash(result[0].password, password));
 			if (result[0].token.email === null && hash.checkHash(result[0].password, password)) {
 				callback({
 					username: result[0].username
@@ -193,7 +190,6 @@ function sendReset(usernameEmail, callback) {
 	mongo.update('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, {$set: {'token.reset': token}}, function(result) {
 		if (result) {
 			mongo.find('users', {$or: [{username: usernameEmail}, {email: usernameEmail}]}, function(findRes) {
-				console.log(findRes);
 				email.sendReset(findRes[0].email, findRes[0].username, `http://localhost:8080/reset/${token}`, callback);
 			});
 		} else {
