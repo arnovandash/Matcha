@@ -1,6 +1,8 @@
-app.controller('locate__', function($http, $scope, $sessionStorage, partial) {
+app.controller('locate__', function($http, $scope) {
+  var retryCount = 0;
   var lat;
   var lng;
+
 
   $scope.locate = function () {
     console.log('Activating GPS...');
@@ -28,9 +30,12 @@ app.controller('locate__', function($http, $scope, $sessionStorage, partial) {
       console.log('Long: ' + lng);
       console.log('Gotcha bi*ch!');
     })
-    .error(function (error) {
-      console.log('Failure..');// retrying');
-      //setTimeout(on_error, 5000);
+    .error(function () {
+      console.log('Failure, retrying...');
+      if (retryCount < 3) {
+        setTimeout(on_error, 5000);
+        retryCount++;
+      }
     });
   }
 });

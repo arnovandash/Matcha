@@ -79,15 +79,15 @@ function findSort(collection, find, sort, callback) {
     });
 }
 
-/***************************************************************************************************
- * Finds and updates the the collection to the values specified by the set object                  *
- * @method update                                                                                  *
- * @param  {String}   collection The collection to run the update on                               *
- * @param  {Object}   find       Object that defines the document to update                        *
- * @param  {Object}   set        Object that defines what values need to be updated in the datasbe *
- * @param  {Function} callback   Function called when the database returns                         *
- * @return {null}                                                                                  *
- ***************************************************************************************************/
+/****************************************************************************************************
+ * Finds and updates the the collection to the values specified by the set object                   *
+ * @method update                                                                                   *
+ * @param  {String}   collection The collection to run the update on                                *
+ * @param  {Object}   find       Object that defines the document to update                         *
+ * @param  {Object}   set        Object that defines what values need to be updated in the database *
+ * @param  {Function} callback   Function called when the database returns                          *
+ * @return {null}                                                                                   *
+ ****************************************************************************************************/
 function update(collection, find, set, callback) {
     mongo.connect(url, function(err, db) {
         assert.equal(null, err);
