@@ -1,4 +1,4 @@
-app.controller('locate__', function($http, $scope, $sessionStorage) {
+app.controller('locate__', function($http, $scope) {
   var retryCount = 0;
   var lat;
   var lng;
@@ -51,4 +51,4 @@ app.controller('locate__', function($http, $scope, $sessionStorage) {
       console.log('Error ' + data);
     });
   }
-})
+});
