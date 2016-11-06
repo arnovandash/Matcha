@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams) {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog) {
     if ($routeParams.id === undefined && $sessionStorage.user.id === undefined) {
         $http.post('/api/whoami')
             .success(function(data) {
@@ -23,18 +23,17 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .success(function(data) {
                 console.log(data);
                 if (data) {
-                    $scope.account = {
-                        firstname: data.firstname,
-                        lastname: data.lastname,
-                        username: data.username,
-                        email: data.email,
-                        bio: (data.bio !== undefined) ? data.bio : null,
-                        birthdate: new Date(data.birthdate * 1000),
-                        gender: data.gender,
-                        interestedMale: data.seeking.male,
-                        interestedFemale: data.seeking.female,
-                        interestedOther: data.seeking.other
-                    };
+                    var account = $scope.account;
+                    account.firstname = data.firstname;
+                    account.lastname = data.lastname;
+                    account.username = data.username;
+                    account.email = data.email;
+                    account.bio = (data.bio !== undefined) ? data.bio : null;
+                    account.birthdate = new Date(data.birthdate * 1000);
+                    account.gender = data.gender;
+                    account.interestedMale = data.seeking.male;
+                    account.interestedFemale = data.seeking.female;
+                    account.interestedOther = data.seeking.other;
                 } else {
                     window.location.replace('/');
                 }
@@ -62,6 +61,12 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 month: account.birthdate.getUTCMonth() + 1,
                 year: account.birthdate.getUTCFullYear()
             },
+            tags: account.selectedTags.map(function(tag) {
+                delete tag.$$hashKey;
+                delete tag._lowername;
+                delete tag._lowertype;
+                return tag;
+            }),
             email: account.email,
             password: account.oldPassword,
             newPassword: account.newPassword
@@ -99,4 +104,74 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 console.log(`Error: ${data}`);
             });
     };
+
+    $scope.account = {
+        selectedTags: [],
+        selectedTag: null,
+        searchText: null,
+        tags: loadTags()
+    };
+
+    $scope.transformChip = function(chip, ev) {
+        if (angular.isObject(chip)) {
+            return chip;
+        }
+
+        var confirm = $mdDialog.prompt()
+            .title('Please give your new intrest a category')
+            .textContent(`You made a new intrest ${chip}, please give it a category. Example: Pizza has the category: Food`)
+            .placeholder('Category')
+            .ariaLabel('Dog name')
+			.targetEvent(ev)
+            .ok('Submit')
+            .cancel('Cancel');
+
+        $mdDialog.show(confirm).then(function(result) {
+            return {
+                name: chip,
+                type: result
+            };
+        }, function() {
+            return {
+                name: chip,
+                type: 'new'
+            };
+        });
+    };
+
+    $scope.querySearch = function(query) {
+        var results = query ? $scope.account.tags.filter(createFilterFor(query)) : [];
+        return results;
+    };
+
+    function loadTags() {
+        var tags = [{
+            name: 'Kayaking',
+            type: 'Sport'
+        }, {
+            name: 'Sky Diving',
+            type: 'Sport'
+        }, {
+            name: 'Pizza',
+            type: 'Food'
+        }, {
+            name: 'Tungton',
+            type: 'Element'
+        }];
+
+        return tags.map(function(tag) {
+            tag._lowername = tag.name.toLowerCase();
+            tag._lowertype = tag.type.toLowerCase();
+            return tag;
+        });
+    }
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+
+        return function filterFn(tag) {
+            return (tag._lowername.indexOf(lowercaseQuery) === 0) ||
+                (tag._lowertype.indexOf(lowercaseQuery) === 0);
+        };
+    }
 });

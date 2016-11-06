@@ -4,8 +4,6 @@ var user = require('./user');
 var router = express.Router();
 var sess;
 
-
-
 router.get('/partials/home', function(req, res) {
     sess = req.session;
     if (sess.user !== undefined && sess.user !== null) {
@@ -132,14 +130,18 @@ router.post('/api/reset', function(req, res) {
 
 router.post('/api/set_location', function(req, res) {
     sess = req.session;
-    var r = req.body;
-    var location = {
-        latitude: r.latitude,
-        longitude: r.longitude
-    };
-    user.setLocation(location, sess.user.username, function(result) {
-        res.json(result);
-    });
+	if (sess.user !== undefined && sess.user !== null) {
+		var r = req.body;
+	    var location = {
+	        latitude: r.latitude,
+	        longitude: r.longitude
+	    };
+	    user.setLocation(location, sess.user.username, function(result) {
+	        res.json(result);
+	    });
+	} else {
+		res.json(false);
+	}
 });
 
 router.post('/api/get_user', function(req, res) {

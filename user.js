@@ -149,7 +149,6 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
  * @return {Boolean}           true if error occured, false if successful *
  **************************************************************************/
 function modify(update, callback) {
-	console.log(`UPDATE: ${update}`);
     if (testInput(update, callback)) {
         return true;
     }
@@ -169,9 +168,8 @@ function modify(update, callback) {
 		set.password = hash.createHash(update.password);
 	}
     mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
-		console.log(`UDPATE: ${result}`);
         if (result === true) {
-            var query = "MATCH (a:Person {id: '`id`'}) SET a.username = '`username`' MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s";
+            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s SET a.username = '`username`'";
 			query += " MERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
             if (update.seeking.male === true) {
                 query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
