@@ -112,7 +112,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         tags: loadTags()
     };
 
-    $scope.transformChip = function(chip, ev) {
+    $scope.transformChip = function(chip) {
+		console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -122,21 +123,25 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .textContent(`You made a new intrest ${chip}, please give it a category. Example: Pizza has the category: Food`)
             .placeholder('Category')
             .ariaLabel('Dog name')
-			.targetEvent(ev)
             .ok('Submit')
             .cancel('Cancel');
 
         $mdDialog.show(confirm).then(function(result) {
-            return {
+            $scope.account.selectedTags.push({
                 name: chip,
-                type: result
-            };
+                type: result,
+				_lowername: chip.toLowerCase(),
+				_lowertype: result.toLowerCase()
+            });
         }, function() {
             return {
                 name: chip,
-                type: 'new'
+                type: 'new',
+				_lowername: chip.toLowerCase(),
+				_lowertype: 'new'
             };
         });
+		return null;
     };
 
     $scope.querySearch = function(query) {

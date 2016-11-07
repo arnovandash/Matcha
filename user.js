@@ -225,16 +225,20 @@ function login(username, password, callback) {
         username: username
     }, function(result) {
         if (result.length === 1) {
-            if (result[0].token.email === null && hash.checkHash(result[0].password, password)) {
-                callback({
-                    id: result[0]._id,
-                    username: result[0].username
-                });
-            } else {
-                callback(null);
-            }
+			if (result[0].token.email === null) {
+				if (hash.checkHash(result[0].password, password)) {
+	                callback({
+	                    id: result[0]._id,
+	                    username: result[0].username
+	                });
+	            } else {
+	                callback('Incorrect username or Password');
+	            }
+			} else {
+				callback('You need to verify your email address before you can log in');
+			}
         } else {
-            callback(null);
+            callback('Incorrect Username or password');
         }
     });
 }
