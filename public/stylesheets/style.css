@@ -40,3 +40,7 @@
 	min-height: 128px;
 	display: flex;
 }
+
+.logout-button {
+	min-width: 36px;
+}

@@ -17,8 +17,9 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         console.log($routeParams.id);
         console.log($sessionStorage.user.id);
         console.log(`ID: ${($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id}`);
+		$scope.user.id = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
-                id: ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id
+                id: $scope.user.id
             })
             .success(function(data) {
                 console.log(data);
@@ -109,10 +110,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         selectedTags: [],
         selectedTag: null,
         searchText: null,
-        tags: loadTags()
     };
+	loadTags();
 
-    $scope.transformChip = function(chip) {
+    $scope.transformChip = function(chip, ev) {
 		console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
@@ -123,6 +124,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .textContent(`You made a new intrest ${chip}, please give it a category. Example: Pizza has the category: Food`)
             .placeholder('Category')
             .ariaLabel('Dog name')
+			.targetEvent(ev)
             .ok('Submit')
             .cancel('Cancel');
 
@@ -133,13 +135,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 				_lowername: chip.toLowerCase(),
 				_lowertype: result.toLowerCase()
             });
+			document.getElementById('chips').select();
         }, function() {
-            return {
-                name: chip,
-                type: 'new',
-				_lowername: chip.toLowerCase(),
-				_lowertype: 'new'
-            };
+			document.getElementById('chips').select();
+            return null;
         });
 		return null;
     };
@@ -150,25 +149,30 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     };
 
     function loadTags() {
-        var tags = [{
-            name: 'Kayaking',
-            type: 'Sport'
-        }, {
-            name: 'Sky Diving',
-            type: 'Sport'
-        }, {
-            name: 'Pizza',
-            type: 'Food'
-        }, {
-            name: 'Tungton',
-            type: 'Element'
-        }];
-
-        return tags.map(function(tag) {
-            tag._lowername = tag.name.toLowerCase();
-            tag._lowertype = tag.type.toLowerCase();
-            return tag;
-        });
+		$http.post('/api/get_tags', {
+			id: $scope.user.id
+		})
+			.success(function(data) {
+				$scope.account.tags = [];
+				console.log(data);
+				data[0].map(function(tag) {
+					tag._lowername = tag.name.toLowerCase();
+					tag._lowertype = tag.type.toLowerCase();
+					return tag;
+				});
+				data[1].map(function(tag) {
+					tag._lowername = tag.name.toLowerCase();
+					tag._lowertype = tag.type.toLowerCase();
+					return tag;
+				});
+				console.log(data);
+				$scope.account.tags = data[0];
+				$scope.account.selectedTags = data[1];
+			})
+			.error(function(data) {
+				console.log(`Error: ${data}`);
+				$scope.account.tags = [];
+			});
     }
 
     function createFilterFor(query) {

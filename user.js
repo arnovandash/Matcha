@@ -10,7 +10,8 @@ module.exports = {
     confirmEmail: confirmEmail,
     sendReset: sendReset,
     confirmReset: confirmReset,
-    setLocation: setLocation
+    setLocation: setLocation,
+	getTags: getTags
 };
 
 var apoc = require('apoc');
@@ -169,7 +170,7 @@ function modify(update, callback) {
 	}
     mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
         if (result === true) {
-            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) DELETE g, s SET a.username = '`username`'";
+            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) MATCH (a)-[t:TAG]->(:Tag) DELETE g, s, t SET a.username = '`username`'";
 			query += " MERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
             if (update.seeking.male === true) {
                 query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
@@ -180,6 +181,14 @@ function modify(update, callback) {
             if (update.seeking.other === true) {
                 query += " MERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
+			update.tags.forEach(function(tag, index) {
+				var name = JSON.stringify(String(tag.name));
+				name = name.substring(1, name.length - 1);
+				var type = JSON.stringify(String(tag.type));
+				type = type.substring(1, type.length - 1);
+				query += ` MERGE (t${index}:Tag {name: '${name}', type: '${type}'}) MERGE (a)-[:TAG]->(t${index})`;
+			});
+			console.log(query);
             apoc.query(query, {}, {
                     id: update.id,
 					username: update.username,
@@ -431,4 +440,21 @@ function confirmReset(link, password, callback) {
             password: hash.createHash(password)
         }
     }, callback);
+}
+
+function getTags(id, callback) {
+	if (id === undefined || id === null) {
+		id = '123abc'; // ID that does not exist
+	}
+	apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
+		id: id
+	})
+	.exec(server)
+	.then(function(result) {
+		console.log(require('util').inspect(result, { depth: null }));
+		callback(result[0].data[0].row);
+	}, function(fail) {
+		console.log(fail);
+		callback(fail);
+	});
 }

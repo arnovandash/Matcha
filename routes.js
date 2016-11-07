@@ -171,6 +171,12 @@ router.post('/api/modify', function(req, res) {
     }
 });
 
+router.post('/api/get_tags', function(req, res) {
+	user.getTags(req.body.id, function(result) {
+		res.json(result);
+	});
+});
+
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/
