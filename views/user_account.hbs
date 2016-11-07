@@ -52,7 +52,7 @@
 		<div layout="row">
 			<md-input-container flex>
 				<label>Intrests</label>
-				<md-chips id="chips" ng-model="account.selectedTags" md-autocomplete-snap md-transform-chip="transformChip($chip, $event)" md-require-match="false">
+				<md-chips ng-model="account.selectedTags" md-autocomplete-snap md-transform-chip="transformChip($chip, $event)" md-require-match="false" id="chips">
 					<md-autocomplete md-selected-item="account.selectedTag" md-search-text="account.searchText" md-items="item in querySearch(account.searchText)" md-item-text="item.name" placeholder="Search for a tag">
 						<span md-highlight-text="account.searchText">\{{item.name}} :: \{{item.type}}</span>
 					</md-autocomplete>

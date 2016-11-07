@@ -13,13 +13,17 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         getUser();
     }
 
+	$scope.account = {
+		selectedTags: [],
+		selectedTag: null,
+		searchText: null,
+	};
+	loadTags();
+
     function getUser() {
-        console.log($routeParams.id);
-        console.log($sessionStorage.user.id);
-        console.log(`ID: ${($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id}`);
-		$scope.user.id = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+		$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
-                id: $scope.user.id
+                id: $scope.userId
             })
             .success(function(data) {
                 console.log(data);
@@ -106,13 +110,6 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     };
 
-    $scope.account = {
-        selectedTags: [],
-        selectedTag: null,
-        searchText: null,
-    };
-	loadTags();
-
     $scope.transformChip = function(chip, ev) {
 		console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
@@ -135,9 +132,9 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 				_lowername: chip.toLowerCase(),
 				_lowertype: result.toLowerCase()
             });
-			document.getElementById('chips').select();
+			document.getElementById('chips').focus();
         }, function() {
-			document.getElementById('chips').select();
+			document.getElementById('chips').focus();
             return null;
         });
 		return null;
@@ -150,7 +147,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
     function loadTags() {
 		$http.post('/api/get_tags', {
-			id: $scope.user.id
+			id: $scope.userId
 		})
 			.success(function(data) {
 				$scope.account.tags = [];

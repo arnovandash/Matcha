@@ -170,23 +170,23 @@ function modify(update, callback) {
 	}
     mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
         if (result === true) {
-            var query = "MATCH (a:Person {id: '`id`'}) MATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) MATCH (a)-[t:TAG]->(:Tag) DELETE g, s, t SET a.username = '`username`'";
-			query += " MERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
+            var query = "MATCH (a:Person {id: '`id`'})\nMATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) MATCH (a)-[t:TAG]->(:Tag) DELETE g, s, t\nSET a.username = '`username`'";
+			query += "\nMERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
             if (update.seeking.male === true) {
-                query += " MERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
+                query += "\nMERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
             }
             if (update.seeking.female === true) {
-                query += " MERGE (f:Gender {gender: 'F'}) MERGE (a)-[:SEEKING]->(f)";
+                query += "\nMERGE (f:Gender {gender: 'F'}) MERGE (a)-[:SEEKING]->(f)";
             }
             if (update.seeking.other === true) {
-                query += " MERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
+                query += "\nMERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
 			update.tags.forEach(function(tag, index) {
 				var name = JSON.stringify(String(tag.name));
 				name = name.substring(1, name.length - 1);
 				var type = JSON.stringify(String(tag.type));
 				type = type.substring(1, type.length - 1);
-				query += ` MERGE (t${index}:Tag {name: '${name}', type: '${type}'}) MERGE (a)-[:TAG]->(t${index})`;
+				query += `\nMERGE (t${index}:Tag {name: '${name}', type: '${type}'}) MERGE (a)-[:TAG]->(t${index})`;
 			});
 			console.log(query);
             apoc.query(query, {}, {
@@ -196,6 +196,7 @@ function modify(update, callback) {
                 })
                 .exec(server)
                 .then(function(result) {
+					console.log(require('util').inspect(result, { depth: null }));
                     callback(true);
                     return false;
                 }, function(fail) {
@@ -231,7 +232,7 @@ function users() {
  **************************************************************************************/
 function login(username, password, callback) {
     mongo.find('users', {
-        username: username
+        username: new RegExp(username, 'i')
     }, function(result) {
         if (result.length === 1) {
 			if (result[0].token.email === null) {
@@ -446,12 +447,12 @@ function getTags(id, callback) {
 	if (id === undefined || id === null) {
 		id = '123abc'; // ID that does not exist
 	}
+	console.log(`Finding user: ${id}`);
 	apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
 		id: id
 	})
 	.exec(server)
 	.then(function(result) {
-		console.log(require('util').inspect(result, { depth: null }));
 		callback(result[0].data[0].row);
 	}, function(fail) {
 		console.log(fail);
