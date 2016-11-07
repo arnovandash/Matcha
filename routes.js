@@ -15,13 +15,14 @@ router.get('/partials/home', function(req, res) {
 
 router.get('/partials/account/:id?', function(req, res) {
     console.log(req.params.id);
+	sess = req.session;
     if (req.params.id === undefined) {
-        sess = req.session;
         if (sess.user === undefined || sess.user === null) {
             res.send("Error: You need to be logged in");
         } else {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
+				result.user = sess.user;
                 res.render('user_account', result);
             });
         }
@@ -32,6 +33,7 @@ router.get('/partials/account/:id?', function(req, res) {
             user.find(req.params.id, function(result) {
                 if (result) {
                     result.mine = false;
+					result.user = sess.user;
                     res.render('user_account', result);
                 } else {
                     res.json('no user of that id');
@@ -42,7 +44,7 @@ router.get('/partials/account/:id?', function(req, res) {
 });
 
 router.get('/partials/license', function(req, res) {
-    res.render('license');
+    res.render('license', req.session.user);
 });
 
 /***************************

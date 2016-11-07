@@ -181,13 +181,6 @@ function modify(update, callback) {
             if (update.seeking.other === true) {
                 query += "\nMERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
-			update.tags.forEach(function(tag, index) {
-				var name = JSON.stringify(String(tag.name));
-				name = name.substring(1, name.length - 1);
-				var type = JSON.stringify(String(tag.type));
-				type = type.substring(1, type.length - 1);
-				query += `\nMERGE (t${index}:Tag {name: '${name}', type: '${type}'}) MERGE (a)-[:TAG]->(t${index})`;
-			});
 			console.log(query);
             apoc.query(query, {}, {
                     id: update.id,
@@ -197,8 +190,27 @@ function modify(update, callback) {
                 .exec(server)
                 .then(function(result) {
 					console.log(require('util').inspect(result, { depth: null }));
-                    callback(true);
-                    return false;
+					query = "MATCH (a:Person {id: '`id`'})";
+					update.tags.forEach(function(tag, index) {
+						var name = JSON.stringify(String(tag.name));
+						name = name.substring(1, name.length - 1);
+						var type = JSON.stringify(String(tag.type));
+						type = type.substring(1, type.length - 1);
+						query += `\nMERGE (tag${index}:Tag {name: '${name}', type: '${type}'}) MERGE (type${index}:Type {type: '${type}'}) MERGE (a)-[:TAG]->(tag${index}) MERGE (tag${index})-[:TYPE]->(type${index})`;
+					});
+					apoc.query(query, {}, {
+						id: update.id
+					})
+					.exec(server)
+					.then(function(result2) {
+						console.log(require('util').inspect(result2, { depth: null }));
+						callback(true);
+						return false;
+					}, function(fail2) {
+						console.log(fail2);
+	                    callback(fail2);
+	                    return true;
+					});
                 }, function(fail) {
                     console.log(fail);
                     callback(fail);

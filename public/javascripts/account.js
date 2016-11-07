@@ -15,6 +15,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
 	$scope.account = {
 		selectedTags: [],
+		tags: [],
+		types: [],
 		selectedTag: null,
 		searchText: null,
 	};
@@ -126,12 +128,14 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .cancel('Cancel');
 
         $mdDialog.show(confirm).then(function(result) {
-            $scope.account.selectedTags.push({
+			var newTag = {
                 name: chip,
                 type: result,
 				_lowername: chip.toLowerCase(),
 				_lowertype: result.toLowerCase()
-            });
+            };
+			$scope.account.selectedTags.push(newTag);
+			$scope.account.tags.push(newTag);
 			document.getElementById('chips').focus();
         }, function() {
 			document.getElementById('chips').focus();
@@ -144,6 +148,28 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         var results = query ? $scope.account.tags.filter(createFilterFor(query)) : [];
         return results;
     };
+
+	$scope.typeSearch = function(query) {
+		var results = query ? $scope.account.tags.filter(typeFilterFor(query)) : [];
+		return results;
+	};
+
+	function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+
+        return function filterFn(tag) {
+            return (tag._lowername.indexOf(lowercaseQuery) === 0) ||
+                (tag._lowertype.indexOf(lowercaseQuery) === 0);
+        };
+    }
+
+	function typeFilterFor(query) {
+		var lowercaseQuery = angular.lowercase(query);
+
+        return function filterFn(tag) {
+            return tag._lowertype.indexOf(lowercaseQuery);
+        };
+	}
 
     function loadTags() {
 		$http.post('/api/get_tags', {
@@ -170,14 +196,5 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 				console.log(`Error: ${data}`);
 				$scope.account.tags = [];
 			});
-    }
-
-    function createFilterFor(query) {
-        var lowercaseQuery = angular.lowercase(query);
-
-        return function filterFn(tag) {
-            return (tag._lowername.indexOf(lowercaseQuery) === 0) ||
-                (tag._lowertype.indexOf(lowercaseQuery) === 0);
-        };
     }
 });
