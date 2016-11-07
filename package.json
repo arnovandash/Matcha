@@ -16,6 +16,7 @@
     "express-session": "~1.14.1",
     "mongodb": "^2.2.11",
     "morgan": "~1.7.0",
+    "multer": "^1.2.0",
     "sendmail": "^1.0.0",
     "serve-favicon": "~2.3.0"
   }

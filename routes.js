@@ -76,6 +76,10 @@ router.post('/api/logout', function(req, res) {
     res.json(true);
 });
 
+router.post('/api/photo', function(req, res){
+
+});
+
 /**************************************************************
  * Returns true if username is free, false if username exists *
  **************************************************************/
