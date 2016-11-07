@@ -50,6 +50,7 @@ router.get('/partials/license', function(req, res) {
  ***************************/
 router.get('/partials/confirm', function(req, res) {
     res.json('waiting...');
+    //res.render('account');
 });
 
 router.get('/partials/send_reset', function(req, res) {
