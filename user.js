@@ -11,7 +11,8 @@ module.exports = {
     sendReset: sendReset,
     confirmReset: confirmReset,
     setLocation: setLocation,
-    getTags: getTags
+    getTags: getTags,
+	findMatches: findMatches
 };
 
 var apoc = require('apoc');
@@ -471,6 +472,13 @@ function confirmReset(link, password, callback) {
     }, callback);
 }
 
+/********************************************************************************************
+ * Returns all tags from Neo4j, as well as those that apply to the id of the user specified *
+ * @method getTags                                                                          *
+ * @param  {String}   id       Id of the user to find tags for                              *
+ * @param  {Function} callback Returns an array [[{user tags}], [{all tags}]]               *
+ * @return {callback}                                                                       *
+ ********************************************************************************************/
 function getTags(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc'; // ID that does not exist
@@ -486,4 +494,21 @@ function getTags(id, callback) {
             console.log(fail);
             callback(fail);
         });
+}
+
+function findMatches(id, callback) {
+	if (id === undefined || id === null) {
+		id = '123abc';
+	}
+	apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag) AS Types", {}, {
+		id: id
+	})
+	.exec(server)
+	.then(function(result) {
+		console.log(require('util').inspect(result[0].data[0].row, { depth: null }));
+		callback(result[0].data[0].row);
+	}, function(fail) {
+		console.log(fail);
+		callback(fail);
+	});
 }
