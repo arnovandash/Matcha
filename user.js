@@ -1,6 +1,6 @@
 module.exports = {
     add: add,
-	modify: modify,
+    modify: modify,
     listAll: users,
     login: login,
     find: find,
@@ -11,7 +11,7 @@ module.exports = {
     sendReset: sendReset,
     confirmReset: confirmReset,
     setLocation: setLocation,
-	getTags: getTags
+    getTags: getTags
 };
 
 var apoc = require('apoc');
@@ -46,8 +46,8 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-		console.log('Input error');
-		console.log(input);
+        console.log('Input error');
+        console.log(input);
         return true;
     }
     return false;
@@ -123,7 +123,7 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
             }
             apoc.query(query, {}, {
                     id: id,
-					username: username,
+                    username: username,
                     gender: gender
                 })
                 .exec(server)
@@ -137,7 +137,7 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
                 });
         } else {
             console.log('Error creating user in Mongo: ' + result.err);
-			callback(result.err);
+            callback(result.err);
         }
     });
 }
@@ -153,25 +153,35 @@ function modify(update, callback) {
     if (testInput(update, callback)) {
         return true;
     }
-
-	update.birthdate = parseInt(new Date(update.birthdate.year, update.birthdate.month, update.birthdate.day).getTime() / 1000);
-
+    update.birthdate = parseInt(new Date(update.birthdate.year, update.birthdate.month, update.birthdate.day).getTime() / 1000);
     var id = null;
-	var set = {
-		username: update.username,
-		firstname: update.firstname,
-		lastname: update.lastname,
-		birthdate: update.birthdate,
-		email: update.email,
-		bio: update.bio
-	};
-	if (update.password !== undefined) {
-		set.password = hash.createHash(update.password);
-	}
-    mongo.update('users', {_id: new ObjectId(update.id)}, {$set: set}, function(result) {
+    var set = {
+        username: update.username,
+        firstname: update.firstname,
+        lastname: update.lastname,
+        birthdate: update.birthdate,
+        email: update.email,
+        bio: update.bio,
+    };
+    mongo.find('users', {
+        _id: new ObjectId(update.id)
+    }, function(result) {
+        if (result.length !== 1 || result[0].token.email !== null || !hash.checkHash(result[0].password, update.password)) {
+            callback('Incorrect id or password');
+			return true;
+        }
+    });
+    if (update.newPassword !== undefined && update.newPassword !== null && update.newPassword.length > 1) {
+        set.password = hash.createHash(update.newPassword);
+    }
+    mongo.update('users', {
+        _id: new ObjectId(update.id)
+    }, {
+        $set: set
+    }, function(result) {
         if (result === true) {
             var query = "MATCH (a:Person {id: '`id`'})\nMATCH (a)-[g:GENDER]->(:Gender) MATCH (a)-[s:SEEKING]->(:Gender) MATCH (a)-[t:TAG]->(:Tag) DELETE g, s, t\nSET a.username = '`username`'";
-			query += "\nMERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
+            query += "\nMERGE (n:Gender {gender: '`gender`'}) MERGE (a)-[:GENDER]->(n)";
             if (update.seeking.male === true) {
                 query += "\nMERGE (m:Gender {gender: 'M'}) MERGE (a)-[:SEEKING]->(m)";
             }
@@ -181,44 +191,48 @@ function modify(update, callback) {
             if (update.seeking.other === true) {
                 query += "\nMERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
-			console.log(query);
+            console.log(query);
             apoc.query(query, {}, {
                     id: update.id,
-					username: update.username,
+                    username: update.username,
                     gender: update.gender
                 })
                 .exec(server)
                 .then(function(result) {
-					console.log(require('util').inspect(result, { depth: null }));
-					query = "MATCH (a:Person {id: '`id`'})";
-					update.tags.forEach(function(tag, index) {
-						var name = JSON.stringify(String(tag.name));
-						name = name.substring(1, name.length - 1);
-						var type = JSON.stringify(String(tag.type));
-						type = type.substring(1, type.length - 1);
-						query += `\nMERGE (tag${index}:Tag {name: '${name}', type: '${type}'}) MERGE (type${index}:Type {type: '${type}'}) MERGE (a)-[:TAG]->(tag${index}) MERGE (tag${index})-[:TYPE]->(type${index})`;
-					});
-					apoc.query(query, {}, {
-						id: update.id
-					})
-					.exec(server)
-					.then(function(result2) {
-						console.log(require('util').inspect(result2, { depth: null }));
-						callback(true);
-						return false;
-					}, function(fail2) {
-						console.log(fail2);
-	                    callback(fail2);
-	                    return true;
-					});
+                    console.log(require('util').inspect(result, {
+                        depth: null
+                    }));
+                    query = "MATCH (a:Person {id: '`id`'})";
+                    update.tags.forEach(function(tag, index) {
+                        var name = JSON.stringify(String(tag.name));
+                        name = name.substring(1, name.length - 1);
+                        var type = JSON.stringify(String(tag.type));
+                        type = type.substring(1, type.length - 1);
+                        query += `\nMERGE (tag${index}:Tag {name: '${name}', type: '${type}'}) MERGE (type${index}:Type {type: '${type}'}) MERGE (a)-[:TAG]->(tag${index}) MERGE (tag${index})-[:TYPE]->(type${index})`;
+                    });
+                    apoc.query(query, {}, {
+                            id: update.id
+                        })
+                        .exec(server)
+                        .then(function(result2) {
+                            console.log(require('util').inspect(result2, {
+                                depth: null
+                            }));
+                            callback(true);
+                            return false;
+                        }, function(fail2) {
+                            console.log(fail2);
+                            callback(fail2);
+                            return true;
+                        });
                 }, function(fail) {
                     console.log(fail);
                     callback(fail);
                     return true;
                 });
         } else {
-            console.log('Error creating user in Mongo: ' + result.err);
-			callback('Mongo error');
+            console.log('Updating user in Mongo: ' + result.err);
+            callback('User account update error');
         }
     });
 }
@@ -247,18 +261,18 @@ function login(username, password, callback) {
         username: new RegExp(username, 'i')
     }, function(result) {
         if (result.length === 1) {
-			if (result[0].token.email === null) {
-				if (hash.checkHash(result[0].password, password)) {
-	                callback({
-	                    id: result[0]._id,
-	                    username: result[0].username
-	                });
-	            } else {
-	                callback('Incorrect username or Password');
-	            }
-			} else {
-				callback('You need to verify your email address before you can log in');
-			}
+            if (result[0].token.email === null) {
+                if (hash.checkHash(result[0].password, password)) {
+                    callback({
+                        id: result[0]._id,
+                        username: result[0].username
+                    });
+                } else {
+                    callback('Incorrect username or Password');
+                }
+            } else {
+                callback('You need to verify your email address before you can log in');
+            }
         } else {
             callback('Incorrect Username or password');
         }
@@ -309,7 +323,9 @@ function get(id, callback) {
                 })
                 .exec(server)
                 .then(function(gender) {
-					console.log(require('util').inspect(gender, { depth: null }));
+                    console.log(require('util').inspect(gender, {
+                        depth: null
+                    }));
                     gender = gender[0].data[0].row;
                     user.gender = gender[0];
                     user.seeking = {
@@ -329,7 +345,7 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
-					console.log(`USER: ${user}`);
+                    console.log(`USER: ${user}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
@@ -456,18 +472,18 @@ function confirmReset(link, password, callback) {
 }
 
 function getTags(id, callback) {
-	if (id === undefined || id === null) {
-		id = '123abc'; // ID that does not exist
-	}
-	console.log(`Finding user: ${id}`);
-	apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
-		id: id
-	})
-	.exec(server)
-	.then(function(result) {
-		callback(result[0].data[0].row);
-	}, function(fail) {
-		console.log(fail);
-		callback(fail);
-	});
+    if (id === undefined || id === null) {
+        id = '123abc'; // ID that does not exist
+    }
+    console.log(`Finding user: ${id}`);
+    apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
+            id: id
+        })
+        .exec(server)
+        .then(function(result) {
+            callback(result[0].data[0].row);
+        }, function(fail) {
+            console.log(fail);
+            callback(fail);
+        });
 }

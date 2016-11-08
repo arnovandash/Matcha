@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog) {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
     if ($routeParams.id === undefined && $sessionStorage.user.id === undefined) {
         $http.post('/api/whoami')
             .success(function(data) {
@@ -13,17 +13,17 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         getUser();
     }
 
-	$scope.account = {
-		selectedTags: [],
-		tags: [],
-		types: [],
-		selectedTag: null,
-		searchText: null,
-	};
-	loadTags();
+    $scope.account = {
+        selectedTags: [],
+        tags: [],
+        types: [],
+        selectedTag: null,
+        searchText: null,
+    };
+    loadTags();
 
     function getUser() {
-		$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+        $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
                 id: $scope.userId
             })
@@ -100,12 +100,30 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 send.seeking.other = false;
             }
         }
+        $scope.account.oldPassword = '';
+        $scope.account.newPassword = '';
+        $scope.account.newPassword2 = '';
+        $scope.updateChanges.$setUntouched();
         console.log(send);
         $http.post('/api/modify', {
                 update: send
             })
             .success(function(data) {
                 console.log(data);
+				var message = '';
+				if (data === true) {
+					message = 'Profile updated successfully!';
+				} else {
+					message = data;
+				}
+				$mdToast.show(
+                    $mdToast.simple()
+					.parent(document.getElementById('toaster'))
+                    .textContent(message)
+                    .position('top right')
+                    .hideDelay(3000)
+                );
+
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
@@ -113,7 +131,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     };
 
     $scope.transformChip = function(chip, ev) {
-		console.log($scope.account.selectedTags);
+        console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -123,25 +141,25 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .textContent(`You made a new intrest ${chip}, please give it a category. Example: Pizza has the category: Food`)
             .placeholder('Category')
             .ariaLabel('Dog name')
-			.targetEvent(ev)
+            .targetEvent(ev)
             .ok('Submit')
             .cancel('Cancel');
 
         $mdDialog.show(confirm).then(function(result) {
-			var newTag = {
+            var newTag = {
                 name: chip,
                 type: result,
-				_lowername: chip.toLowerCase(),
-				_lowertype: result.toLowerCase()
+                _lowername: chip.toLowerCase(),
+                _lowertype: result.toLowerCase()
             };
-			$scope.account.selectedTags.push(newTag);
-			$scope.account.tags.push(newTag);
-			document.getElementById('chips').focus();
+            $scope.account.selectedTags.push(newTag);
+            $scope.account.tags.push(newTag);
+            document.getElementById('chips').focus();
         }, function() {
-			document.getElementById('chips').focus();
+            document.getElementById('chips').focus();
             return null;
         });
-		return null;
+        return null;
     };
 
     $scope.querySearch = function(query) {
@@ -149,12 +167,12 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         return results;
     };
 
-	$scope.typeSearch = function(query) {
-		var results = query ? $scope.account.tags.filter(typeFilterFor(query)) : [];
-		return results;
-	};
+    $scope.typeSearch = function(query) {
+        var results = query ? $scope.account.tags.filter(typeFilterFor(query)) : [];
+        return results;
+    };
 
-	function createFilterFor(query) {
+    function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
 
         return function filterFn(tag) {
@@ -163,40 +181,40 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         };
     }
 
-	function typeFilterFor(query) {
-		var lowercaseQuery = angular.lowercase(query);
+    function typeFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
 
         return function filterFn(tag) {
             return tag._lowertype.indexOf(lowercaseQuery);
         };
-	}
+    }
 
     function loadTags() {
-		$http.post('/api/get_tags', {
-			id: $scope.userId
-		})
-			.success(function(data) {
-				$scope.account.tags = [];
-				if (typeof data === 'object') {
-					data[0].map(function(tag) {
-						tag._lowername = tag.name.toLowerCase();
-						tag._lowertype = tag.type.toLowerCase();
-						return tag;
-					});
-					data[1].map(function(tag) {
-						tag._lowername = tag.name.toLowerCase();
-						tag._lowertype = tag.type.toLowerCase();
-						return tag;
-					});
-					$scope.account.tags = data[0];
-					$scope.account.selectedTags = data[1];
-				} else {
-					console.log('error fetching data');
-				}
-			})
-			.error(function(data) {
-				console.log(`Error: ${data}`);
-				$scope.account.tags = [];
-			});
+        $http.post('/api/get_tags', {
+                id: $scope.userId
+            })
+            .success(function(data) {
+                $scope.account.tags = [];
+                if (typeof data === 'object') {
+                    data[0].map(function(tag) {
+                        tag._lowername = tag.name.toLowerCase();
+                        tag._lowertype = tag.type.toLowerCase();
+                        return tag;
+                    });
+                    data[1].map(function(tag) {
+                        tag._lowername = tag.name.toLowerCase();
+                        tag._lowertype = tag.type.toLowerCase();
+                        return tag;
+                    });
+                    $scope.account.tags = data[0];
+                    $scope.account.selectedTags = data[1];
+                } else {
+                    console.log('error fetching data');
+                }
+            })
+            .error(function(data) {
+                console.log(`Error: ${data}`);
+                $scope.account.tags = [];
+            });
     }
 });
