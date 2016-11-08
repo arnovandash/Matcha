@@ -15,8 +15,16 @@
 				<label>Lastname</label>
 				<input ng-model="account.lastname" />
 			</md-input-container>
-		</div>
+		</div>pw
 	</div>
+
+    <div ng_controller="upload__">
+        <form name="upload-form">
+                <input type="file" accept="image/*" ngf-select ng-model="picFile" name="file">
+            <button ng-click="test(picFile)">Upload</button>
+        </form>
+    </div>
+
 	<div layout="row" layout-wrap>
 		<md-input-container>
 			<label>Email address</label>
