@@ -90,19 +90,8 @@ app.controller('register__', function ($scope, $http, partial) {
             console.log('No email');
         }
     };
-    app.directive("testUserName", function () {
-        if ($scope.reg.email !== undefined) {
-            $http.post('/api/check_email', {
-                email: $scope.reg.email
-            }).success(function (data) {
-               // console.log(data);
-                return data;
-            }).error(function (data) {
-                //console.log('Error ' + data);
-                return false;
-            });
-        } else {
-            console.log('No email');
-        }
-    });
+
+
+
 });
+
