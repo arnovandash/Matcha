@@ -177,20 +177,22 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 		})
 			.success(function(data) {
 				$scope.account.tags = [];
-				console.log(data);
-				data[0].map(function(tag) {
-					tag._lowername = tag.name.toLowerCase();
-					tag._lowertype = tag.type.toLowerCase();
-					return tag;
-				});
-				data[1].map(function(tag) {
-					tag._lowername = tag.name.toLowerCase();
-					tag._lowertype = tag.type.toLowerCase();
-					return tag;
-				});
-				console.log(data);
-				$scope.account.tags = data[0];
-				$scope.account.selectedTags = data[1];
+				if (typeof data === 'object') {
+					data[0].map(function(tag) {
+						tag._lowername = tag.name.toLowerCase();
+						tag._lowertype = tag.type.toLowerCase();
+						return tag;
+					});
+					data[1].map(function(tag) {
+						tag._lowername = tag.name.toLowerCase();
+						tag._lowertype = tag.type.toLowerCase();
+						return tag;
+					});
+					$scope.account.tags = data[0];
+					$scope.account.selectedTags = data[1];
+				} else {
+					console.log('error fetching data');
+				}
 			})
 			.error(function(data) {
 				console.log(`Error: ${data}`);
