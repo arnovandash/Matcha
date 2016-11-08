@@ -22,7 +22,8 @@ router.get('/partials/account/:id?', function(req, res) {
         } else {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
-				result.user = sess.user;
+				result.username = sess.user.username;
+				result.id = sess.user.id;
                 res.render('user_account', result);
             });
         }
