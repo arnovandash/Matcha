@@ -506,7 +506,7 @@ function findMatches(id, callback) {
 	.exec(server)
 	.then(function(result) {
 		console.log(require('util').inspect(result[0].data[0].row, { depth: null }));
-		callback(result[0].data[0].row);
+		callback(result[0].data);
 	}, function(fail) {
 		console.log(fail);
 		callback(fail);

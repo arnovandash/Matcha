@@ -44,7 +44,7 @@ app.use('/', routes);
 /*user.get('581df7beec34b159a4cb1870', function(result) {
 	console.log(result);
 }); */
-user.findMatches('5820a7262d9b3f69e00da1ee', function(result) {
+user.findMatches('581f1204a868f311f1f24a26', function(result) {
 	console.log(require('util').inspect(result, { depth: null }));
 });
 //mongo.update('users', {username: 'nigel23'}, {$set: {username: 'nigel2'}}, function(result) {console.log(result);});
