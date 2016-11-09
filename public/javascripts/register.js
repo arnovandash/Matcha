@@ -90,8 +90,5 @@ app.controller('register__', function ($scope, $http, partial) {
             console.log('No email');
         }
     };
-
-
-
 });
 

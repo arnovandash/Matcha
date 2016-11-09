@@ -94,7 +94,7 @@ router.post('/api/check_username', function(req, res) {
 router.post('/api/check_email', function(req, res) {
     if (req.body.email) {
         user.checkEmail(req.body.email, function(result) {
-            res.json((result === 1) ? false : true);
+            res.json(result);
         });
     } else {
         console.log('No email field');

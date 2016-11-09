@@ -12,7 +12,9 @@
                 <label>Password</label>
                 <input type="password" ng-model="login.password">
             </md-input-container>
-            <md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="login" ng-click="login()">Login</md-button>
+            <md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="login"
+                       ng-click="login()">Login
+            </md-button>
         </form>
         <a class="reset-password" href="/send_reset">Reset password</a>
     </div>
@@ -34,15 +36,29 @@
             </md-input-container>
             <md-input-container>
                 <label>Email</label>
-                <input type="email" ng-model="reg.email2" required>
+                <input type="email" ng-model="reg.email" required name="email" valid-email="" ng-model-options="{ updateOn: 'blur' }">
+                <div ng-messages="registerForm.email.$error" role="alert">
+                    <div ng-message-exp="'required'">
+                        Your need an email address.
+                    </div>
+                    <div ng-message-exp="'freeEmail'">
+                        This Email is already in use.
+                    </div>
+                </div>
             </md-input-container>
             <md-input-container>
                 <label>Email again</label>
-                <input type="email" ng-model="reg.email" feild-match="reg.email2" >
+                <input type="email" ng-model="reg.email2" required ng-pattern="reg.email" name="email2">
+                <div ng-messages="registerForm.email2.$error" role="alert">
+                    <div ng-message-exp="['required', 'pattern']">
+                        Your email fields must match.
+                    </div>
+                </div>
             </md-input-container>
             <md-input-container>
                 <label>Birthdate</label>
-                <md-datepicker ng-model="reg.birthdate" md-min-date="minDate" md-max-date="maxDate" required="true"></md-datepicker>
+                <md-datepicker ng-model="reg.birthdate" md-min-date="minDate" md-max-date="maxDate"
+                               required="true"></md-datepicker>
             </md-input-container>
             <div>
                 <label>Gender</label>
@@ -62,17 +78,39 @@
             </div>
             <md-input-container>
                 <label>Username</label>
-                <input type="text" ng-model="reg.username" ng-model-options="{ updateOn: 'blur' }" valid-username="" required>
+                <input type="text" ng-model="reg.username" ng-model-options="{ updateOn: 'blur' }" valid-username=""
+                       required name="userName">
+                <div ng-messages="registerForm.userName.$error" role="alert">
+                    <div ng-message-exp="required">
+                        Your need a username.
+                    </div>
+                    <div ng-message-exp="'username'">
+                        Username is already in use.
+                    </div>
+                </div>
             </md-input-container>
             <md-input-container>
                 <label>Password</label>
-                <input type="password" ng-model="reg.password" required>
+                <input type="password" ng-model="reg.password" required name="password" pattern="[a-zA-Z0-9]{4,}">
+                <div ng-messages="registerForm.password.$error" role="alert">
+                    <div ng-message-exp="'required'">
+                        your must have a password.
+                    </div>
+                    <div ng-message-exp="'pattern'">your password must be at least 4 characters long.</div>
+                </div>
             </md-input-container>
             <md-input-container>
                 <label>Password again</label>
-                <input type="password" ng-model="reg.password2" required feild-match="reg.password">
+                <input type="password" ng-model="reg.password2" required name="password2" ng-pattern="reg.password">
+                <div ng-messages="registerForm.password2.$error" role="alert">
+                    <div ng-message-exp="['required', 'pattern']">
+                        your password fields must match
+                    </div>
+                </div>
             </md-input-container>
-            <md-button class="md-raised md-primary" aria-label="register" ng-click="register()" ng-disabled="registerForm.$invalid">Register</md-button>
+            <md-button class="md-raised md-primary" aria-label="register" ng-click="register()"
+                       ng-disabled="registerForm.$invalid">Register
+            </md-button>
         </form>
     </div>
 </md-content>
