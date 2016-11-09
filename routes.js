@@ -16,15 +16,16 @@ router.get('/partials/home', function(req, res) {
 router.get('/partials/account/:id?', function(req, res) {
     console.log("going to account");
     console.log(req.params.id);
+	sess = req.session;
     if (req.params.id === undefined) {
-        sess = req.session;
         if (sess.user === undefined || sess.user === null) {
             res.send("Error: You need to be logged in");
         } else {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
-                console.log("result: " + result);
-                res.render('user_account', sess.user);
+				result.username = sess.user.username;
+				result.id = sess.user.id;
+                res.render('user_account', result);
             });
         }
     } else {
@@ -34,6 +35,7 @@ router.get('/partials/account/:id?', function(req, res) {
             user.find(req.params.id, function(result) {
                 if (result) {
                     result.mine = false;
+					result.user = sess.user;
                     res.render('user_account', result);
                 } else {
                     res.json('no user of that id');
@@ -44,7 +46,7 @@ router.get('/partials/account/:id?', function(req, res) {
 });
 
 router.get('/partials/license', function(req, res) {
-    res.render('license');
+    res.render('license', req.session.user);
 });
 
 /***************************
@@ -65,7 +67,7 @@ router.get('/partials/reset', function(req, res) {
 
 router.post('/api/login', function(req, res) {
     user.login(req.body.username, req.body.password, function(result) {
-        req.session.user = result;
+        req.session.user = (typeof result === 'object') ? result : null;
         res.json(result);
     });
 });
@@ -173,6 +175,12 @@ router.post('/api/modify', function(req, res) {
             res.json(result);
         });
     }
+});
+
+router.post('/api/get_tags', function(req, res) {
+	user.getTags(req.body.id, function(result) {
+		res.json(result);
+	});
 });
 
 /********************************************************

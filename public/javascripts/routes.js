@@ -5,8 +5,7 @@ app.config(function($routeProvider, $locationProvider) {
 			controller: 'home__'
 		})
 		.when('/license', {
-			templateUrl: 'partials/license',
-			controller: 'home__'
+			templateUrl: 'partials/license'
 		})
 		.when('/confirm/:link', {
 			templateUrl: 'partials/confirm',

@@ -7,9 +7,9 @@
 		<span flex></span>
 		{{#if username}}
 		<div layout="row" ng-controller="logout__">
-			<a ng-href="/account"><h3>{{ username }}</h3></a>
-			<md-button aria-label="logout" ng-click="logout()">
-                <md-icon md-font-set="material-icons">power_setting_new</md-icon>
+			<md-button ng-click="go('/account')"><h3>{{ username }}</h3></md-button>
+			<md-button class="logout-button" aria-label="logout" ng-click="logout()">
+				<md-icon md-font-set="material-icons">power_setting_new</md-icon>
 			</md-button>
 		</div>
 		{{/if}}

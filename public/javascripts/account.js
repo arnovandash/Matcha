@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog) {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
     if ($routeParams.id === undefined && $sessionStorage.user.id === undefined) {
         $http.post('/api/whoami')
             .success(function(data) {
@@ -13,12 +13,19 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         getUser();
     }
 
+    $scope.account = {
+        selectedTags: [],
+        tags: [],
+        types: [],
+        selectedTag: null,
+        searchText: null,
+    };
+    loadTags();
+
     function getUser() {
-        console.log($routeParams.id);
-        console.log($sessionStorage.user.id);
-        console.log(`ID: ${($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id}`);
+        $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
-                id: ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id
+                id: $scope.userId
             })
             .success(function(data) {
                 console.log(data);
@@ -94,6 +101,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 send.seeking.other = false;
             }
         }
+        $scope.account.oldPassword = '';
+        $scope.account.newPassword = '';
+        $scope.account.newPassword2 = '';
+        $scope.updateChanges.$setUntouched();
         console.log(send);
         console.log($scope.$error);
         $http.post('/api/modify', {
@@ -101,20 +112,28 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             })
             .success(function(data) {
                 console.log(data);
+				var message = '';
+				if (data === true) {
+					message = 'Profile updated successfully!';
+				} else {
+					message = data;
+				}
+				$mdToast.show(
+                    $mdToast.simple()
+					.parent(document.getElementById('toaster'))
+                    .textContent(message)
+                    .position('top right')
+                    .hideDelay(3000)
+                );
+
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
             });
     };
 
-    $scope.account = {
-        selectedTags: [],
-        selectedTag: null,
-        searchText: null,
-        tags: loadTags()
-    };
-
     $scope.transformChip = function(chip, ev) {
+        console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -124,21 +143,25 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .textContent(`You made a new intrest ${chip}, please give it a category. Example: Pizza has the category: Food`)
             .placeholder('Category')
             .ariaLabel('Dog name')
-			.targetEvent(ev)
+            .targetEvent(ev)
             .ok('Submit')
             .cancel('Cancel');
 
         $mdDialog.show(confirm).then(function(result) {
-            return {
+            var newTag = {
                 name: chip,
-                type: result
+                type: result,
+                _lowername: chip.toLowerCase(),
+                _lowertype: result.toLowerCase()
             };
+            $scope.account.selectedTags.push(newTag);
+            $scope.account.tags.push(newTag);
+            document.getElementById('chips').focus();
         }, function() {
-            return {
-                name: chip,
-                type: 'new'
-            };
+            document.getElementById('chips').focus();
+            return null;
         });
+        return null;
     };
 
     $scope.querySearch = function(query) {
@@ -146,27 +169,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         return results;
     };
 
-    function loadTags() {
-        var tags = [{
-            name: 'Kayaking',
-            type: 'Sport'
-        }, {
-            name: 'Sky Diving',
-            type: 'Sport'
-        }, {
-            name: 'Pizza',
-            type: 'Food'
-        }, {
-            name: 'Tungton',
-            type: 'Element'
-        }];
-
-        return tags.map(function(tag) {
-            tag._lowername = tag.name.toLowerCase();
-            tag._lowertype = tag.type.toLowerCase();
-            return tag;
-        });
-    }
+    $scope.typeSearch = function(query) {
+        var results = query ? $scope.account.tags.filter(typeFilterFor(query)) : [];
+        return results;
+    };
 
     function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
@@ -175,5 +181,42 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             return (tag._lowername.indexOf(lowercaseQuery) === 0) ||
                 (tag._lowertype.indexOf(lowercaseQuery) === 0);
         };
+    }
+
+    function typeFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+
+        return function filterFn(tag) {
+            return tag._lowertype.indexOf(lowercaseQuery);
+        };
+    }
+
+    function loadTags() {
+        $http.post('/api/get_tags', {
+                id: $scope.userId
+            })
+            .success(function(data) {
+                $scope.account.tags = [];
+                if (typeof data === 'object') {
+                    data[0].map(function(tag) {
+                        tag._lowername = tag.name.toLowerCase();
+                        tag._lowertype = tag.type.toLowerCase();
+                        return tag;
+                    });
+                    data[1].map(function(tag) {
+                        tag._lowername = tag.name.toLowerCase();
+                        tag._lowertype = tag.type.toLowerCase();
+                        return tag;
+                    });
+                    $scope.account.tags = data[0];
+                    $scope.account.selectedTags = data[1];
+                } else {
+                    console.log('error fetching data');
+                }
+            })
+            .error(function(data) {
+                console.log(`Error: ${data}`);
+                $scope.account.tags = [];
+            });
     }
 });
