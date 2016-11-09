@@ -80,14 +80,23 @@ router.post('/api/logout', function(req, res) {
 
 router.post('/api/photo', function(req, res){
     console.log("Server side:")
+    console.log(req.body);
+
+   // console.log(req.files);
+   // fs.readFile(req.body.data, function (err, data) {
+    //    if (err) throw err;
+    //    console.log(data);
+    //});
+
+    /*
    // mkdirp(getDirName(path), function (err) {
    //     if (err) return cb(err);
-    //fs.readFile(req.files.displayImage.path, function (err, data) {
-     //   var newPath = __dirname + "/uploads/uploadedFileName";
-     //   fs.writeFile(newPath, data, function (err) {
-            res.json(console.log(req));
-     //   });
-   // });
+   fs.readFile(req.files.displayImage.path, function (err, data) {
+        var newPath = __dirname + "/uploads/uploadedFileName";
+        fs.writeFile(newPath, data, function (error) {
+            res.json(console.log(req.file));
+        });
+    });*/
 
 });
 
