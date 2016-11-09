@@ -27,6 +27,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                     account.firstname = data.firstname;
                     account.lastname = data.lastname;
                     account.username = data.username;
+                    $scope.originalUsername = data.username;
                     account.email = data.email;
                     account.bio = (data.bio !== undefined) ? data.bio : null;
                     account.birthdate = new Date(data.birthdate * 1000);
@@ -94,6 +95,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             }
         }
         console.log(send);
+        console.log($scope.$error);
         $http.post('/api/modify', {
                 update: send
             })

@@ -2,16 +2,19 @@ app.directive('validUsername', function ($q, $http) {
     return {
         require: 'ngModel',
         link: function (scope, elm, attrs, ctrl) {
+
             ctrl.$asyncValidators.username = function (modelValue, viewValue) {
                 if (ctrl.$isEmpty(modelValue)) {
                     // consider empty model valid
+                    return $q.resolve();
+                }
+                if (scope.originalUsername !== undefined && modelValue === scope.originalUsername){
                     return $q.resolve();
                 }
                 var def = $q.defer();
                 $http.post('/api/check_username', {
                     username: modelValue
                 }).success(function (data, status, headers, config) {
-                    console.log(data);
                     if (data === false) {
                         def.reject();
                     }

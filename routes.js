@@ -14,6 +14,7 @@ router.get('/partials/home', function(req, res) {
 });
 
 router.get('/partials/account/:id?', function(req, res) {
+    console.log("going to account");
     console.log(req.params.id);
     if (req.params.id === undefined) {
         sess = req.session;
@@ -22,7 +23,8 @@ router.get('/partials/account/:id?', function(req, res) {
         } else {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
-                res.render('user_account', result);
+                console.log("result: " + result);
+                res.render('user_account', sess.user);
             });
         }
     } else {
@@ -161,6 +163,7 @@ router.post('/api/get_user', function(req, res) {
 
 router.post('/api/modify', function(req, res) {
     var values = req.body.update;
+    console.log(values);
     sess = req.session;
     if (sess.user === undefined || sess.user === null || values === undefined) {
         res.json('Values undefined');
