@@ -15,16 +15,17 @@
 				<label>Lastname</label>
 				<input ng-model="account.lastname" />
 			</md-input-container>
-		</div>pw
+		</div>
 	</div>
-
-    <div ng_controller="upload__">
-        <form name="upload-form">
-                <input type="file" accept="image/*" ngf-select ng-model="picFile" name="file">
-            <button ng-click="test(picFile)">Upload</button>
+    <div>
+        <form myForm="upload" ng_controller="upload__">
+            <input type="file" ngf-select ng-model="picFile" name="file"
+               accept="image/*" ngf-max-size="1MB">
+            <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
+            <md-button ng-click="picFile = null" ng-show="picFile">Remove</md-button>
+            <md-button ng-click="uploadPic(picFile)">Submit</md-button>
         </form>
     </div>
-
 	<div layout="row" layout-wrap>
 		<md-input-container>
 			<label>Email address</label>
