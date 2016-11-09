@@ -6,4 +6,32 @@
       Test Geolocation
     </md-button>
 
+	{{{{angular}}}}
+	<div class="recomend-container">
+		<article id="5820b638a3c99a7e6a7955f5" class="recomend" style="background-color: rgb(103,58,183)" ng-repeat="person in recomendations">
+			<header>
+				<span><strong>{{person.username}}</strong> ({{person.firstname}} {{person.lastname}})</span>
+			</header>
+			<img src="images/no_pic_female_black_512.png" />
+			<footer>
+				<span>Years old: {{person.age}}</span>
+				<span>Seeking: {{person.seeking}}</span>
+				<div ng-hide="person.commonTags.length === 0">
+					<span>Has the same intrests to you:</span>
+					<ul>
+						<li ng-repeat="item in person.commonTags">{{item}}</li>
+					</ul>
+				</div>
+				<div ng-hide="person.commonCats.length === 0">
+					<span>Has similar intrests to you:</span>
+					<ul>
+						<li ng-repeat="item in person.commonCats">{{item.name}}</li>
+					</ul>
+				</div>
+			</footer>
+		</article>
+
+	</div>
+	{{{{/angular}}}}
+
 </md-content>

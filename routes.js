@@ -180,6 +180,17 @@ router.post('/api/get_tags', function(req, res) {
 	});
 });
 
+router.post('/api/get_recomendations', function(req, res) {
+	sess = req.session;
+	if (sess.user === undefined || sess.user === null) {
+		res.json('you have to log in to get recomendations');
+	} else {
+		user.getRecomendations(sess.user.id, function(result) {
+			res.json(result);
+		});
+	}
+});
+
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/

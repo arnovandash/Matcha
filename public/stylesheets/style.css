@@ -64,3 +64,36 @@ body {
 	pointer-events: none;
     z-index: 10000;
 }
+
+.recomend {
+	margin: 6px;
+	max-width: 360px;
+	display: flex;
+	flex-direction: column;
+	color: #FFF;
+}
+
+.recomend > header {
+	height: 64px;
+	display: flex;
+	padding-left: 6px;
+	align-items: center;
+}
+
+.recomend > img {
+	width: 360px;
+	display: flex;
+}
+
+.recomend > footer {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	padding: 6px;
+}
+
+.recomend-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}

@@ -12,7 +12,8 @@ module.exports = {
     confirmReset: confirmReset,
     setLocation: setLocation,
     getTags: getTags,
-	findMatches: findMatches
+	findMatches: findMatches,
+	getRecomendations: getRecomendations
 };
 
 var apoc = require('apoc');
@@ -192,7 +193,6 @@ function modify(update, callback) {
             if (update.seeking.other === true) {
                 query += "\nMERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
-            console.log(query);
             apoc.query(query, {}, {
                     id: update.id,
                     username: update.username,
@@ -200,9 +200,6 @@ function modify(update, callback) {
                 })
                 .exec(server)
                 .then(function(result) {
-                    console.log(require('util').inspect(result, {
-                        depth: null
-                    }));
                     query = "MATCH (a:Person {id: '`id`'})";
                     update.tags.forEach(function(tag, index) {
                         var name = JSON.stringify(String(tag.name));
@@ -324,9 +321,6 @@ function get(id, callback) {
                 })
                 .exec(server)
                 .then(function(gender) {
-                    console.log(require('util').inspect(gender, {
-                        depth: null
-                    }));
                     gender = gender[0].data[0].row;
                     user.gender = gender[0];
                     user.seeking = {
@@ -346,7 +340,6 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
-                    console.log(`USER: ${user}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
@@ -483,7 +476,6 @@ function getTags(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc'; // ID that does not exist
     }
-    console.log(`Finding user: ${id}`);
     apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
             id: id
         })
@@ -495,7 +487,11 @@ function getTags(id, callback) {
             callback(fail);
         });
 }
-
+/*********************************************************************************************
+ * Finds all the id's of the people who match with the provided id.                          *
+ * @param  {String}   id       Id of the user to find matches for                            *
+ * @param  {Function} callback [{row: [matched ID], [common tags], [common tag categories]}] *
+ *********************************************************************************************/
 function findMatches(id, callback) {
 	if (id === undefined || id === null) {
 		id = '123abc';
@@ -505,10 +501,89 @@ function findMatches(id, callback) {
 	})
 	.exec(server)
 	.then(function(result) {
-		console.log(require('util').inspect(result[0].data[0].row, { depth: null }));
 		callback(result[0].data);
 	}, function(fail) {
 		console.log(fail);
 		callback(fail);
 	});
+}
+
+/********************************************************************
+ * Finds all the details for a recommended user for the provided ID *
+ * @param  {String}   id       ID to find recomendations for        *
+ * @param  {Function} callback [{Recommended user}]                 *
+ ********************************************************************/
+function getRecomendations(id, callback) {
+	if (id === undefined || id === null) {
+		id = '123abc';
+	}
+	var recommends = [];
+	var stop = false;
+
+	mongo.find('users', {
+        _id: new ObjectId(id)
+    }, function(result) {
+        if (result.length === 1) {
+			var lat = result[0].location.latitude;
+			var long = result[0].location.longitude;
+			console.log(require('util').inspect(result, { depth: null }));
+
+			findMatches(id, function(result1) {
+				var indexes = result1.length;
+				console.log(require('util').inspect(result1, { depth: null }));
+				console.log('1');
+				if (typeof result1 === 'object') {
+					result.forEach(function(row, index) {
+						console.log('2');
+						if (stop === false) {
+							get(row.row[0], function(result2) {
+								console.log('2');
+								console.log(require('util').inspect(result2, { depth: null }));
+								if (typeof result2 === 'object') {
+									result2.distance = getDistance([lat, long], [0, 0]);
+									result2.commonTags = row.row[1];
+									result2.commonCats = row.row[2];
+									recommends.push(result2);
+								} else {
+									stop = true;
+								}
+								if (--indexes === 0) {
+									if (stop === false) {
+										callback(recommends);
+									} else {
+										console.log('An error occured');
+										callback(false);
+									}
+								}
+							});
+						} else {
+							console.log('Stop = true');
+						}
+					});
+				} else {
+					console.log('An error occured');
+					callback(false);
+				}
+			});
+        } else {
+			console.log('An error occured');
+            callback(false);
+        }
+    });
+}
+
+/***********************************************************************
+ * Takes 2 coordinates and returns the distance between then in meters *
+ * @param  {Array} pos1 [latitude, logitude]                           *
+ * @param  {Array} pos2 [latitude, logitude]                           *
+ * @return {Float}      Distance in Meters                             *
+ ***********************************************************************/
+function getDistance(pos1, pos2) {
+	var x1 = pos1[0].toRadians();
+	var y1 = pos1[1].toRadians();
+	var x2 = pos2[0].toRadians();
+	var y2 = pos2[1].toRadians();
+	var x = (y2-y1) * Math.cos((x1+x2)/2);
+	var y = (y2-y1);
+	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
 }
