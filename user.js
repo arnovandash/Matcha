@@ -533,7 +533,7 @@ function getRecomendations(id, callback) {
 				console.log(require('util').inspect(result1, { depth: null }));
 				console.log('1');
 				if (typeof result1 === 'object') {
-					result.forEach(function(row, index) {
+					result.forEach(function(row) {
 						console.log('2');
 						if (stop === false) {
 							get(row.row[0], function(result2) {
