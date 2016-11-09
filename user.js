@@ -307,6 +307,7 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
+	console.log(`GET ${id}`);
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(user) {
@@ -340,12 +341,14 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
+					console.log(`USER: ${util.inspect(user, {depth: null})}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
                     callback(fail);
                 });
         } else {
+			console.log('User id does not exist');
             callback(false);
         }
     });
@@ -524,23 +527,27 @@ function getRecomendations(id, callback) {
         _id: new ObjectId(id)
     }, function(result) {
         if (result.length === 1) {
-			var lat = result[0].location.latitude;
-			var long = result[0].location.longitude;
-			console.log(require('util').inspect(result, { depth: null }));
+			var lat = 0.0;
+			var long = 0.0;
+			if (result[0].location !== undefined) {
+				lat = result[0].location.latitude;
+				long = result[0].location.longitude;
+			}
 
 			findMatches(id, function(result1) {
 				var indexes = result1.length;
-				console.log(require('util').inspect(result1, { depth: null }));
-				console.log('1');
 				if (typeof result1 === 'object') {
-					result.forEach(function(row) {
-						console.log('2');
+					result1.forEach(function(row, index) {
 						if (stop === false) {
 							get(row.row[0], function(result2) {
-								console.log('2');
-								console.log(require('util').inspect(result2, { depth: null }));
 								if (typeof result2 === 'object') {
-									result2.distance = getDistance([lat, long], [0, 0]);
+									if (result2.location === undefined) {
+										result2.location = {
+											latitude: 0.0,
+											longitude: 0.0
+										};
+									}
+									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									recommends.push(result2);
@@ -561,7 +568,7 @@ function getRecomendations(id, callback) {
 						}
 					});
 				} else {
-					console.log('An error occured');
+					console.log('typeof not an object');
 					callback(false);
 				}
 			});
@@ -579,10 +586,10 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
-	var x1 = pos1[0].toRadians();
-	var y1 = pos1[1].toRadians();
-	var x2 = pos2[0].toRadians();
-	var y2 = pos2[1].toRadians();
+	var x1 = pos1[0] * Math.PI / 180;
+	var y1 = pos1[1] * Math.PI / 180;
+	var x2 = pos2[0] * Math.PI / 180;
+	var y2 = pos2[1] * Math.PI / 180;
 	var x = (y2-y1) * Math.cos((x1+x2)/2);
 	var y = (y2-y1);
 	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
