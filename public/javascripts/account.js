@@ -123,7 +123,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 					.parent(document.getElementById('toaster'))
                     .textContent(message)
                     .position('top right')
-                    .hideDelay(3000)
+                    .hideDelay(4000)
                 );
 
             })

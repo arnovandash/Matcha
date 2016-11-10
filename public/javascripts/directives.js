@@ -56,3 +56,31 @@ app.directive("validEmail", function ($q, $http) {
         }
     };
 });
+
+app.directive("validEmail", function ($q, $http) {
+    return {
+        require: "ngModel",
+        link: function (scope, element, attrs, ctrl) {
+            ctrl.$asyncValidators.freeEmail = function (modelValue, viewValue) {
+                console.log("modle: " + modelValue + " view: " + viewValue);
+                if (ctrl.$isEmpty(modelValue)) {
+                    // consider empty model valid
+                    return $q.resolve();
+                }
+                var def = $q.defer();
+                $http.post('/api/check_email', {
+                    email: modelValue
+                }).success(function (data) {
+                    console.log(data);
+                    if (data === false)
+                        def.reject();
+                    def.resolve();
+                }).error(function (data) {
+                    console.log('Error ' + data);
+                    def.reject();
+                });
+                return def.promise;
+            }
+        }
+    };
+});

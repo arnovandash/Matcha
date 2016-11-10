@@ -29,6 +29,10 @@ app.config(function($routeProvider, $locationProvider) {
 			},
 			controller: 'account__'
 		})
+		.when('/chat', {
+            templateUrl:'/partials/chat',
+            controller: 'chat__'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});

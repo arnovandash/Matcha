@@ -49,6 +49,12 @@ router.get('/partials/license', function(req, res) {
     res.render('license', req.session.user);
 });
 
+router.get('/partials/chat/', function (req,res) {
+    console.log("doda doda");
+    sess = req.session;
+    res.render('chat', sess.user);
+});
+
 /***************************
  * NEED A PAGE FOR THIS!!! *
  ***************************/
