@@ -4,7 +4,10 @@
 	<h2>{{ username }}</h2>
 	<div layout="row">
 		<div class="profile-pic-main">
-			<img src="images/no_pic_male_black_512.png" />
+			<img ng-if="account.profilePic" src="images/{{person.profilePic}}.png" />
+			<img ng-if="!account.profilePic && account.gender == 'M'" src="images/no_pic_male_black_512.png" />
+			<img ng-if="!account.profilePic && account.gender == 'F'" src="images/no_pic_female_black_512.png" />
+			<img ng-if="!account.profilePic && account.gender == 'O'" src="images/no_pic_other_black_512.png" />
 		</div>
 		<div layout="column">
 			<md-input-container>
