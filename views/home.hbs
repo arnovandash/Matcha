@@ -1,9 +1,38 @@
 <!DOCTYPE html>
 {{> toolbar}}
-<md-content layout-padding layout-wrap ng-controller="locate__">
+<md-content layout-padding layout-wrap>
     <h1>Welcome {{ username }}</h1>
-    <md-button class="md-primary md-raised" ng-click="locate()" >
-      Test Geolocation
-    </md-button>
+
+	{{{{angular}}}}
+	<div class="recomend-container">
+		<article id="5820b638a3c99a7e6a7955f5" ng-repeat="person in recomendations" class="recomend" style="background-color: rgb(103,58,183); order: {{person.rating}}">
+			<header>
+				<span><strong>{{person.username}}</strong> ({{person.firstname}} {{person.lastname}})</span>
+			</header>
+			<img ng-if="person.profilePic" src="images/{{person.profilePic}}.png" />
+			<img ng-if="!person.profilePic && person.gender == 'M'" src="images/no_pic_male_black_512.png" />
+			<img ng-if="!person.profilePic && person.gender == 'F'" src="images/no_pic_female_black_512.png" />
+			<img ng-if="!person.profilePic && person.gender == 'O'" src="images/no_pic_other_black_512.png" />
+			<footer>
+			<div>
+				<span>Years old: {{person.age}}</span>
+				<span class="badge yellow" ng-if="person.seeking.other">
+					Other<md-tooltip>Seeking anything from which to gain affection</md-tooltip>
+				</span>
+				<span class="badge pink" ng-if="person.seeking.female">
+					Female<md-tooltip>Seeking a Bonney Las</md-tooltip>
+				</span>
+				<span class="badge blue" ng-if="person.seeking.male">
+					Male<md-tooltip>Seeking a Manly Man</md-tooltip>
+				</span>
+			</div>
+			<span>Distance: {{Math.round(person.distance / 1000)}} Km</span>
+			<span ng-hide="person.commonTags.length === 0">Has the same intrests to you: {{person.commTags}}</span>
+			<span ng-hide="person.commonCats.length === 0">Has similar intrests to you: {{person.commCats}}</span>
+			</footer>
+		</article>
+
+	</div>
+	{{{{/angular}}}}
 
 </md-content>

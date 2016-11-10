@@ -5,6 +5,9 @@ app.controller('sendReset__', function($http, $scope) {
 	            usernameEmail: $scope.reset.username
 	        }).success(function(data) {
 	            console.log(data);
+				if (data === true) {
+					window.location.replace('/');
+				}
 	        }).error(function(data) {
 	            console.log('Error' + data);
 	        });
@@ -22,6 +25,9 @@ app.controller('confirmReset__', function($http, $scope, $routeParams) {
 				password: $scope.reset.password
 	        }).success(function(data) {
 	            console.log(data);
+				if (data === true) {
+					window.location.replace('/');
+				}
 	        }).error(function(data) {
 	            console.log('Error' + data);
 	        });

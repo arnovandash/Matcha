@@ -17,14 +17,17 @@ router.get('/partials/home', function(req, res) {
 });
 
 router.get('/partials/account/:id?', function(req, res) {
+    console.log("going to account");
     console.log(req.params.id);
+	sess = req.session;
     if (req.params.id === undefined) {
-        sess = req.session;
         if (sess.user === undefined || sess.user === null) {
             res.send("Error: You need to be logged in");
         } else {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
+				result.username = sess.user.username;
+				result.id = sess.user.id;
                 res.render('user_account', result);
             });
         }
@@ -35,6 +38,7 @@ router.get('/partials/account/:id?', function(req, res) {
             user.find(req.params.id, function(result) {
                 if (result) {
                     result.mine = false;
+					result.user = sess.user;
                     res.render('user_account', result);
                 } else {
                     res.json('no user of that id');
@@ -45,7 +49,7 @@ router.get('/partials/account/:id?', function(req, res) {
 });
 
 router.get('/partials/license', function(req, res) {
-    res.render('license');
+    res.render('license', req.session.user);
 });
 
 /***************************
@@ -53,6 +57,7 @@ router.get('/partials/license', function(req, res) {
  ***************************/
 router.get('/partials/confirm', function(req, res) {
     res.json('waiting...');
+    //res.render('account');
 });
 
 router.get('/partials/send_reset', function(req, res) {
@@ -105,7 +110,7 @@ router.post('/api/check_username', function(req, res) {
 router.post('/api/check_email', function(req, res) {
     if (req.body.email) {
         user.checkEmail(req.body.email, function(result) {
-            res.json((result === 1) ? false : true);
+            res.json(result);
         });
     } else {
         console.log('No email field');
@@ -172,6 +177,7 @@ router.post('/api/get_user', function(req, res) {
 
 router.post('/api/modify', function(req, res) {
     var values = req.body.update;
+    console.log(values);
     sess = req.session;
     if (sess.user === undefined || sess.user === null || values === undefined) {
         res.json('Values undefined');
@@ -181,6 +187,23 @@ router.post('/api/modify', function(req, res) {
             res.json(result);
         });
     }
+});
+
+router.post('/api/get_tags', function(req, res) {
+	user.getTags(req.body.id, function(result) {
+		res.json(result);
+	});
+});
+
+router.post('/api/get_recomendations', function(req, res) {
+	sess = req.session;
+	if (sess.user === undefined || sess.user === null) {
+		res.json('you have to log in to get recomendations');
+	} else {
+		user.getRecomendations(sess.user.id, function(result) {
+			res.json(result);
+		});
+	}
 });
 
 /********************************************************

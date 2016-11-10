@@ -4,7 +4,11 @@ app.controller('logout__', function($http, $scope, $sessionStorage, partial) {
 		.success(function(data, status, headers, config) {
 			console.log(data);
 			$sessionStorage.user = data;
-			partial.reload();
+			if (window.location === '/') {
+				partial.reload();
+			} else {
+				window.location.replace('/');
+			}
 		}).error(function(data, status, headers, config) {
 			console.log('Error' + data);
 		});

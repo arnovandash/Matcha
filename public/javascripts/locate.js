@@ -1,9 +1,11 @@
-app.controller('locate__', function($http, $scope) {
+app.service('locate', function($http) {
     var retryCount = 0;
     var lat;
     var lng;
+	var callback;
 
-    $scope.locate = function() {
+    this.getLocation = function(callBack) {
+		callback = callBack;
         console.log('Activating GPS...');
         navigator.geolocation.getCurrentPosition(on_success, on_error, {
             timeout: 5000
@@ -46,6 +48,7 @@ app.controller('locate__', function($http, $scope) {
             latitude: lat,
             longitude: lng
         }).success(function(data) {
+			callback();
             console.log(data);
         }).error(function(data) {
             console.log('Error ' + data);
