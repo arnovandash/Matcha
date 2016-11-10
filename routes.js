@@ -3,6 +3,7 @@ var session = require('express-session');
 var user = require('./user');
 var mkdirp = require('mkdirp');
 var fs = require('fs');
+var path = require('path');
 var router = express.Router();
 var sess;
 
@@ -79,25 +80,12 @@ router.post('/api/logout', function(req, res) {
 });
 
 router.post('/api/photo', function(req, res){
-    console.log("Server side:")
-    console.log(req.body);
-
-   // console.log(req.files);
-   // fs.readFile(req.body.data, function (err, data) {
-    //    if (err) throw err;
-    //    console.log(data);
-    //});
-
-    /*
-   // mkdirp(getDirName(path), function (err) {
-   //     if (err) return cb(err);
-   fs.readFile(req.files.displayImage.path, function (err, data) {
-        var newPath = __dirname + "/uploads/uploadedFileName";
-        fs.writeFile(newPath, data, function (error) {
-            res.json(console.log(req.file));
-        });
-    });*/
-
+    console.log(req.body.uid);
+    var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    console.log(dir);
+    fs.writeFile(dir, req.body.data, {encoding: 'base64'}, function(result) {
+            res.json(result);
+    });
 });
 
 /**************************************************************
