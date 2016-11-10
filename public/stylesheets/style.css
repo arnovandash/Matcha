@@ -64,3 +64,66 @@ body {
 	pointer-events: none;
     z-index: 10000;
 }
+
+.recomend {
+	margin: 6px;
+	max-width: 360px;
+	display: flex;
+	flex-direction: column;
+	color: #FFF;
+}
+
+.recomend > header {
+	height: 64px;
+	display: flex;
+	padding-left: 6px;
+	align-items: center;
+}
+
+.recomend > img {
+	width: 360px;
+	display: flex;
+}
+
+.recomend > footer {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	padding: 6px;
+}
+
+.recomend-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.badge {
+	font-size: 0.8rem;
+	color: #FFF;
+	border-radius: 2px;
+	min-width: 3rem;
+	padding: 0 6px;
+	text-align: center;
+	float: right;
+	margin-left: 3px;
+}
+
+.blue {
+	background-color: #039BE5;
+}
+
+.pink {
+	background-color: #D81B60;
+}
+
+.yellow {
+	background-color: #FFEB3B;
+	color: #000
+}
+
+.seeking {
+	display: flex;
+	justify-content: space-between;
+}

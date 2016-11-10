@@ -12,7 +12,8 @@ module.exports = {
     confirmReset: confirmReset,
     setLocation: setLocation,
     getTags: getTags,
-	findMatches: findMatches
+	findMatches: findMatches,
+	getRecomendations: getRecomendations
 };
 
 var apoc = require('apoc');
@@ -192,7 +193,6 @@ function modify(update, callback) {
             if (update.seeking.other === true) {
                 query += "\nMERGE (o:Gender {gender: 'O'}) MERGE (a)-[:SEEKING]->(o)";
             }
-            console.log(query);
             apoc.query(query, {}, {
                     id: update.id,
                     username: update.username,
@@ -200,9 +200,6 @@ function modify(update, callback) {
                 })
                 .exec(server)
                 .then(function(result) {
-                    console.log(require('util').inspect(result, {
-                        depth: null
-                    }));
                     query = "MATCH (a:Person {id: '`id`'})";
                     update.tags.forEach(function(tag, index) {
                         var name = JSON.stringify(String(tag.name));
@@ -294,7 +291,8 @@ function find(id, callback) {
         if (result.length === 1) {
             callback({
                 id: result._id,
-                username: result.username
+                username: result.username,
+				email: result.email
             });
         } else {
             callback(false);
@@ -310,6 +308,7 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
+	console.log(`GET ${id}`);
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(user) {
@@ -324,9 +323,6 @@ function get(id, callback) {
                 })
                 .exec(server)
                 .then(function(gender) {
-                    console.log(require('util').inspect(gender, {
-                        depth: null
-                    }));
                     gender = gender[0].data[0].row;
                     user.gender = gender[0];
                     user.seeking = {
@@ -346,13 +342,14 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
-                    console.log(`USER: ${user}`);
+					console.log(`USER: ${util.inspect(user, {depth: null})}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
                     callback(fail);
                 });
         } else {
+			console.log('User id does not exist');
             callback(false);
         }
     });
@@ -438,7 +435,7 @@ function sendReset(usernameEmail, callback) {
         $set: {
             'token.reset': token
         }
-    }, function(result) {
+    }, (result) => {
         if (result) {
             mongo.find('users', {
                 $or: [{
@@ -446,7 +443,7 @@ function sendReset(usernameEmail, callback) {
                 }, {
                     email: usernameEmail
                 }]
-            }, function(findRes) {
+            }, (findRes) => {
                 email.sendReset(findRes[0].email, findRes[0].username, `http://localhost:8080/reset/${token}`, callback);
             });
         } else {
@@ -483,31 +480,155 @@ function getTags(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc'; // ID that does not exist
     }
-    console.log(`Finding user: ${id}`);
     apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
             id: id
         })
         .exec(server)
-        .then(function(result) {
+        .then((result) => {
             callback(result[0].data[0].row);
-        }, function(fail) {
+        }, (fail) => {
             console.log(fail);
             callback(fail);
         });
 }
-
+/*********************************************************************************************
+ * Finds all the id's of the people who match with the provided id.                          *
+ * @param  {String}   id       Id of the user to find matches for                            *
+ * @param  {Function} callback [{row: [matched ID], [common tags], [common tag categories]}] *
+ *********************************************************************************************/
 function findMatches(id, callback) {
 	if (id === undefined || id === null) {
 		id = '123abc';
 	}
-	apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag) AS Types", {}, {
+	apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag.name) AS Types", {}, {
 		id: id
 	})
 	.exec(server)
-	.then(function(result) {
-		console.log(require('util').inspect(result[0].data[0].row, { depth: null }));
+	.then((result) => {
 		callback(result[0].data);
-	}, function(fail) {
+	}, (fail) => {
+		console.log(fail);
+		callback(fail);
+	});
+}
+
+/********************************************************************
+ * Finds all the details for a recommended user for the provided ID *
+ * @param  {String}   id       ID to find recomendations for        *
+ * @param  {Function} callback [{Recommended user}]                 *
+ ********************************************************************/
+function getRecomendations(id, callback) {
+	if (id === undefined || id === null) {
+		id = '123abc';
+	}
+	var recommends = [];
+	var stop = false;
+
+	mongo.find('users', {
+        _id: new ObjectId(id)
+    }, (result) => {
+        if (result.length === 1) {
+			var lat = 0.0;
+			var long = 0.0;
+			if (result[0].location !== undefined) {
+				lat = result[0].location.latitude;
+				long = result[0].location.longitude;
+			}
+
+			findMatches(id, (result1) => {
+				var indexes = result1.length;
+				if (typeof result1 === 'object') {
+					result1.forEach((row, index) => {
+						if (stop === false) {
+							get(row.row[0], (result2) => {
+								if (typeof result2 === 'object') {
+									if (result2.location === undefined) {
+										result2.location = {
+											latitude: 0.0,
+											longitude: 0.0
+										};
+									}
+									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
+									result2.commonTags = row.row[1];
+									result2.commonCats = row.row[2];
+									let now = Math.round(new Date().getTime()/1000.0);
+									result2.age = Math.round((now - result2.birthdate) / 31536000);
+									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
+									result2.rating = Math.round((5000 / (result2.distance + 0.01)) + (result2.likes / 3) - (result2.blocks) + (result2.commonTags.length * 10) + (result2.commonCats.length * 3) - (Math.abs((result[0].age / 2 + 7) - result2.age) * 100)) * -1;
+									recommends.push(result2);
+								} else {
+									stop = true;
+								}
+								if (--indexes === 0) {
+									if (stop === false) {
+										callback(recommends);
+									} else {
+										console.log('An error occured');
+										callback(false);
+									}
+								}
+							});
+						} else {
+							console.log('Stop = true');
+						}
+					});
+				} else {
+					console.log('typeof not an object');
+					callback(false);
+				}
+			});
+        } else {
+			console.log('An error occured');
+            callback(false);
+        }
+    });
+}
+
+/***********************************************************************
+ * Takes 2 coordinates and returns the distance between then in meters *
+ * @param  {Array} pos1 [latitude, logitude]                           *
+ * @param  {Array} pos2 [latitude, logitude]                           *
+ * @return {Float}      Distance in Meters                             *
+ ***********************************************************************/
+function getDistance(pos1, pos2) {
+	let x1 = pos1[0] * Math.PI / 180;
+	let y1 = pos1[1] * Math.PI / 180;
+	let x2 = pos2[0] * Math.PI / 180;
+	let y2 = pos2[1] * Math.PI / 180;
+	let x = (y2-y1) * Math.cos((x1+x2)/2);
+	let y = (y2-y1);
+	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
+}
+
+/************************************************************
+ * Creates a like relationship from id1 to id2              *
+ * @param  {String}   id1      User liking                  *
+ * @param  {String}   id2      User being liked             *
+ * @param  {Function} callback Called when database returns *
+ ************************************************************/
+function like(id1, id2, callback) {
+	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'} MERGE (a)-[:LIKES]->(b))", {}, {
+		id1: id1,
+		id2: id2
+	})
+	.execute(server)
+	.then((result) => {
+		console.log(result);
+		find(id2, (result) => {
+			if (typeof result === 'object') {
+				let send = `<body>
+						<h2>You got a like on your Matcha profile</h2>
+						<h4>Please click the link below to view the person's account who liked you</h4>
+						<a href="localhost:8080/account/${id1}">View</a>
+					</body>`;
+				email.send(result.email, 'You got a new like', send, (result) => {
+					callback(result);
+				});
+			} else {
+				callback('Cannot find user id');
+			}
+		});
+	}, (fail) => {
 		console.log(fail);
 		callback(fail);
 	});

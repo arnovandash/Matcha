@@ -1,79 +1,119 @@
 <!DOCTYPE html>
-{{> toolbar}}
+    {{> toolbar}}
 <md-content layout-padding layout-wrap layout="column">
     <h3>Login</h3>
-	<div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
-		<form layout="row" layout-sm="column" ng-controller="login__">
-			<md-input-container>
-				<label>Username</label>
-				<input type="text" ng-model="login.username">
-			</md-input-container>
-			<md-input-container>
-				<label>Password</label>
-				<input type="password" ng-model="login.password">
-			</md-input-container>
-			<md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="login" ng-click="login()">Login</md-button>
-		</form>
-		<a class="reset-password" href="/send_reset">Reset password</a>
-	</div>
+    <div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
+        <form layout="row" layout-sm="column" ng-controller="login__">
+            <md-input-container>
+                <label>Username</label>
+                <input type="text" ng-model="login.username">
+            </md-input-container>
+            <md-input-container>
+                <label>Password</label>
+                <input type="password" ng-model="login.password">
+            </md-input-container>
+            <md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="login"
+                       ng-click="login()">Login
+            </md-button>
+        </form>
+        <a class="reset-password" href="/send_reset">Reset password</a>
+    </div>
 </md-content>
 
 <h2>OR</h2>
 
 <md-content layout-padding layout-wrap layout="column">
     <h3>Register</h3>
-	<div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
-		<form layout-wrap layout="column" ng-controller="register__">
-			<md-input-container>
-				<label>Firstname</label>
-				<input type="text" ng-model="reg.firstname">
-			</md-input-container>
-			<md-input-container>
-				<label>Lastname</label>
-				<input type="text" ng-model="reg.lastname">
-			</md-input-container>
-			<md-input-container>
-				<label>Email</label>
-				<input type="text" ng-model="reg.email2">
-			</md-input-container>
-			<md-input-container>
-				<label>Email again</label>
-				<input type="text" ng-model="reg.email">
-			</md-input-container>
-			<md-input-container>
-            	<label>Birthdate</label>
-            	<md-datepicker ng-model="reg.birthdate"></md-datepicker>
-			</md-input-container>
-			<div>
-				<label>Gender</label>
-				<md-radio-group ng-model="reg.gender">
-					<md-radio-button value="M">Male</md-radio-button>
-					<md-radio-button value="F">Female</md-radio-button>
-					<md-radio-button value="O">Uncategorised mail</md-radio-button>
-				</md-radio-group>
-			</div>
-			<div>
-				<label>Interested in</label>
-				<div layout="row">
-					<md-checkbox ng-model="reg.interestedMale">Male</md-checkbox>
-					<md-checkbox ng-model="reg.interestedFemale">Female</md-checkbox>
-					<md-checkbox ng-model="reg.interestedOther">Uncategorised mail</md-checkbox>
-				</div>
-			</div>
-			<md-input-container>
-				<label>Username</label>
-				<input type="text" ng-model="reg.username">
-			</md-input-container>
-			<md-button ng-click="checkUsername()">Check username</md-button>
-			<md-input-container>
-				<label>Password</label>
-				<input type="password" ng-model="reg.password">
-			</md-input-container>
-			<md-input-container>
-				<label>Password again</label>
-				<input type="password" ng-model="reg.password2">
-			</md-input-container>
-			<md-button class="md-raised md-primary" aria-label="register" ng-click="register()">Register</md-button>
-		</form>
-	</div>
+    <div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
+        <form layout-wrap layout="column" ng-controller="register__" name="registerForm">
+            <md-input-container>
+                <label>Firstname</label>
+                <input type="text" ng-model="reg.firstname" required>
+            </md-input-container>
+            <md-input-container>
+                <label>Lastname</label>
+                <input type="text" ng-model="reg.lastname" required>
+            </md-input-container>
+            <md-input-container>
+                <label>Email</label>
+                <input type="email" ng-model="reg.email" required name="email" valid-email="" ng-model-options="{ updateOn: 'blur' }">
+                <div ng-messages="registerForm.email.$error" role="alert">
+                    <div ng-message-exp="'required'">
+                        Your need an email address.
+                    </div>
+                    <div ng-message-exp="'freeEmail'">
+                        This Email is already in use.
+                    </div>
+					<div ng-message-exp="'email'">
+						Not a valid email address.
+					</div>
+                </div>
+            </md-input-container>
+            <md-input-container>
+                <label>Email again</label>
+                <input type="email" ng-model="reg.email2" required ng-pattern="reg.email" name="email2">
+                <div ng-messages="registerForm.email2.$error" role="alert">
+                    <div ng-message-exp="['required', 'pattern']">
+                        Your email fields must match.
+                    </div>
+                </div>
+            </md-input-container>
+            <md-input-container>
+                <label>Birthdate</label>
+                <md-datepicker ng-model="reg.birthdate" md-min-date="minDate" md-max-date="maxDate"
+                               required="true"></md-datepicker>
+            </md-input-container>
+            <div>
+                <label>Gender</label>
+                <md-radio-group ng-model="reg.gender" required="">
+                    <md-radio-button value="M">Male</md-radio-button>
+                    <md-radio-button value="F">Female</md-radio-button>
+                    <md-radio-button value="O">Uncategorised mail</md-radio-button>
+                </md-radio-group>
+            </div>
+            <div>
+                <label>Interested in</label>
+                <div layout="row">
+                    <md-checkbox ng-model="reg.interestedMale">Male</md-checkbox>
+                    <md-checkbox ng-model="reg.interestedFemale">Female</md-checkbox>
+                    <md-checkbox ng-model="reg.interestedOther">Uncategorised mail</md-checkbox>
+                </div>
+            </div>
+            <md-input-container>
+                <label>Username</label>
+                <input type="text" ng-model="reg.username" ng-model-options="{ updateOn: 'blur' }" valid-username=""
+                       required name="userName">
+                <div ng-messages="registerForm.userName.$error" role="alert">
+                    <div ng-message-exp="required">
+                        Your need a username.
+                    </div>
+                    <div ng-message-exp="'username'">
+                        Username is already in use.
+                    </div>
+                </div>
+            </md-input-container>
+            <md-input-container>
+                <label>Password</label>
+                <input type="password" ng-model="reg.password" required name="password" pattern="[a-zA-Z0-9]{4,}">
+                <div ng-messages="registerForm.password.$error" role="alert">
+                    <div ng-message-exp="'required'">
+                        your must have a password.
+                    </div>
+                    <div ng-message-exp="'pattern'">your password must be at least 4 characters long.</div>
+                </div>
+            </md-input-container>
+            <md-input-container>
+                <label>Password again</label>
+                <input type="password" ng-model="reg.password2" required name="password2" ng-pattern="reg.password">
+                <div ng-messages="registerForm.password2.$error" role="alert">
+                    <div ng-message-exp="['required', 'pattern']">
+                        your password fields must match
+                    </div>
+                </div>
+            </md-input-container>
+            <md-button class="md-raised md-primary" aria-label="register" ng-click="register()"
+                       ng-disabled="registerForm.$invalid">Register
+            </md-button>
+        </form>
+    </div>
 </md-content>

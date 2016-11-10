@@ -5,7 +5,7 @@ app.controller('confirm__', function($scope, $http, $routeParams) {
         }).success(function(data) {
             console.log(data);
 			if (data === true) {
-				window.location.replace('/');
+				window.location.replace('/account');
 			}
         }).error(function(data) {
             console.log(`Error: ${data}`);
