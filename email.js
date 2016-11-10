@@ -20,7 +20,6 @@ var sendmail = require('sendmail')({
  * @param   {String}    subject     Subject of the email                                        *
  * @param   {String}    html        Body of teh email in html                                   *
  * @param   {Function}  callback    Callback function, called when the email has been sent      *
- * @return  {Null}                                                                              *
  ************************************************************************************************/
 function sendEmail(to, subject, html, callback) {
 	sendmail({

@@ -13,7 +13,12 @@ var email = require('./email');
 var mongo = require('./myMongo');
 var app = express();
 var hbs = exphbs.create({
-	extname: '.hbs'
+    extname: '.hbs',
+    helpers: {
+        angular: function(options) {
+            return options.fn();
+        }
+    }
 });
 
 app.engine('hbs', hbs.engine);
@@ -44,9 +49,12 @@ app.use('/', routes);
 /*user.get('581df7beec34b159a4cb1870', function(result) {
 	console.log(result);
 }); */
-user.findMatches('581f1204a868f311f1f24a26', function(result) {
+/*user.findMatches('581f1204a868f311f1f24a26', function(result) {
 	console.log(require('util').inspect(result, { depth: null }));
-});
+}); */
+/*user.getRecomendations('581f1204a868f311f1f24a26', function(result) {
+	console.log(require('util').inspect(result, { depth: null }));
+}); */
 //mongo.update('users', {username: 'nigel23'}, {$set: {username: 'nigel2'}}, function(result) {console.log(result);});
 //email.send('yoloswaggins@mailinator.com', 'sup nigga', '<h1>You say what? MOFO?</h1>');
 //email.sendConfirm('yoloswaggins@mailinator.com', 'yoloswaggins', 'http://localhost:8080', null);

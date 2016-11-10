@@ -1,14 +1,16 @@
-app.controller('login__', function($http, $scope, $sessionStorage, partial) {
-    $scope.login = function() {
+app.controller('login__', ($http, $scope, $sessionStorage, partial, locate) => {
+    $scope.login = () => {
         $http.post('/api/login', {
             username: $scope.login.username,
             password: $scope.login.password
-        }).success(function(data, status, headers, config) {
-            console.log(data);
-            $sessionStorage.user = data;
-			partial.reload();
-        }).error(function(data, status, headers, config) {
-            console.log('Error' + data);
+        }).success((data) => {
+			locate.getLocation(() => {
+				console.log(data);
+		        $sessionStorage.user = data;
+				partial.reload();
+			});
+        }).error((data) => {
+            console.log(`Error ${data}`);
         });
     };
 });
