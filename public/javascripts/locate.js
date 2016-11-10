@@ -24,8 +24,9 @@ app.service('locate', function($http) {
     function on_error() {
         console.log('GPS activation failure!');
         console.log('Location falling back on Cell towers');
-        var location = $http.post('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBjCZRwFkhJpKNqq_HNxJfDeNOWBFE5Ijc')
-            .success(function() {
+        var location;
+        location = $http.post('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBjCZRwFkhJpKNqq_HNxJfDeNOWBFE5Ijc')
+            .success(function () {
                 console.log('SUCCESS!!');
                 lat = location.$$state.value.data.location.lat;
                 lng = location.$$state.value.data.location.lng;
@@ -33,8 +34,7 @@ app.service('locate', function($http) {
                 console.log('Long: ' + lng);
                 console.log('Gotcha bi*ch!');
                 post_latlng(lat, lng);
-            })
-            .error(function() {
+            }).error(function () {
                 console.log('Failure, retrying...');
                 if (retryCount < 3) {
                     setTimeout(on_error, 5000);

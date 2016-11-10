@@ -1,6 +1,9 @@
 var express = require('express');
 var session = require('express-session');
 var user = require('./user');
+var mkdirp = require('mkdirp');
+var fs = require('fs');
+var path = require('path');
 var router = express.Router();
 var sess;
 
@@ -79,6 +82,15 @@ router.post('/api/whoami', function(req, res) {
 router.post('/api/logout', function(req, res) {
     req.session.user = null;
     res.json(true);
+});
+
+router.post('/api/photo', function(req, res){
+    console.log(req.body.uid);
+    var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    console.log(dir);
+    fs.writeFile(dir, req.body.data, {encoding: 'base64'}, function(result) {
+            res.json(result);
+    });
 });
 
 /**************************************************************

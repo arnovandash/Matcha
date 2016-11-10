@@ -1,4 +1,4 @@
-app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage']);
+app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage', 'ngFileUpload' ]);
 
 app.controller('matcha__', function($http, $scope, $sessionStorage) {
 	$http.post('/api/whoami')

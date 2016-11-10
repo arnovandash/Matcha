@@ -30,9 +30,10 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({
-    extended: false
+    extended: false,
+    limit: '50mb'
 }));
 app.use(cookieParser());
 
