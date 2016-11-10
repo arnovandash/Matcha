@@ -11,7 +11,6 @@ var routes = require('./routes');
 var user = require('./user');
 var email = require('./email');
 var mongo = require('./myMongo');
-var multer = require('multer');
 var app = express();
 var hbs = exphbs.create({
 	extname: '.hbs'
