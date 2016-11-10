@@ -14,6 +14,7 @@ router.get('/partials/home', function(req, res) {
 });
 
 router.get('/partials/account/:id?', function(req, res) {
+    console.log("going to account");
     console.log(req.params.id);
 	sess = req.session;
     if (req.params.id === undefined) {
@@ -53,6 +54,7 @@ router.get('/partials/license', function(req, res) {
  ***************************/
 router.get('/partials/confirm', function(req, res) {
     res.json('waiting...');
+    //res.render('account');
 });
 
 router.get('/partials/send_reset', function(req, res) {
@@ -96,7 +98,7 @@ router.post('/api/check_username', function(req, res) {
 router.post('/api/check_email', function(req, res) {
     if (req.body.email) {
         user.checkEmail(req.body.email, function(result) {
-            res.json((result === 1) ? false : true);
+            res.json(result);
         });
     } else {
         console.log('No email field');
@@ -163,6 +165,7 @@ router.post('/api/get_user', function(req, res) {
 
 router.post('/api/modify', function(req, res) {
     var values = req.body.update;
+    console.log(values);
     sess = req.session;
     if (sess.user === undefined || sess.user === null || values === undefined) {
         res.json('Values undefined');
