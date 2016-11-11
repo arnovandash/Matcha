@@ -1,22 +1,31 @@
-app.controller('upload__', ['$scope', '$http', 'Upload', '$timeout', function ($scope, $http, Upload, $timeout) {
+app.controller('upload__', ['$http', 'Upload', '$timeout', '$scope', '$sessionStorage', function ($http, Upload, $timeout, $scope, $sessionStorage) {
     $scope.uploadPic = function(file) {
-        var image = Upload.base64DataUrl(file);
-        image.then(function (image) {
-            $timeout(function () {
-                imgPost(image);
+        console.log($sessionStorage);
+        console.log($sessionStorage.user.username);
+      //  if ($sessionStorage.data.username !== undefined)
+     //   {
+            var image = Upload.base64DataUrl(file);
+            image.then(function (image) {
+                $timeout(function () {
+                    imgPost(image);
+                });
+            }, function (response) {
+                if (response.status > 0)
+                    console.log(`Error: ${data}`);
+            }, function (evt) {
+                file.progress = 100, parseInt(100.0 * evt.loaded / evt.total);
             });
-        }, function (response) {
-            if (response.status > 0)
-                console.log(`Error: ${data}`);
-        }, function (evt) {
-            file.progress = 100, parseInt(100.0 * evt.loaded / evt.total);
-        });
+      //  }
+      //  else
+       //     $http.post('/api/logout')
+       //     window.location.replace('/');
+       //     console.log($scope);
     }
 
     function makeid(length)
     {
         var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
         for( var i=0; i < length; i++ )
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         return text;

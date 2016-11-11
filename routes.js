@@ -1,7 +1,6 @@
 var express = require('express');
 var session = require('express-session');
 var user = require('./user');
-var mkdirp = require('mkdirp');
 var fs = require('fs');
 var path = require('path');
 var router = express.Router();
@@ -84,14 +83,39 @@ router.post('/api/logout', function(req, res) {
     res.json(true);
 });
 
-router.post('/api/photo', function(req, res){
-    console.log(req.body.uid);
+router.post('/api/photo', function(req, res) {
+    sess = req.session.user;
+    console.log("session");
+    console.log(sess);
+    if (req.session.user == undefined)
+    {
+        res.json(result);
+    }
+    else
+    {}
     var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
     console.log(dir);
-    fs.writeFile(dir, req.body.data, {encoding: 'base64'}, function(result) {
-            res.json(result);
+    fs.writeFile(dir, req.body.data, {encoding: 'base64'});
+    user.imgUpload(sess.username, req.body.uid, function (result) {
+        res.json(result);
     });
 });
+
+/*
+
+ router.post('/api/photo', function(req, res) {
+ sess = req.session;
+ var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+ fs.writeFile(dir, req.body.data, {encoding: 'base64'}, function (result) {
+ res.json(result);
+ });
+ user.uploadImg(sess.user.username, req.body.uid, function (result) {
+ res.json(result);
+ });
+ });
+
+
+ */
 
 /**************************************************************
  * Returns true if username is free, false if username exists *

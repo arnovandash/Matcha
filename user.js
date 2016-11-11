@@ -13,7 +13,8 @@ module.exports = {
     setLocation: setLocation,
     getTags: getTags,
 	findMatches: findMatches,
-	getRecomendations: getRecomendations
+	getRecomendations: getRecomendations,
+    imgUpload: imgUpload
 };
 
 var apoc = require('apoc');
@@ -53,6 +54,10 @@ function testInput(input, callback) {
         return true;
     }
     return false;
+}
+
+function imgUpload(username, uid, callback) {
+        mongo.update('users', {username: username}, {$addToSet: {images: uid}}, callback);
 }
 
 /*******************************************************************************************************************************
@@ -249,8 +254,8 @@ function users() {
 
 /**************************************************************************************
  * Attemps to login with the provided credentials                                     *
- * @param   {string}    username    Username crediential                              *
- * @param   {string}    password    Password crediential                              *
+ * @param   {string}    username    Username credential                               *
+ * @param   {string}    password    Password credential                               *
  * @param   {Function}  callback    Callback function called when database returns    *
  * @return  {null}                                                                    *
  **************************************************************************************/
@@ -360,14 +365,14 @@ function get(id, callback) {
  * @method setLocation                                                         *
  * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}   *
  * @param  {String}    username    Username of the user to add the location to *
- * @param  {Function}  callback    Returns the vaue from the update function   *
+ * @param  {Function}  callback    Returns the value from the update function  *
  *******************************************************************************/
 function setLocation(coordinates, username, callback) {
     mongo.update('users', {
         username: username
     }, {
         $set: {
-            location: coordinates
+            location: [coordinates.latitude, coordinates.longitude, new Date().getTime()]
         }
     }, callback);
 }
@@ -548,7 +553,7 @@ function getRecomendations(id, callback) {
 											longitude: 0.0
 										};
 									}
-									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
+									result2.distance = getDistance([lat, long], result2.location);
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									let now = Math.round(new Date().getTime()/1000.0);
