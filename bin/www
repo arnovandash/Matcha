@@ -32,9 +32,11 @@ server.on('listening', onListening);
 
 io.on('connection', function(socket){
     console.log('a user connected');
+    io.emit('server message', "hello all");
     socket.on('chat message', function (msg) {
         console.log(msg);
-        io.emit('chat message',msg);
+        if (msg.to)
+            io.emit(msg.to,msg.msg);
     })
 });
 /**

@@ -4,7 +4,7 @@ var user = require('./user');
 var router = express.Router();
 var sess;
 
-router.get('/partials/home', function(req, res) {
+router.get('/partials/home', function (req, res) {
     sess = req.session;
     if (sess.user !== undefined && sess.user !== null) {
         res.render('home', sess.user);
@@ -13,18 +13,18 @@ router.get('/partials/home', function(req, res) {
     }
 });
 
-router.get('/partials/account/:id?', function(req, res) {
+router.get('/partials/account/:id?', function (req, res) {
     console.log("going to account");
     console.log(req.params.id);
-	sess = req.session;
+    sess = req.session;
     if (req.params.id === undefined) {
         if (sess.user === undefined || sess.user === null) {
             res.send("Error: You need to be logged in");
         } else {
-            user.find(sess.user.id, function(result) {
+            user.find(sess.user.id, function (result) {
                 result.mine = true;
-				result.username = sess.user.username;
-				result.id = sess.user.id;
+                result.username = sess.user.username;
+                result.id = sess.user.id;
                 res.render('user_account', result);
             });
         }
@@ -32,10 +32,10 @@ router.get('/partials/account/:id?', function(req, res) {
         if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
             res.send("Error: no user of that id");
         } else {
-            user.find(req.params.id, function(result) {
+            user.find(req.params.id, function (result) {
                 if (result) {
                     result.mine = false;
-					result.user = sess.user;
+                    result.user = sess.user;
                     res.render('user_account', result);
                 } else {
                     res.json('no user of that id');
@@ -45,44 +45,44 @@ router.get('/partials/account/:id?', function(req, res) {
     }
 });
 
-router.get('/partials/license', function(req, res) {
-    res.render('license', req.session.user);
+router.get('/partials/chat/:id?', function (req, res) {
+    console.log(req.session.user);
+    res.render('chat', req.session.user);
 });
 
-router.get('/partials/chat/', function (req,res) {
-    console.log("doda doda");
-    sess = req.session;
-    res.render('chat', sess.user);
+
+router.get('/partials/license', function (req, res) {
+    res.render('license', req.session.user);
 });
 
 /***************************
  * NEED A PAGE FOR THIS!!! *
  ***************************/
-router.get('/partials/confirm', function(req, res) {
+router.get('/partials/confirm', function (req, res) {
     res.json('waiting...');
     //res.render('account');
 });
 
-router.get('/partials/send_reset', function(req, res) {
+router.get('/partials/send_reset', function (req, res) {
     res.render('send_reset');
 });
 
-router.get('/partials/reset', function(req, res) {
+router.get('/partials/reset', function (req, res) {
     res.render('reset');
 });
 
-router.post('/api/login', function(req, res) {
-    user.login(req.body.username, req.body.password, function(result) {
+router.post('/api/login', function (req, res) {
+    user.login(req.body.username, req.body.password, function (result) {
         req.session.user = (typeof result === 'object') ? result : null;
         res.json(result);
     });
 });
 
-router.post('/api/whoami', function(req, res) {
+router.post('/api/whoami', function (req, res) {
     res.json(req.session.user);
 });
 
-router.post('/api/logout', function(req, res) {
+router.post('/api/logout', function (req, res) {
     req.session.user = null;
     res.json(true);
 });
@@ -90,9 +90,9 @@ router.post('/api/logout', function(req, res) {
 /**************************************************************
  * Returns true if username is free, false if username exists *
  **************************************************************/
-router.post('/api/check_username', function(req, res) {
+router.post('/api/check_username', function (req, res) {
     if (req.body.username) {
-        user.checkUsername(req.body.username, function(result) {
+        user.checkUsername(req.body.username, function (result) {
             res.json(result);
         });
     } else {
@@ -101,9 +101,9 @@ router.post('/api/check_username', function(req, res) {
     }
 });
 
-router.post('/api/check_email', function(req, res) {
+router.post('/api/check_email', function (req, res) {
     if (req.body.email) {
-        user.checkEmail(req.body.email, function(result) {
+        user.checkEmail(req.body.email, function (result) {
             res.json(result);
         });
     } else {
@@ -112,64 +112,64 @@ router.post('/api/check_email', function(req, res) {
     }
 });
 
-router.post('/api/register', function(req, res) {
+router.post('/api/register', function (req, res) {
     console.log(req.body);
     var r = req.body;
-    user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function(result) {
+    user.add(r.username, r.firstname, r.lastname, r.gender, r.lookingFor, r.birthdate, r.email, r.password, function (result) {
         res.json(result);
     });
 });
 
-router.post('/api/confirm', function(req, res) {
+router.post('/api/confirm', function (req, res) {
     console.log(req.body);
-    user.confirmEmail(req.body.link, function(result) {
+    user.confirmEmail(req.body.link, function (result) {
         res.json(result);
     });
 });
 
-router.post('/api/send_reset', function(req, res) {
-    user.sendReset(req.body.usernameEmail, function(result) {
+router.post('/api/send_reset', function (req, res) {
+    user.sendReset(req.body.usernameEmail, function (result) {
         res.json(result);
     });
 });
 
-router.post('/api/reset', function(req, res) {
-    user.confirmReset(req.body.link, req.body.password, function(result) {
+router.post('/api/reset', function (req, res) {
+    user.confirmReset(req.body.link, req.body.password, function (result) {
         res.json(result);
     });
 });
 
-router.post('/api/set_location', function(req, res) {
+router.post('/api/set_location', function (req, res) {
     sess = req.session;
-	if (sess.user !== undefined && sess.user !== null) {
-		var r = req.body;
-	    var location = {
-	        latitude: r.latitude,
-	        longitude: r.longitude
-	    };
-	    user.setLocation(location, sess.user.username, function(result) {
-	        res.json(result);
-	    });
-	} else {
-		res.json(false);
-	}
+    if (sess.user !== undefined && sess.user !== null) {
+        var r = req.body;
+        var location = {
+            latitude: r.latitude,
+            longitude: r.longitude
+        };
+        user.setLocation(location, sess.user.username, function (result) {
+            res.json(result);
+        });
+    } else {
+        res.json(false);
+    }
 });
 
-router.post('/api/get_user', function(req, res) {
+router.post('/api/get_user', function (req, res) {
     if (req.body.id === undefined) {
         res.json(false);
     } else {
         if (!req.body.id.match(/[0-9A-Fa-f]{24}/)) {
             res.json(false);
         } else {
-            user.get(req.body.id, function(result) {
+            user.get(req.body.id, function (result) {
                 res.json(result);
             });
         }
     }
 });
 
-router.post('/api/modify', function(req, res) {
+router.post('/api/modify', function (req, res) {
     var values = req.body.update;
     console.log(values);
     sess = req.session;
@@ -177,22 +177,22 @@ router.post('/api/modify', function(req, res) {
         res.json('Values undefined');
     } else {
         values.id = sess.user.id;
-        user.modify(values, function(result) {
+        user.modify(values, function (result) {
             res.json(result);
         });
     }
 });
 
-router.post('/api/get_tags', function(req, res) {
-	user.getTags(req.body.id, function(result) {
-		res.json(result);
-	});
+router.post('/api/get_tags', function (req, res) {
+    user.getTags(req.body.id, function (result) {
+        res.json(result);
+    });
 });
 
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/
-router.get('*', function(req, res) {
+router.get('*', function (req, res) {
     res.render('index');
 });
 
