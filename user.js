@@ -48,8 +48,7 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-        console.log('Input error');
-        console.log(input);
+		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
         return true;
     }
     return false;
@@ -213,9 +212,6 @@ function modify(update, callback) {
                         })
                         .exec(server)
                         .then(function(result2) {
-                            console.log(require('util').inspect(result2, {
-                                depth: null
-                            }));
                             callback(true);
                             return false;
                         }, function(fail2) {
@@ -342,7 +338,6 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
-					console.log(`USER: ${util.inspect(user, {depth: null})}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
@@ -613,7 +608,6 @@ function like(id1, id2, callback) {
 	})
 	.execute(server)
 	.then((result) => {
-		console.log(result);
 		find(id2, (result) => {
 			if (typeof result === 'object') {
 				let send = `<body>

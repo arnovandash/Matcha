@@ -28,7 +28,7 @@ router.get('/partials/account/:id?', function(req, res) {
                 result.mine = true;
 				result.username = sess.user.username;
 				result.id = sess.user.id;
-                res.render('user_account', result);
+                res.render('other_account', result);
             });
         }
     } else {
@@ -39,7 +39,7 @@ router.get('/partials/account/:id?', function(req, res) {
                 if (result) {
                     result.mine = false;
 					result.user = sess.user;
-                    res.render('user_account', result);
+                    res.render('other_account', result);
                 } else {
                     res.json('no user of that id');
                 }

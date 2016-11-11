@@ -8,6 +8,11 @@ body {
     flex-direction: column;
 }
 
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
 .login-form {
     padding: 50px;
     border-radius: 5px;
@@ -27,7 +32,7 @@ body {
     max-width: 850px;
 }
 
-.doc > p {
+.doc>p {
     font-size: 1.2rem;
     font-weight: 400;
     line-height: 1.2em;
@@ -45,7 +50,7 @@ body {
     margin: auto 20px auto 6px;
 }
 
-.profile-pic-main > img {
+.profile-pic-main>img {
     min-width: 128px;
     min-height: 128px;
     display: flex;
@@ -58,96 +63,96 @@ body {
 .toaster {
     position: fixed;
     top: 0;
-	left: 0;
-	height: 56px;
-	width: 100%;
-	pointer-events: none;
+    left: 0;
+    height: 56px;
+    width: 100%;
+    pointer-events: none;
     z-index: 10000;
 }
 
 .recomend {
-	margin: 6px;
-	max-width: 360px;
-	display: flex;
-	flex-direction: column;
-	color: #FFF;
+    margin: 6px;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    color: #FFF;
 }
 
-.recomend > header {
-	height: 64px;
-	display: flex;
-	padding-left: 6px;
-	align-items: center;
+.recomend>header {
+    height: 64px;
+    display: flex;
+    padding-left: 6px;
+    align-items: center;
 }
 
-.recomend > img {
-	width: 360px;
-	display: flex;
+.recomend>img {
+    width: 360px;
+    display: flex;
 }
 
-.recomend > footer {
-	display: flex;
-	flex-direction: column;
-	flex-wrap: wrap;
-	padding: 6px;
+.recomend>footer {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    padding: 6px;
 }
 
 .recomend-container {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .badge {
-	font-size: 0.8rem;
-	color: #FFF;
-	border-radius: 2px;
-	min-width: 3rem;
-	padding: 0 6px;
-	text-align: center;
-	float: right;
-	margin-left: 3px;
+    font-size: 0.8rem;
+    color: #FFF;
+    border-radius: 2px;
+    min-width: 3rem;
+    padding: 0 6px;
+    text-align: center;
+    float: right;
+    margin-left: 3px;
 }
 
 .blue {
-	background-color: #039BE5;
+    background-color: #039BE5;
 }
 
 .pink {
-	background-color: #D81B60;
+    background-color: #D81B60;
 }
 
 .yellow {
-	background-color: #FFEB3B;
-	color: #000
+    background-color: #FFEB3B;
+    color: #000
 }
 
 .seeking {
-	display: flex;
-	justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 .thumb {
-	width: 48px;
-	height: 48px;
-	float: none;
-	position: relative;
-	top: 7px;
+    width: 48px;
+    height: 48px;
+    float: none;
+    position: relative;
+    top: 7px;
 }
 
 form .progress {
-	line-height: 15px;
+    line-height: 15px;
 }
 
 .progress {
-	display: inline-block;
-	width: 100px;
-	border: 3px groove #CCC;
+    display: inline-block;
+    width: 100px;
+    border: 3px groove #CCC;
 }
 
 .progress div {
-	font-size: smaller;
-	background: orange;
-	width: 0;
+    font-size: smaller;
+    background: orange;
+    width: 0;
 }

@@ -13,11 +13,11 @@
 		<div layout="column">
 			<md-input-container>
 				<label>Firstname</label>
-				<input ng-model="account.firstname" {{#unless mine}} disabled {{/unless}} />
+				<input ng-model="account.firstname" {{#unless mine}} readonly {{/unless}} />
 			</md-input-container>
 			<md-input-container>
 				<label>Lastname</label>
-				<input ng-model="account.lastname" {{#unless mine}} disabled {{/unless}} />
+				<input ng-model="account.lastname" {{#unless mine}} readonly {{/unless}} />
 			</md-input-container>
 		</div>
 	</div>
@@ -59,13 +59,13 @@
 	<div layout="row" layout-wrap>
 		<md-input-container>
 			<label>Email address</label>
-			<input ng-model="account.email" {{#unless mine}} disabled {{/unless}} />
+			<input ng-model="account.email" {{#unless mine}} readonly {{/unless}} />
 		</md-input-container>
 	</div>
 	<div layout="column">
 		<md-input-container>
 			<label>Bio</label>
-			<textarea ng-model="account.bio" md-maxlength="150" maxlength="150" {{#unless mine}} disabled {{/unless}}></textarea>
+			<textarea ng-model="account.bio" md-maxlength="150" maxlength="150" {{#unless mine}} readonly {{/unless}}></textarea>
 		</md-input-container>
 		<md-input-container>
 			<label>Birthdate</label>
@@ -92,10 +92,10 @@
 			<md-input-container flex>
 				<label>Intrests</label>
 				<md-chips ng-model="account.selectedTags" md-autocomplete-snap md-transform-chip="transformChip($chip, $event)" md-require-match="false" id="chips">
-					<md-autocomplete md-selected-item="account.selectedTag" md-search-text="account.searchText" md-items="item in querySearch(account.searchText)" md-item-text="item.name" {{#if mine}} placeholder="Search for a tag" {{/if}} {{#unless mine}} disabled {{/unless}}>
+					<md-autocomplete md-selected-item="account.selectedTag" md-search-text="account.searchText" md-items="item in querySearch(account.searchText)" md-item-text="item.name" {{#if mine}} placeholder="Search for a tag" {{/if}}>
 						<span md-highlight-text="account.searchText">\{{item.name}} :: \{{item.type}}</span>
 					</md-autocomplete>
-					<md-chip-template>
+					<md-chip-template  {{#unless mine}} disabled {{/unless}}>
 						<span>
 		          <b>\{{$chip.name}}</b>
 		          <em>(\{{$chip.type}})</em>
@@ -108,7 +108,7 @@
 		<form name="updateChanges" flex layout="column">
 			<md-input-container>
 				<label>Username</label>
-				<input ng-model="account.username" valid-username="" required name="userName" {{#unless mine}} disabled {{/unless}} />
+				<input ng-model="account.username" valid-username="" required name="userName" {{#unless mine}} readonly {{/unless}} />
 			</md-input-container>
 			{{#if mine}}
 			<md-input-container>
