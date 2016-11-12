@@ -488,6 +488,7 @@ function getTags(id, callback) {
             callback(fail);
         });
 }
+
 /*********************************************************************************************
  * Finds all the id's of the people who match with the provided id.                          *
  * @param  {String}   id       Id of the user to find matches for                            *
