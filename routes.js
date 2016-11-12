@@ -83,39 +83,25 @@ router.post('/api/logout', function(req, res) {
     res.json(true);
 });
 
-router.post('/api/photo', function(req, res) {
+router.post('/api/add_img', function(req, res) {
     sess = req.session.user;
-    console.log("session");
-    console.log(sess);
-    if (req.session.user == undefined)
-    {
-        res.json(result);
-    }
-    else
-    {}
     var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
-    console.log(dir);
+    console.log("Creating: " + dir);
     fs.writeFile(dir, req.body.data, {encoding: 'base64'});
     user.imgUpload(sess.username, req.body.uid, function (result) {
         res.json(result);
     });
 });
 
-/*
-
- router.post('/api/photo', function(req, res) {
- sess = req.session;
- var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
- fs.writeFile(dir, req.body.data, {encoding: 'base64'}, function (result) {
- res.json(result);
- });
- user.uploadImg(sess.user.username, req.body.uid, function (result) {
- res.json(result);
- });
- });
-
-
- */
+router.post('/api/del_img', function(req, res) {
+    sess = req.session.user;
+    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    console.log("Removing: " + filepath);
+    fs.unlink(filepath);
+    user.imgPull(sess.username, req.body.uid, function (result) {
+        res.json(result);
+    });
+});
 
 /**************************************************************
  * Returns true if username is free, false if username exists *

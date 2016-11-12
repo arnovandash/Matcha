@@ -38,7 +38,7 @@ function testInput(input, callback) {
     if (typeof input.username !== 'string' ||
         typeof input.firstname !== 'string' ||
         typeof input.lastname !== 'string' ||
-        (typeof input.gender !== 'string' && input.gender.length() !== 1) ||
+        (typeof input.gender !== 'string' && input.gender.length !== 1) ||
         typeof input.seeking !== 'object' ||
         typeof input.birthdate !== 'object' ||
         typeof input.email !== 'string' ||
@@ -61,16 +61,24 @@ function imgUpload(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num < 5) {
+        if (result[0].image_num < 5 || result[0].image_num == null) {
             mongo.update('users', {username: username},
                 {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
         }
-    })
+        else
+            callback(false);
+    });
 }
 
 function imgPull(username, uid, callback) {
-    mongo.update('users', {username: username}, {$inc: { image_num: -1}, $pull : {images : uid}}, callback);
-
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num > 0 || result[0].image_num == null) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
+        }
+    });
 }
 
 /*******************************************************************************************************************************
