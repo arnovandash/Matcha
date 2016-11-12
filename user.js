@@ -571,12 +571,8 @@ function getRecomendations(id, callback) {
 											longitude: 0.0
 										};
 									}
-<<<<<<< HEAD
-									result2.distance = getDistance([lat, long], result2.location);
-=======
 									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
 									console.log(`DISTANCE: ${result2.distance}`);
->>>>>>> master
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									var now = Math.round(new Date().getTime()/1000.0);
