@@ -1,5 +1,7 @@
 module.exports = {
-    add: add,
+	imgUpload: imgUpload,
+    imgPull: imgPull,
+	add: add,
     modify: modify,
     listAll: users,
     login: login,
@@ -37,7 +39,7 @@ function testInput(input, callback) {
     if (typeof input.username !== 'string' ||
         typeof input.firstname !== 'string' ||
         typeof input.lastname !== 'string' ||
-        (typeof input.gender !== 'string' && input.gender.length() !== 1) ||
+        (typeof input.gender !== 'string' && input.gender.length !== 1) ||
         typeof input.seeking !== 'object' ||
         typeof input.birthdate !== 'object' ||
         typeof input.email !== 'string' ||
@@ -53,6 +55,30 @@ function testInput(input, callback) {
         return true;
     }
     return false;
+}
+
+function imgUpload(username, uid, callback) {
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num < 5 || result[0].image_num == null) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
+        }
+        else
+            callback(false);
+    });
+}
+
+function imgPull(username, uid, callback) {
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num > 0 || result[0].image_num == null) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
+        }
+    });
 }
 
 /*******************************************************************************************************************************
@@ -148,7 +174,7 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
  * Updates user profile                                                   *
  * @method modify                                                         *
  * @param  {Object}   update   Contains all the data that needs updating  *
- * @param  {Function} callback Called when the update is complete         *
+ * @param  {Function} callback Called when the update is compvare         *
  * @return {Boolean}           true if error occured, false if successful *
  **************************************************************************/
 function modify(update, callback) {
@@ -246,8 +272,8 @@ function users() {
 
 /**************************************************************************************
  * Attemps to login with the provided credentials                                     *
- * @param   {string}    username    Username crediential                              *
- * @param   {string}    password    Password crediential                              *
+ * @param   {string}    username    Username credential                               *
+ * @param   {string}    password    Password credential                               *
  * @param   {Function}  callback    Callback function called when database returns    *
  * @return  {null}                                                                    *
  **************************************************************************************/
@@ -357,14 +383,14 @@ function get(id, callback) {
  * @method setLocation                                                         *
  * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}   *
  * @param  {String}    username    Username of the user to add the location to *
- * @param  {Function}  callback    Returns the vaue from the update function   *
+ * @param  {Function}  callback    Returns the value from the update function  *
  *******************************************************************************/
 function setLocation(coordinates, username, callback) {
     mongo.update('users', {
         username: username
     }, {
         $set: {
-            location: coordinates
+            location: [coordinates.latitude, coordinates.longitude, new Date().getTime()]
         }
     }, callback);
 }
@@ -545,8 +571,12 @@ function getRecomendations(id, callback) {
 											longitude: 0.0
 										};
 									}
+<<<<<<< HEAD
+									result2.distance = getDistance([lat, long], result2.location);
+=======
 									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
 									console.log(`DISTANCE: ${result2.distance}`);
+>>>>>>> master
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									var now = Math.round(new Date().getTime()/1000.0);
@@ -602,6 +632,15 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
+<<<<<<< HEAD
+	var x1 = pos1[0] * Math.PI / 180;
+	var y1 = pos1[1] * Math.PI / 180;
+	var x2 = pos2[0] * Math.PI / 180;
+	var y2 = pos2[1] * Math.PI / 180;
+	var x = (y2-y1) * Math.cos((x1+x2)/2);
+	var y = (y2-y1);
+	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
+=======
 	var toRadians = Math.PI / 180;
 	var x1 = pos1[0] * toRadians;
 	var y1 = pos1[1] * toRadians;
@@ -610,6 +649,7 @@ function getDistance(pos1, pos2) {
 	var x = (y2-y1) * Math.cos((x1+x2)/2);
 	var y = (y2-y1);
 	return (Math.sqrt(x*x + y*y) * 6371000); // 6371000 is the radius of the Earth in meters
+>>>>>>> master
 }
 
 /************************************************************
@@ -626,6 +666,18 @@ function like(id1, id2, callback) {
 	})
 	.exec(server)
 	.then((result) => {
+<<<<<<< HEAD
+		console.log(result);
+		find(id2, (result) => {
+			if (typeof result === 'object') {
+				var send = `<body>
+						<h2>You got a like on your Matcha profile</h2>
+						<h4>Please click the link below to view the person's account who liked you</h4>
+						<a href="localhost:8080/account/${id1}">View</a>
+					</body>`;
+				email.send(result.email, 'You got a new like', send, (result) => {
+					callback(result);
+=======
 		find(id2, function(result2) {
 			console.log(require('util').inspect(result, { depth: null }));
 			if (typeof result2 !== false && result2.email !== undefined/* && typeof profilePic === 'string'*/) {
@@ -651,6 +703,7 @@ function like(id1, id2, callback) {
 
 				email.send(result2.email, subject, send, (result3) => {
 					callback(result3);
+>>>>>>> master
 				});
 			} else {
 				callback('Cannot find user id');

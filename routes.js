@@ -1,7 +1,6 @@
 var express = require('express');
 var session = require('express-session');
 var user = require('./user');
-var mkdirp = require('mkdirp');
 var fs = require('fs');
 var path = require('path');
 var router = express.Router();
@@ -83,13 +82,22 @@ router.post('/api/logout', function(req, res) {
     res.json(true);
 });
 
-router.post('/api/photo', function(req, res) {
-    console.log(req.body.uid);
+router.post('/api/add_img', function(req, res) {
+    sess = req.session.user;
     var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
-    console.log(dir);
-    fs.writeFile(dir, req.body.data, {
-        encoding: 'base64'
-    }, function(result) {
+    console.log("Creating: " + dir);
+    fs.writeFile(dir, req.body.data, {encoding: 'base64'});
+    user.imgUpload(sess.username, req.body.uid, function (result) {
+        res.json(result);
+    });
+});
+
+router.post('/api/del_img', function(req, res) {
+    sess = req.session.user;
+    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    console.log("Removing: " + filepath);
+    fs.unlink(filepath);
+    user.imgPull(sess.username, req.body.uid, function (result) {
         res.json(result);
     });
 });
