@@ -1,5 +1,6 @@
 app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope) {
-    $scope.account = {
+	$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+	$scope.account = {
         selectedTags: [],
         tags: [],
         types: [],
@@ -7,29 +8,9 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         searchText: null,
     };
 
-    $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
-
-    if ($sessionStorage.user === null) {
-        $http.post('/api/whoami')
-            .success(function(data) {
-                //                console.log(data);
-                if (data === null) {
-                    window.location.replace('/');
-                } else {
-                    $sessionStorage.user = data;
-                    getUser();
-                    getLikes();
-					getBlocks();
-                }
-            })
-            .error(function(data) {
-                console.log(`Error: ${data}`);
-            });
-    } else {
-        getUser();
-        getLikes();
-		getBlocks();
-    }
+    getUser();
+    getLikes();
+    getBlocks();
 
     function getLikes() {
         $http.post('/api/get_likes', {
@@ -44,7 +25,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     }
 
-	function getBlocks() {
+    function getBlocks() {
         $http.post('/api/get_blocks', {
                 id: $scope.userId
             })
@@ -168,7 +149,6 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                     .position('top right')
                     .hideDelay(3000)
                 );
-
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
@@ -297,7 +277,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             })
             .success((data) => {
                 if (data === true) {
-					$mdToast.show(
+                    $mdToast.show(
                         $mdToast.simple()
                         .parent(document.getElementById('toaster'))
                         .textContent(`You unliked ${$scope.account.username}`)
@@ -312,7 +292,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     };
 
-	$scope.block = () => {
+    $scope.block = () => {
         $http.post('/api/block', {
                 id: $routeParams.id
             })
@@ -336,13 +316,13 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     };
 
-	$scope.unblock = () => {
+    $scope.unblock = () => {
         $http.post('/api/unblock', {
                 id: $scope.userId
             })
             .success((data) => {
                 if (data === true) {
-					$mdToast.show(
+                    $mdToast.show(
                         $mdToast.simple()
                         .parent(document.getElementById('toaster'))
                         .textContent(`You unblocked ${$scope.account.username}`)

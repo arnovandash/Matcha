@@ -304,10 +304,21 @@ function login(username, password, callback) {
         if (result.length === 1) {
             if (result[0].token.email === null) {
                 if (hash.checkHash(result[0].password, password)) {
-                    callback({
-                        id: result[0]._id,
-                        username: result[0].username
-                    });
+					apoc.query("MATCH (:Person {id: '`id`'})-[tag:TAG]->(:Tag {name: 'Cats'}) RETURN COUNT(tag) AS Cats", {}, {
+						id: result[0]._id
+					})
+					.exec(server)
+					.then((cat) => {
+						console.log(cat[0].data[0].row[0]);
+						callback({
+	                        id: result[0]._id,
+	                        username: result[0].username,
+							cat: (cat[0].data[0].row[0] === 1)
+	                    });
+					}, (fail) => {
+						console.log(fail.message);
+						callback('An error occurred');
+					});
                 } else {
                     callback('Incorrect username or Password');
                 }

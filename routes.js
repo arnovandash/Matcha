@@ -68,7 +68,7 @@ router.get('/partials/reset', function(req, res) {
 
 router.post('/api/login', function(req, res) {
     user.login(req.body.username, req.body.password, function(result) {
-        req.session.user = (typeof result === 'object') ? result : null;
+        req.session.user = result;
         res.json(result);
     });
 });
