@@ -1,14 +1,14 @@
-app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage', 'ngFileUpload' ]);
+app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage', 'ngFileUpload']);
 
-app.controller('matcha__', function($http, $scope, $sessionStorage) {
-	$http.post('/api/whoami')
-	.success(function(data) {
-		$sessionStorage.user = data;
-		console.log(data);
-	})
-	.error(function(data) {
-		console.log(`Error: ${data}`);
-	});
+app.controller('matcha__', function($http, $scope, $sessionStorage, $rootScope) {
+	$rootScope.http = $http;
+    $http.post('/api/whoami')
+        .success(function(data) {
+            $sessionStorage.user = data;
+        })
+        .error(function(data) {
+            console.log(`Error: ${data}`);
+        });
 });
 
 /******************************************************************************
@@ -22,10 +22,10 @@ app.controller('matcha__', function($http, $scope, $sessionStorage) {
  *    'partial.reload()' to get the new page from the server                  *
  ******************************************************************************/
 app.factory('partial', ['$route', '$templateCache', function($route, $templateCache) {
-	return {
-		reload: function() {
-		    $templateCache.remove($route.current.templateUrl);
-		    $route.reload();
-		}
-	};
+    return {
+        reload: function() {
+            $templateCache.remove($route.current.templateUrl);
+            $route.reload();
+        }
+    };
 }]);
