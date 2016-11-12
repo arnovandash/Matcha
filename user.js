@@ -52,7 +52,7 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
+//		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
         return true;
     }
     return false;
@@ -333,7 +333,7 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
-	console.log(`GET ${id}`);
+//	console.log(`GET ${id}`);
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(user) {
@@ -573,18 +573,18 @@ function getRecomendations(id, callback) {
 										};
 									}
 									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
-									console.log(`DISTANCE: ${result2.distance}`);
+									//console.log(`DISTANCE: ${result2.distance}`);
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									var now = Math.round(new Date().getTime()/1000.0);
 									result2.age = Math.round((now - result2.birthdate) / 31536000);
 									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
-									console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
+									/*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
 									console.log(`LIKES: ${result2.likes / 30}`);
 									console.log(`BLOCKS: ${result2.blocks / 20}`);
 									console.log(`TAGS: ${result2.commonTags.length * 10}`);
 									console.log(`CATS: ${result2.commonCats.length * 5}`);
-									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`);
+									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
 									result2.rating =
 										Math.round((10000 / Math.max(result2.distance, 0.1)) * (
 										(result2.likes / 30) -
@@ -592,11 +592,8 @@ function getRecomendations(id, callback) {
 										(result2.commonTags.length * 10) +
 										(result2.commonCats.length * 5) +
 										(10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
-									console.log(`TOTAL: ${result2.rating}`);
-//									getLikes(id, row.row[0], (likes) => {
-//										result2.likes = likes;
-										recommends.push(result2);
-//									});
+//									console.log(`TOTAL: ${result2.rating}`);
+									recommends.push(result2);
 								} else {
 									stop = true;
 								}
@@ -657,8 +654,8 @@ function like(id1, id2, callback) {
 	.exec(server)
 	.then((result) => {
 		find(id2, function(result2) {
-			console.log(require('util').inspect(result, { depth: null }));
-			if (typeof result2 !== false && result2.email !== undefined/* && typeof profilePic === 'string'*/) {
+//			console.log(require('util').inspect(result, { depth: null }));
+			if (typeof result2 !== false && result2.email !== undefined) {
 				var send;
 				var subject;
 				if (result[0].data[0].row[0] === 1) {
@@ -697,19 +694,24 @@ function like(id1, id2, callback) {
  * @method getLikes
  * @param  {String}   id1      ID of user 1
  * @param  {String}   id2      ID of user 2
- * @param  {fn(likes: Object)} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}}
+ * @param  {callback} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}}
+ *
+ * @callback callback
+ * @param    {Object} likes
  */
 function getLikes(id1, id2, callback) {
+	console.log('Get likes');
 	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
 		id1: id1,
 		id2: id2
 	})
 	.exec(server)
 	.then((result) => {
-		console.log(require('util').inspect(result, { depth: null }));
-		console.log(result[0].data[0].row[0] + result[0].data[1].row[0]);
-		console.log(`1 likes 2 ${result[0].data[0].row[0] === 1}`);
-		console.log(`2 likes 1 ${result[0].data[1].row[0] === 1}`);
+		result = result[0].data[0].row;
+		callback({
+			id1id2: (result[0] === 1),
+			id2id1: (result[1] === 1)
+		});
 	}, (fail) => {
 		console.log(fail);
 		callback(fail);

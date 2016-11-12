@@ -231,7 +231,7 @@ router.post('/api/get_likes', (req, res) => {
 	if (sess.user === undefined || sess.user === null) {
         res.json('You have to be logged in to get likes');
     } else {
-        user.get_likes(sess.user.id, req.body.id, (result) => {
+        user.getLikes(sess.user.id, req.body.id, (result) => {
             res.json(result);
         });
     }

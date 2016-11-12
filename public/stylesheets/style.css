@@ -13,6 +13,11 @@ a {
     text-decoration: inherit;
 }
 
+.flex-wrap {
+	display: flex;
+	flex-wrap: wrap;
+}
+
 .login-form {
     padding: 50px;
     border-radius: 5px;
@@ -141,4 +146,18 @@ a {
 	float: none;
 	position: relative;
 	top: 7px;
+}
+
+.waiting {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 10001;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgb(64, 64, 64);
+	background-color: rgba(64, 64, 64, 0.25);
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }

@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope) {
     $scope.account = {
         selectedTags: [],
         tags: [],
@@ -7,38 +7,53 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         searchText: null,
     };
 
+    $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+
     if ($sessionStorage.user === null) {
         $http.post('/api/whoami')
             .success(function(data) {
-				console.log(data);
-				if (data === null) {
-					window.location.replace('/');
-				} else {
-					$sessionStorage.user = data;
-	                getUser();
-				}
+                //                console.log(data);
+                if (data === null) {
+                    window.location.replace('/');
+                } else {
+                    $sessionStorage.user = data;
+                    getUser();
+					getLikes();
+                }
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
             });
     } else {
-		console.log('over here!');
         getUser();
+		getLikes();
     }
 
+	function getLikes() {
+		$http.post('/api/get_likes', {
+				id: $scope.userId
+			})
+			.success((data2) => {
+				console.log('LIKES:');
+				console.log(data2);
+			})
+			.error((data2) => {
+				console.log(`Error: ${data2}`);
+			});
+	}
+
     function getUser() {
-        $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
                 id: $scope.userId
             })
             .success(function(data) {
-                console.log(data);
+                //                console.log(data);
                 if (data) {
                     data.birthdate = new Date(data.birthdate * 1000);
                     var monthNames = [
                         'January', 'February', 'March', 'April',
-						'May', 'June', 'July', 'August',
-						'September', 'October', 'November', 'December'
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
                     ];
                     $scope.account = {
                         firstname: data.firstname,
@@ -96,8 +111,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             send.gender = 'O';
         }
         if (!send.seeking.male && !send.seeking.female && !send.seeking.other) {
-            console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
-            console.log(`Damn Angus we were just joking about adding this!`);
+            //console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
+            //console.log(`Damn Angus we were just joking about adding this!`);
             send.seeking = {
                 male: true,
                 female: true,
@@ -124,7 +139,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 update: send
             })
             .success(function(data) {
-                console.log(data);
+                //                console.log(data);
                 var message = '';
                 if (data === true) {
                     message = 'Profile updated successfully!';
@@ -146,7 +161,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     };
 
     $scope.transformChip = function(chip, ev) {
-        console.log($scope.account.selectedTags);
+        //        console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -233,23 +248,30 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     }
 
-	$scope.like = () => {
-		$http.post('/api/like', {
-			id: $routeParams.id
-		})
-		.success((data) => {
-			if (data === true) {
-				console.log(`You liked ${$scope.account.username}`);
-			} else {
-				console.log(data);
-			}
-		})
-		.error((data) => {
-			console.log(`Error: ${data}`);
-		});
-	};
+    $scope.like = () => {
+        $http.post('/api/like', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+//					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You liked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                } else {
+//                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
 
-	$scope.chat = () => {
-		window.location.replace(`/chat/${$routeParams.id}`);
-	};
+    $scope.chat = () => {
+        window.location.replace(`/chat/${$routeParams.id}`);
+    };
 });
