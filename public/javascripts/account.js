@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
+app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
     $scope.account = {
         selectedTags: [],
         tags: [],
@@ -9,37 +9,38 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
     if ($sessionStorage.user === null) {
         $http.post('/api/whoami')
-            .success(function(data) {
-				console.log(data);
-				if (data === null) {
-					window.location.replace('/');
-				} else {
-					$sessionStorage.user = data;
-	                getUser();
-				}
+            .success(function (data) {
+                console.log(data);
+                if (data === null) {
+                    window.location.replace('/');
+                } else {
+                    $sessionStorage.user = data;
+                    getUser();
+                }
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log(`Error: ${data}`);
             });
     } else {
-		console.log('over here!');
+        console.log('over here!');
         getUser();
     }
 
     function getUser() {
         $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
-                id: $scope.userId
-            })
-            .success(function(data) {
+            id: $scope.userId
+        })
+            .success(function (data) {
                 console.log(data);
                 if (data) {
                     data.birthdate = new Date(data.birthdate * 1000);
                     var monthNames = [
                         'January', 'February', 'March', 'April',
-						'May', 'June', 'July', 'August',
-						'September', 'October', 'November', 'December'
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
                     ];
+                    console.log(data);
                     $scope.account = {
                         firstname: data.firstname,
                         lastname: data.lastname,
@@ -54,17 +55,29 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                         interestedOther: data.seeking.other
                     };
                     $scope.originalUsername = data.username;
+                    $scope.numImages = data.image_num;
+                    if (data.images) {
+                        $scope.img1 = (data.images[0] === undefined) ? null : "uploads/" + data.images[0] + ".png";
+                        $scope.img2 = (data.images[1] === undefined) ? null : "uploads/" + data.images[1] + ".png";
+                        $scope.img3 = (data.images[2] === undefined) ? null : "uploads/" + data.images[2] + ".png";
+                        $scope.img4 = (data.images[3] === undefined) ? null : "uploads/" + data.images[3] + ".png";
+                        $scope.img5 = (data.images[4] === undefined) ? null : "uploads/" + data.images[4] + ".png";
+                        $scope.account.profilePic = (data.images[0] === undefined) ? false : true;
+                    }
+                    else {
+                        $scope.account.profilePic = false;
+                    }
                 } else {
                     window.location.replace('/');
                 }
                 loadTags();
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log(`Error: ${data}`);
             });
     }
 
-    $scope.update = function() {
+    $scope.update = function () {
         var account = $scope.account;
         var send = {
             username: account.username,
@@ -82,7 +95,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 month: account.birthdate.getUTCMonth() + 1,
                 year: account.birthdate.getUTCFullYear()
             },
-            tags: account.selectedTags.map(function(tag) {
+            tags: account.selectedTags.map(function (tag) {
                 delete tag.$$hashKey;
                 delete tag._lowername;
                 delete tag._lowertype;
@@ -121,9 +134,9 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         console.log(send);
         console.log($scope.$error);
         $http.post('/api/modify', {
-                update: send
-            })
-            .success(function(data) {
+            update: send
+        })
+            .success(function (data) {
                 console.log(data);
                 var message = '';
                 if (data === true) {
@@ -133,19 +146,19 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 }
                 $mdToast.show(
                     $mdToast.simple()
-                    .parent(document.getElementById('toaster'))
-                    .textContent(message)
-                    .position('top right')
-                    .hideDelay(3000)
+                        .parent(document.getElementById('toaster'))
+                        .textContent(message)
+                        .position('top right')
+                        .hideDelay(3000)
                 );
 
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log(`Error: ${data}`);
             });
     };
 
-    $scope.transformChip = function(chip, ev) {
+    $scope.transformChip = function (chip, ev) {
         console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
@@ -160,7 +173,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .ok('Submit')
             .cancel('Cancel');
 
-        $mdDialog.show(confirm).then(function(result) {
+        $mdDialog.show(confirm).then(function (result) {
             var newTag = {
                 name: chip,
                 type: result,
@@ -170,19 +183,19 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             $scope.account.selectedTags.push(newTag);
             $scope.account.tags.push(newTag);
             document.getElementById('chips').focus();
-        }, function() {
+        }, function () {
             document.getElementById('chips').focus();
             return null;
         });
         return null;
     };
 
-    $scope.querySearch = function(query) {
+    $scope.querySearch = function (query) {
         var results = query ? $scope.account.tags.filter(createFilterFor(query)) : [];
         return results;
     };
 
-    $scope.typeSearch = function(query) {
+    $scope.typeSearch = function (query) {
         var results = query ? $scope.account.tags.filter(typeFilterFor(query)) : [];
         return results;
     };
@@ -206,17 +219,17 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
     function loadTags() {
         $http.post('/api/get_tags', {
-                id: $scope.userId
-            })
-            .success(function(data) {
+            id: $scope.userId
+        })
+            .success(function (data) {
                 $scope.account.tags = [];
                 if (typeof data === 'object') {
-                    data[0].map(function(tag) {
+                    data[0].map(function (tag) {
                         tag._lowername = tag.name.toLowerCase();
                         tag._lowertype = tag.type.toLowerCase();
                         return tag;
                     });
-                    data[1].map(function(tag) {
+                    data[1].map(function (tag) {
                         tag._lowername = tag.name.toLowerCase();
                         tag._lowertype = tag.type.toLowerCase();
                         return tag;
@@ -227,29 +240,80 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                     console.log('error fetching data');
                 }
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log(`Error: ${data}`);
                 $scope.account.tags = [];
             });
     }
 
-	$scope.like = () => {
-		$http.post('/api/like', {
-			id: $routeParams.id
-		})
-		.success((data) => {
-			if (data === true) {
-				console.log(`You liked ${$scope.account.username}`);
-			} else {
-				console.log(data);
-			}
-		})
-		.error((data) => {
-			console.log(`Error: ${data}`);
-		});
-	};
+    $scope.like = () => {
+        $http.post('/api/like', {
+            id: $routeParams.id
+        })
+            .success((data) => {
+                if (data === true) {
+                    console.log(`You liked ${$scope.account.username}`);
+                } else {
+                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
 
-	$scope.chat = () => {
-		window.location.replace(`/chat/${$routeParams.id}`);
-	};
+    $scope.chat = () => {
+        window.location.replace(`/chat/${$routeParams.id}`);
+    };
+
+    $scope.uploadPic = function (file) {
+        Upload.base64DataUrl(file).then(function (image) {
+            imgPost(image, function (result) {
+                console.log(`Image Upload Status: ${result.data}`);
+                console.log(`Image Upload Status: ${result.uid}`);
+                if (result.data == true) {
+                    switch ($scope.numImages) {
+                        case 0:
+                            $scope.img1 = "uploads/" + result.uid + ".png";
+                            break;
+                        case 1:
+                            $scope.img2 = "uploads/" + result.uid + ".png";
+                            break;
+                        case 2:
+                            $scope.img3 = "uploads/" + result.uid + ".png";
+                            break;
+                        case 3:
+                            $scope.img4 = "uploads/" + result.uid + ".png";
+                            break;
+                        case 4:
+                            $scope.img5 = "uploads/" + result.uid + ".png";
+                            break;
+                    }
+                    $scope.numImages++;
+                }
+            });
+        });
+    };
+
+    function makeid(length) {
+        var text = "";
+        var possible = "abcdefg0123456789";
+        for (var i = 0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
+    }
+
+    function imgPost(data, callback) {
+        var img = data.replace(/^data:image\/\w+;base64,/, "");
+        var uid = makeid(16);
+        $http.post('/api/add_img', {
+            uid: uid,
+            data: img
+        }).success((data) => {
+            callback({
+                uid: uid,
+                data: data
+            });
+        });
+    }
 });

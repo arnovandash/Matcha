@@ -5,7 +5,7 @@
 	<h2>\{{account.username}}</h2>
 	<div layout="row">
 		<div class="profile-pic-main">
-			<img ng-if="account.profilePic" src="images/{{person.profilePic}}.png" />
+			<img ng-if="account.profilePic" ng-src="\{{img1}}" />
 			<img ng-if="!account.profilePic && account.gender == 'M'" src="images/no_pic_male_black_512.png" />
 			<img ng-if="!account.profilePic && account.gender == 'F'" src="images/no_pic_female_black_512.png" />
 			<img ng-if="!account.profilePic && account.gender == 'O'" src="images/no_pic_other_black_512.png" />
@@ -22,42 +22,29 @@
 		</div>
 	</div>
 	{{#if mine}}
-    <div>
-        <!--
-        <form myForm="upload" ng_controller="upload__">
-            <input type="file" ngf-select ng-model="picFile" name="file"
-               accept="image/*" ngf-max-size="1MB">
-            <canvas id="imageCanvas"></canvas>
-            <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
-            <br>
-            <md-button class="md-raised md-primary" ng-click="picFile = null" ng-show="picFile">Remove</md-button>
-            <md-button class="md-raised md-primary" ng-show="picFile" ng-click="uploadPic(picFile)">Submit</md-button>
-        </form>
--->
+        <div>
+            <form myForm="upload" >
+                <input type="file" ngf-select ng-model="picFile" name="file"
+                       accept="image/*" ngf-max-size="1MB" required><br>
+                <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
+                <br>
+                <md-button class="md-raised md-primary"
+                           ng-click="picFile = null" ng-show="picFile">Remove</md-button>
+                <md-button class="md-raised md-primary"
+                           ng-show="picFile" ng-click="uploadPic(picFile); picFile = null">Submit</md-button>
+                <span ng-show="picFile.result">Upload Successful</span>
+                <span class="err" ng-show="errorMsg">\{{errorMsg}}</span>
+            </form>
+        </div>
+        <div>
+            <img id="img1" width="200" height="200" style="border:1px solid" ng-src="\{{img1}}">
+            <img id="img2" width="200" height="200" style="border:1px solid" ng-src="\{{img2}}">
+            <img id="img3" width="200" height="200" style="border:1px solid" ng-src="\{{img3}}">
+            <img id="img4" width="200" height="200" style="border:1px solid" ng-src="\{{img4}}">
+            <img id="img5" width="200" height="200" style="border:1px solid" ng-src="\{{img5}}">
+        </div>
 
-        <form myForm="upload" ng_controller="upload__">
-        <input type="file" ngf-select ng-model="picFile" name="file"
-               accept="image/*" ngf-max-size="1MB" required
-               ngf-model-invalid="errorFile">
-        <i ng-show="myForm.file.$error.required">*required</i><br>
-        <i ng-show="myForm.file.$error.maxSize">File too large
-            \{{errorFile.size / 1000000|number:1}}MB: max 1MB</i>
-        <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
-            <br>
-            <md-button class="md-raised md-primary"
-                       ng-click="picFile = null" ng-show="picFile">Remove</md-button>
-            <md-button class="md-raised md-primary"
-                       ng-show="picFile" ng-click="uploadPic(picFile)">Submit</md-button>
-        <span class="progress" ng-show="picFile.progress >= 0">
-        <div style="width:\{{picFile.progress}}%"
-             ng-bind="picFile.progress + '%'"></div>
-      </span>
-        <span ng-show="picFile.result">Upload Successful</span>
-        <span class="err" ng-show="errorMsg">\{{errorMsg}}</span>
-        </form>
-
-    </div>
-	<div layout="row" layout-wrap>
+        <div layout="row" layout-wrap>
 		<md-input-container>
 			<label>Email address</label>
 			<input ng-model="account.email" />

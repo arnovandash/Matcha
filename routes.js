@@ -25,7 +25,7 @@ router.get('/partials/account/:id?', function(req, res) {
                 result.mine = true;
                 result.username = sess.user.username;
                 result.id = sess.user.id;
-                res.render('other_account', result);
+                res.render('account', result);
             });
         } else {
             if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
@@ -36,7 +36,7 @@ router.get('/partials/account/:id?', function(req, res) {
                         result.mine = false;
                         result.username = (sess.user !== undefined) ? sess.user.username : null;
                         result.id = (sess.user !== undefined) ? sess.user.id : null;
-                        res.render('other_account', result);
+                        res.render('account', result);
                     } else {
                         res.json('no user of that id');
                     }
@@ -101,6 +101,8 @@ router.post('/api/del_img', function(req, res) {
         res.json(result);
     });
 });
+
+
 
 /**************************************************************
  * Returns true if username is free, false if username exists *

@@ -17,7 +17,7 @@ module.exports = {
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
 	like: like,
-	getLikes: getLikes()
+	getLikes: getLikes
 };
 
 var apoc = require('apoc');
@@ -62,12 +62,14 @@ function imgUpload(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num < 5 || result[0].image_num === null) {
+        if (result[0].image_num < 5 || result[0].image_num === null || result[0].image_num === undefined) {
             mongo.update('users', {username: username},
                 {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
         }
-        else
+        else {
+            console.log("Image not sent to db");
             callback(false);
+        }
     });
 }
 
@@ -75,7 +77,7 @@ function imgPull(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num > 0 || result[0].image_num === null) {
+        if (result[0].image_num > 0 || result[0].image_num === null || result[0].image_num === undefined) {
             mongo.update('users', {username: username},
                 {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
         }
