@@ -16,7 +16,8 @@ module.exports = {
     getTags: getTags,
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
-	like: like
+	like: like,
+	getLikes: getLikes()
 };
 
 var apoc = require('apoc');
@@ -61,7 +62,7 @@ function imgUpload(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num < 5 || result[0].image_num == null) {
+        if (result[0].image_num < 5 || result[0].image_num === null) {
             mongo.update('users', {username: username},
                 {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
         }
@@ -74,7 +75,7 @@ function imgPull(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num > 0 || result[0].image_num == null) {
+        if (result[0].image_num > 0 || result[0].image_num === null) {
             mongo.update('users', {username: username},
                 {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
         }
@@ -688,7 +689,14 @@ function like(id1, id2, callback) {
 	});
 }
 
-function countLikes(id1, id2, callback) {
+/******************************************************************************/
+/* Get if ID1 likes ID2 and if ID2 likes ID1                                  */
+/* @method getLikes                                                           */
+/* @param  {String}   id1      ID of user 1                                   */
+/* @param  {String}   id2      ID of user 2                                   */
+/* @param  {Function} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}} */
+/******************************************************************************/
+function getLikes(id1, id2, callback) {
 	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
 		id1: id1,
 		id2: id2
@@ -697,6 +705,8 @@ function countLikes(id1, id2, callback) {
 	.then((result) => {
 		console.log(require('util').inspect(result, { depth: null }));
 		console.log(result[0].data[0].row[0] + result[0].data[1].row[0]);
+		console.log(`1 likes 2 ${result[0].data[0].row[0] === 1}`);
+		console.log(`2 likes 1 ${result[0].data[1].row[0] === 1}`);
 	}, (fail) => {
 		console.log(fail);
 		callback(fail);
