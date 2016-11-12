@@ -14,7 +14,8 @@ module.exports = {
     getTags: getTags,
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
-    imgUpload: imgUpload
+    imgUpload: imgUpload,
+    imgPull: imgPull
 };
 
 var apoc = require('apoc');
@@ -57,7 +58,19 @@ function testInput(input, callback) {
 }
 
 function imgUpload(username, uid, callback) {
-        mongo.update('users', {username: username}, {$addToSet: {images: uid}}, callback);
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num < 5) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
+        }
+    })
+}
+
+function imgPull(username, uid, callback) {
+    mongo.update('users', {username: username}, {$inc: { image_num: -1}, $pull : {images : uid}}, callback);
+
 }
 
 /*******************************************************************************************************************************
@@ -153,7 +166,7 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
  * Updates user profile                                                   *
  * @method modify                                                         *
  * @param  {Object}   update   Contains all the data that needs updating  *
- * @param  {Function} callback Called when the update is complete         *
+ * @param  {Function} callback Called when the update is compvare         *
  * @return {Boolean}           true if error occured, false if successful *
  **************************************************************************/
 function modify(update, callback) {
@@ -556,7 +569,7 @@ function getRecomendations(id, callback) {
 									result2.distance = getDistance([lat, long], result2.location);
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
-									let now = Math.round(new Date().getTime()/1000.0);
+									var now = Math.round(new Date().getTime()/1000.0);
 									result2.age = Math.round((now - result2.birthdate) / 31536000);
 									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
 									result2.rating = Math.round((5000 / (result2.distance + 0.01)) + (result2.likes / 3) - (result2.blocks) + (result2.commonTags.length * 10) + (result2.commonCats.length * 3) - (Math.abs((result[0].age / 2 + 7) - result2.age) * 100)) * -1;
@@ -596,12 +609,12 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
-	let x1 = pos1[0] * Math.PI / 180;
-	let y1 = pos1[1] * Math.PI / 180;
-	let x2 = pos2[0] * Math.PI / 180;
-	let y2 = pos2[1] * Math.PI / 180;
-	let x = (y2-y1) * Math.cos((x1+x2)/2);
-	let y = (y2-y1);
+	var x1 = pos1[0] * Math.PI / 180;
+	var y1 = pos1[1] * Math.PI / 180;
+	var x2 = pos2[0] * Math.PI / 180;
+	var y2 = pos2[1] * Math.PI / 180;
+	var x = (y2-y1) * Math.cos((x1+x2)/2);
+	var y = (y2-y1);
 	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
 }
 
@@ -621,7 +634,7 @@ function like(id1, id2, callback) {
 		console.log(result);
 		find(id2, (result) => {
 			if (typeof result === 'object') {
-				let send = `<body>
+				var send = `<body>
 						<h2>You got a like on your Matcha profile</h2>
 						<h4>Please click the link below to view the person's account who liked you</h4>
 						<a href="localhost:8080/account/${id1}">View</a>

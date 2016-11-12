@@ -22,18 +22,6 @@
 		</div>
 	</div>
     <div>
-        <!--
-        <form myForm="upload" ng_controller="upload__">
-            <input type="file" ngf-select ng-model="picFile" name="file"
-               accept="image/*" ngf-max-size="1MB">
-            <canvas id="imageCanvas"></canvas>
-            <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
-            <br>
-            <md-button class="md-raised md-primary" ng-click="picFile = null" ng-show="picFile">Remove</md-button>
-            <md-button class="md-raised md-primary" ng-show="picFile" ng-click="uploadPic(picFile)">Submit</md-button>
-        </form>
--->
-
         <form myForm="upload" ng_controller="upload__">
         <input type="file" ngf-select ng-model="picFile" name="file"
                accept="image/*" ngf-max-size="1MB" required
@@ -54,6 +42,10 @@
         <span ng-show="picFile.result">Upload Successful</span>
         <span class="err" ng-show="errorMsg">\{{errorMsg}}</span>
         </form>
+
+        <div>
+
+        </div>
 
     </div>
 	<div layout="row" layout-wrap>
