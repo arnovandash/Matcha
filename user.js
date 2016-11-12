@@ -1,7 +1,7 @@
 module.exports = {
-	imgUpload: imgUpload,
+    imgUpload: imgUpload,
     imgPull: imgPull,
-	add: add,
+    add: add,
     modify: modify,
     listAll: users,
     login: login,
@@ -14,10 +14,14 @@ module.exports = {
     confirmReset: confirmReset,
     setLocation: setLocation,
     getTags: getTags,
-	findMatches: findMatches,
-	getRecomendations: getRecomendations,
-	like: like,
-	getLikes: getLikes
+    findMatches: findMatches,
+    getRecomendations: getRecomendations,
+    like: like,
+    unlike: unlike,
+    getLikes: getLikes,
+	block: block,
+	unblock: unblock,
+	getBlocks: getBlocks
 };
 
 var apoc = require('apoc');
@@ -52,7 +56,7 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-//		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
+        //		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
         return true;
     }
     return false;
@@ -63,10 +67,17 @@ function imgUpload(username, uid, callback) {
         username: username
     }, function(result) {
         if (result[0].image_num < 5 || result[0].image_num === null) {
-            mongo.update('users', {username: username},
-                {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
-        }
-        else
+            mongo.update('users', {
+                username: username
+            }, {
+                $inc: {
+                    image_num: 1
+                },
+                $addToSet: {
+                    images: uid
+                }
+            }, callback);
+        } else
             callback(false);
     });
 }
@@ -76,8 +87,16 @@ function imgPull(username, uid, callback) {
         username: username
     }, function(result) {
         if (result[0].image_num > 0 || result[0].image_num === null) {
-            mongo.update('users', {username: username},
-                {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
+            mongo.update('users', {
+                username: username
+            }, {
+                $inc: {
+                    image_num: -1
+                },
+                $pull: {
+                    images: uid
+                }
+            }, callback);
         }
     });
 }
@@ -197,7 +216,7 @@ function modify(update, callback) {
     }, function(result) {
         if (result.length !== 1 || result[0].token.email !== null || !hash.checkHash(result[0].password, update.password)) {
             callback('Incorrect id or password');
-			return true;
+            return true;
         }
     });
     if (update.newPassword !== undefined && update.newPassword !== null && update.newPassword.length > 1) {
@@ -312,12 +331,12 @@ function find(id, callback) {
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(result) {
-		result = result[0];
+        result = result[0];
         if (result._id !== undefined) {
             callback({
                 id: result._id,
                 username: result.username,
-				email: result.email
+                email: result.email
             });
         } else {
             callback(false);
@@ -333,7 +352,7 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
-//	console.log(`GET ${id}`);
+    //	console.log(`GET ${id}`);
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(user) {
@@ -373,7 +392,7 @@ function get(id, callback) {
                     callback(fail);
                 });
         } else {
-			console.log('User id does not exist');
+            console.log('User id does not exist');
             callback(false);
         }
     });
@@ -521,19 +540,19 @@ function getTags(id, callback) {
  * @param  {Function} callback [{row: [matched ID], [common tags], [common tag categories]}] *
  *********************************************************************************************/
 function findMatches(id, callback) {
-	if (id === undefined || id === null) {
-		id = '123abc';
-	}
-	apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag.name) AS Types", {}, {
-		id: id
-	})
-	.exec(server)
-	.then((result) => {
-		callback(result[0].data);
-	}, (fail) => {
-		console.log(fail);
-		callback(fail);
-	});
+    if (id === undefined || id === null) {
+        id = '123abc';
+    }
+    apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag.name) AS Types", {}, {
+            id: id
+        })
+        .exec(server)
+        .then((result) => {
+            callback(result[0].data);
+        }, (fail) => {
+            console.log(fail);
+            callback(fail);
+        });
 }
 
 /********************************************************************
@@ -542,81 +561,81 @@ function findMatches(id, callback) {
  * @param  {Function} callback [{Recommended user}]                 *
  ********************************************************************/
 function getRecomendations(id, callback) {
-	if (id === undefined || id === null) {
-		id = '123abc';
-	}
-	var recommends = [];
-	var stop = false;
+    if (id === undefined || id === null) {
+        id = '123abc';
+    }
+    var recommends = [];
+    var stop = false;
 
-	mongo.find('users', {
+    mongo.find('users', {
         _id: new ObjectId(id)
     }, (result) => {
         if (result.length === 1) {
-			var lat = 0.0;
-			var long = 0.0;
-			if (result[0].location !== undefined) {
-				lat = result[0].location.latitude;
-				long = result[0].location.longitude;
-			}
+            var lat = 0.0;
+            var long = 0.0;
+            if (result[0].location !== undefined) {
+                lat = result[0].location.latitude;
+                long = result[0].location.longitude;
+            }
 
-			findMatches(id, (result1) => {
-				var indexes = result1.length;
-				if (typeof result1 === 'object') {
-					result1.forEach((row, index) => {
-						if (stop === false) {
-							get(row.row[0], (result2) => {
-								if (typeof result2 === 'object') {
-									if (result2.location === undefined) {
-										result2.location = {
-											latitude: 0.0,
-											longitude: 0.0
-										};
-									}
-									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
-									//console.log(`DISTANCE: ${result2.distance}`);
-									result2.commonTags = row.row[1];
-									result2.commonCats = row.row[2];
-									var now = Math.round(new Date().getTime()/1000.0);
-									result2.age = Math.round((now - result2.birthdate) / 31536000);
-									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
-									/*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
-									console.log(`LIKES: ${result2.likes / 30}`);
-									console.log(`BLOCKS: ${result2.blocks / 20}`);
-									console.log(`TAGS: ${result2.commonTags.length * 10}`);
-									console.log(`CATS: ${result2.commonCats.length * 5}`);
-									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
-									result2.rating =
-										Math.round((10000 / Math.max(result2.distance, 0.1)) * (
-										(result2.likes / 30) -
-										(result2.blocks / 20) +
-										(result2.commonTags.length * 10) +
-										(result2.commonCats.length * 5) +
-										(10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
-//									console.log(`TOTAL: ${result2.rating}`);
-									recommends.push(result2);
-								} else {
-									stop = true;
-								}
-								if (--indexes === 0) {
-									if (stop === false) {
-										callback(recommends);
-									} else {
-										console.log('An error occured');
-										callback(false);
-									}
-								}
-							});
-						} else {
-							console.log('Stop = true');
-						}
-					});
-				} else {
-					console.log('typeof not an object');
-					callback(false);
-				}
-			});
+            findMatches(id, (result1) => {
+                var indexes = result1.length;
+                if (typeof result1 === 'object') {
+                    result1.forEach((row, index) => {
+                        if (stop === false) {
+                            get(row.row[0], (result2) => {
+                                if (typeof result2 === 'object') {
+                                    if (result2.location === undefined) {
+                                        result2.location = {
+                                            latitude: 0.0,
+                                            longitude: 0.0
+                                        };
+                                    }
+                                    result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
+                                    //console.log(`DISTANCE: ${result2.distance}`);
+                                    result2.commonTags = row.row[1];
+                                    result2.commonCats = row.row[2];
+                                    var now = Math.round(new Date().getTime() / 1000.0);
+                                    result2.age = Math.round((now - result2.birthdate) / 31536000);
+                                    result[0].age = Math.round((now - result[0].birthdate) / 31536000);
+                                    /*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
+                                    console.log(`LIKES: ${result2.likes / 30}`);
+                                    console.log(`BLOCKS: ${result2.blocks / 20}`);
+                                    console.log(`TAGS: ${result2.commonTags.length * 10}`);
+                                    console.log(`CATS: ${result2.commonCats.length * 5}`);
+                                    console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
+                                    result2.rating =
+                                        Math.round((10000 / Math.max(result2.distance, 0.1)) * (
+                                            (result2.likes / 30) -
+                                            (result2.blocks / 20) +
+                                            (result2.commonTags.length * 10) +
+                                            (result2.commonCats.length * 5) +
+                                            (10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
+                                    //									console.log(`TOTAL: ${result2.rating}`);
+                                    recommends.push(result2);
+                                } else {
+                                    stop = true;
+                                }
+                                if (--indexes === 0) {
+                                    if (stop === false) {
+                                        callback(recommends);
+                                    } else {
+                                        console.log('An error occured');
+                                        callback(false);
+                                    }
+                                }
+                            });
+                        } else {
+                            console.log('Stop = true');
+                        }
+                    });
+                } else {
+                    console.log('typeof not an object');
+                    callback(false);
+                }
+            });
         } else {
-			console.log('An error occured');
+            console.log('An error occured');
             callback(false);
         }
     });
@@ -629,14 +648,14 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
-	var toRadians = Math.PI / 180;
-	var x1 = pos1[0] * toRadians;
-	var y1 = pos1[1] * toRadians;
-	var x2 = pos2[0] * toRadians;
-	var y2 = pos2[1] * toRadians;
-	var x = (y2-y1) * Math.cos((x1+x2)/2);
-	var y = (y2-y1);
-	return (Math.sqrt(x*x + y*y) * 6371000); // 6371000 is the radius of the Earth in meters
+    var toRadians = Math.PI / 180;
+    var x1 = pos1[0] * toRadians;
+    var y1 = pos1[1] * toRadians;
+    var x2 = pos2[0] * toRadians;
+    var y2 = pos2[1] * toRadians;
+    var x = (y2 - y1) * Math.cos((x1 + x2) / 2);
+    var y = (y2 - y1);
+    return (Math.sqrt(x * x + y * y) * 6371000); // 6371000 is the radius of the Earth in meters
 }
 
 /************************************************************
@@ -646,47 +665,88 @@ function getDistance(pos1, pos2) {
  * @param  {Function} callback Called when database returns *
  ************************************************************/
 function like(id1, id2, callback) {
-	console.log(`ID1: ${id1} ID2: ${id2}`);
-	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (b)-[l:LIKES]->(a)  MERGE (a)-[:LIKES]->(b) RETURN COUNT(l)", {}, {
-		id1: id1,
-		id2: id2
-	})
-	.exec(server)
-	.then((result) => {
-		find(id2, function(result2) {
-//			console.log(require('util').inspect(result, { depth: null }));
-			if (typeof result2 !== false && result2.email !== undefined) {
-				var send;
-				var subject;
-				if (result[0].data[0].row[0] === 1) {
-					send =
-						`<body>
+    apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (b)-[l:LIKES]->(a)  MERGE (a)-[:LIKES]->(b) RETURN COUNT(l)", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            find(id2, function(result2) {
+                //			console.log(require('util').inspect(result, { depth: null }));
+                if (typeof result2 !== false && result2.email !== undefined) {
+                    var send;
+                    var subject;
+                    if (result[0].data[0].row[0] === 1) {
+                        send =
+                            `<body>
 							<h2>You've got a connection on Matcha!!!</h2>
 							<h4>Please click the link below to view the person's account who made a connection with you</h4>
 							<a href="http://localhost:8080/account/${id1}">View</a>
 						</body>`;
-					subject = 'You got a connection on Matcha!!!';
-				} else {
-					send =
-						`<body>
+                        subject = 'You got a connection on Matcha!!!';
+                    } else {
+                        send =
+                            `<body>
 							<h2>You got a like on your Matcha profile</h2>
 							<h4>Please click the link below to view the person's account who liked you</h4>
 							<a href="http://localhost:8080/account/${id1}">View</a>
 						</body>`;
-					subject = 'you got a new like';
-				}
+                        subject = 'you got a new like';
+                    }
 
-				email.send(result2.email, subject, send, (result3) => {
-					callback(result3);
-				});
-			} else {
-				callback('Cannot find user id');
-			}
-		});
-	}, (fail) => {
-		console.log(fail);
-		callback(fail);
-	});
+                    email.send(result2.email, subject, send, (result3) => {
+                        callback(result3);
+                    });
+                } else {
+                    callback('Cannot find user id');
+                }
+            });
+        }, (fail) => {
+            console.log(fail);
+            callback(fail);
+        });
+}
+
+/**
+ * Removes the LIKES the replationship between ID1 and ID2
+ * @method unlike
+ * @param  {String}   id1      User ID doing the Unliking
+ * @param  {String}   id2      User ID being Unliked
+ * @param  {Function} callback Called when database returns
+ */
+function unlike(id1, id2, callback) {
+    apoc.query("MATCH (:Person {id: '`id1`'})-[l:LIKES]->(:Person {id: '`id2`'}) DELETE l RETURN l", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            //		console.log(require('util').inspect(result, { depth: null }));
+            if (result[0].data[0].meta[0].deleted === true) {
+                find(id2, function(result2) {
+                    if (typeof result2 !== false && result2.email !== undefined) {
+                        var send;
+                        send =
+                            `<body>
+								<h2>Someone unliked your Matcha profile</h2>
+								<h4>Please click the link below to view the person's account who unliked you</h4>
+								<a href="http://localhost:8080/account/${id1}">View</a>
+							</body>`;
+
+                        email.send(result2.email, 'Someone unliked you', send, (result3) => {
+                            callback(result3);
+                        });
+                    } else {
+                        callback('Cannot find user id');
+                    }
+                });
+            } else {
+                callback('Failed to unlike');
+            }
+        }, (fail) => {
+            console.log(fail.message);
+            callback(fail);
+        });
 }
 
 /**
@@ -700,20 +760,140 @@ function like(id1, id2, callback) {
  * @param    {Object} likes
  */
 function getLikes(id1, id2, callback) {
-	console.log('Get likes');
-	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
-		id1: id1,
-		id2: id2
-	})
-	.exec(server)
-	.then((result) => {
-		result = result[0].data[0].row;
-		callback({
-			id1id2: (result[0] === 1),
-			id2id1: (result[1] === 1)
-		});
-	}, (fail) => {
-		console.log(fail);
-		callback(fail);
-	});
+    console.log('Get likes');
+    apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            result = result[0].data[0].row;
+            callback({
+                id1id2: (result[0] === 1),
+                id2id1: (result[1] === 1)
+            });
+        }, (fail) => {
+            console.log(fail.message);
+            callback(fail);
+        });
+}
+
+/**
+ * Creates a BLOCK replationship between ID1 and ID2
+ * @method block
+ * @param  {String}   id1      User ID doing the BLOCKing
+ * @param  {String}   id2      User ID being BLOCKed
+ * @param  {Function} callback Called when database returns
+ */
+function block(id1, id2, callback) {
+    apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (b)-[l:BLOCK]->(a)  MERGE (a)-[:BLOCK]->(b) RETURN COUNT(l)", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            find(id2, function(result2) {
+                //			console.log(require('util').inspect(result, { depth: null }));
+                if (typeof result2 !== false && result2.email !== undefined) {
+                    var send;
+                    var subject;
+                    if (result[0].data[0].row[0] === 1) {
+                        send =
+                            `<body>
+							<h2>You got blocked back on Matcha!!!</h2>
+							<h4>Please click the link below to view the person's account who blocked you back</h4>
+							<a href="http://localhost:8080/account/${id1}">View</a>
+						</body>`;
+                        subject = 'You got blocked back on Matcha!!!';
+                    } else {
+                        send =
+                            `<body>
+							<h2>You got blocked on Matcha</h2>
+							<h4>Please click the link below to view the person's account who blocked you</h4>
+							<a href="http://localhost:8080/account/${id1}">View</a>
+						</body>`;
+                        subject = 'You got blocked on Matcha';
+                    }
+
+                    email.send(result2.email, subject, send, (result3) => {
+                        callback(result3);
+                    });
+                } else {
+                    callback('Cannot find user id');
+                }
+            });
+        }, (fail) => {
+            console.log(fail);
+            callback(fail);
+        });
+}
+
+/**
+ * Removes the BLOCK the replationship between ID1 and ID2
+ * @method unblock
+ * @param  {String}   id1      User ID doing the UnBLOCKing
+ * @param  {String}   id2      User ID being UnBLOCKed
+ * @param  {Function} callback Called when database returns
+ */
+function unblock(id1, id2, callback) {
+    apoc.query("MATCH (:Person {id: '`id1`'})-[b:BLOCK]->(:Person {id: '`id2`'}) DELETE b RETURN b", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            //		console.log(require('util').inspect(result, { depth: null }));
+            if (result[0].data[0].meta[0].deleted === true) {
+                find(id2, function(result2) {
+                    if (typeof result2 !== false && result2.email !== undefined) {
+                        var send;
+                        send =
+                            `<body>
+								<h2>Someone unblocked your Matcha profile</h2>
+								<h4>Please click the link below to view the person's account who unblocked you</h4>
+								<a href="http://localhost:8080/account/${id1}">View</a>
+							</body>`;
+
+                        email.send(result2.email, 'Someone unblocked you', send, (result3) => {
+                            callback(result3);
+                        });
+                    } else {
+                        callback('Cannot find user id');
+                    }
+                });
+            } else {
+                callback('Failed to unblock');
+            }
+        }, (fail) => {
+            console.log(fail.message);
+            callback(fail);
+        });
+}
+
+/**
+ * Get if ID1 blocked ID2 and if ID2 blocked ID1
+ * @method getBlocks
+ * @param  {String}   id1      ID of user 1
+ * @param  {String}   id2      ID of user 2
+ * @param  {callback} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}}
+ *
+ * @callback callback
+ * @param    {Object} blocks
+ */
+function getBlocks(id1, id2, callback) {
+    apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[ab:BLOCK]->(b) OPTIONAL MATCH (b)-[bb:BLOCK]->(a) RETURN COUNT(ab) AS aBocked, COUNT(bb) AS bBlocked", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            result = result[0].data[0].row;
+            callback({
+                id1id2: (result[0] === 1),
+                id2id1: (result[1] === 1)
+            });
+        }, (fail) => {
+            console.log(fail.message);
+            callback(fail);
+        });
 }

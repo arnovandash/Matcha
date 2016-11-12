@@ -175,10 +175,10 @@
 
 	{{#unless mine}}
 	<div layout="row" class="flex-wrap">
-		<md-button class="md-raised" aria-label="like" ng-click="like()">
+		<md-button class="md-raised" aria-label="like" ng-click="like()" ng-if="!likes.id1id2">
 			<md-icon md-font-set="material-icons">favorite</md-icon>&nbsp Like
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="unlike()">
+		<md-button class="md-raised" aria-label="like" ng-click="unlike()" ng-if="likes.id1id2">
 			<md-icon md-font-set="material-icons">favorite_border</md-icon>&nbsp Unlike
 		</md-button>
 		<md-button class="md-raised" aria-label="like" ng-click="block()">
@@ -187,7 +187,7 @@
 		<md-button class="md-raised" aria-label="like" ng-click="unblock()">
 			<md-icon md-font-set="material-icons">lock_open</md-icon>&nbsp Unblock
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="chat()">
+		<md-button class="md-raised" aria-label="like" ng-click="chat()" ng-if="likes.id1id2 && likes.id2id1">
 			<md-icon md-font-set="material-icons">message</md-icon>&nbsp Chat
 		</md-button>
 	</div>

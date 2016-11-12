@@ -18,7 +18,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 } else {
                     $sessionStorage.user = data;
                     getUser();
-					getLikes();
+                    getLikes();
                 }
             })
             .error(function(data) {
@@ -26,21 +26,21 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             });
     } else {
         getUser();
-		getLikes();
+        getLikes();
     }
 
-	function getLikes() {
-		$http.post('/api/get_likes', {
-				id: $scope.userId
-			})
-			.success((data2) => {
-				console.log('LIKES:');
-				console.log(data2);
-			})
-			.error((data2) => {
-				console.log(`Error: ${data2}`);
-			});
-	}
+    function getLikes() {
+        $http.post('/api/get_likes', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                console.log(data);
+                $scope.likes = data;
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    }
 
     function getUser() {
         $http.post('/api/get_user', {
@@ -254,7 +254,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             })
             .success((data) => {
                 if (data === true) {
-//					console.log(`You liked ${$scope.account.username}`);
+                    //					console.log(`You liked ${$scope.account.username}`);
                     $mdToast.show(
                         $mdToast.simple()
                         .parent(document.getElementById('toaster'))
@@ -262,8 +262,9 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                         .position('top right')
                         .hideDelay(3000)
                     );
+                    $scope.likes.id1id2 = true;
                 } else {
-//                    console.log(data);
+                    //                    console.log(data);
                 }
             })
             .error((data) => {
@@ -273,5 +274,19 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
     $scope.chat = () => {
         window.location.replace(`/chat/${$routeParams.id}`);
+    };
+
+    $scope.unlike = () => {
+        $http.post('/api/unlike', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+                    $scope.likes.id1id2 = false;
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
     };
 });
