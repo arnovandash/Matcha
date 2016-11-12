@@ -1,5 +1,7 @@
 module.exports = {
-    add: add,
+	imgUpload: imgUpload,
+    imgPull: imgPull,
+	add: add,
     modify: modify,
     listAll: users,
     login: login,
@@ -14,7 +16,9 @@ module.exports = {
     getTags: getTags,
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
-	like: like
+	like: like,
+	getLikes: getLikes,
+   // countLikes: countLikes
 };
 
 var apoc = require('apoc');
@@ -37,7 +41,7 @@ function testInput(input, callback) {
     if (typeof input.username !== 'string' ||
         typeof input.firstname !== 'string' ||
         typeof input.lastname !== 'string' ||
-        (typeof input.gender !== 'string' && input.gender.length() !== 1) ||
+        (typeof input.gender !== 'string' && input.gender.length !== 1) ||
         typeof input.seeking !== 'object' ||
         typeof input.birthdate !== 'object' ||
         typeof input.email !== 'string' ||
@@ -49,10 +53,34 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
+//		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
         return true;
     }
     return false;
+}
+
+function imgUpload(username, uid, callback) {
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num < 5 || result[0].image_num === null) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
+        }
+        else
+            callback(false);
+    });
+}
+
+function imgPull(username, uid, callback) {
+    mongo.find('users', {
+        username: username
+    }, function(result) {
+        if (result[0].image_num > 0 || result[0].image_num === null) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
+        }
+    });
 }
 
 /*******************************************************************************************************************************
@@ -148,7 +176,7 @@ function add(username, firstname, lastname, gender, seeking, birthdate, email, p
  * Updates user profile                                                   *
  * @method modify                                                         *
  * @param  {Object}   update   Contains all the data that needs updating  *
- * @param  {Function} callback Called when the update is complete         *
+ * @param  {Function} callback Called when the update is compvare         *
  * @return {Boolean}           true if error occured, false if successful *
  **************************************************************************/
 function modify(update, callback) {
@@ -246,8 +274,8 @@ function users() {
 
 /**************************************************************************************
  * Attemps to login with the provided credentials                                     *
- * @param   {string}    username    Username crediential                              *
- * @param   {string}    password    Password crediential                              *
+ * @param   {string}    username    Username credential                               *
+ * @param   {string}    password    Password credential                               *
  * @param   {Function}  callback    Callback function called when database returns    *
  * @return  {null}                                                                    *
  **************************************************************************************/
@@ -306,7 +334,7 @@ function find(id, callback) {
  * @return {null}                                                         *
  **************************************************************************/
 function get(id, callback) {
-	console.log(`GET ${id}`);
+//	console.log(`GET ${id}`);
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(user) {
@@ -357,14 +385,14 @@ function get(id, callback) {
  * @method setLocation                                                         *
  * @param  {Object}    coordinates {latitude: {Number}, longitude: {Number}}   *
  * @param  {String}    username    Username of the user to add the location to *
- * @param  {Function}  callback    Returns the vaue from the update function   *
+ * @param  {Function}  callback    Returns the value from the update function  *
  *******************************************************************************/
 function setLocation(coordinates, username, callback) {
     mongo.update('users', {
         username: username
     }, {
         $set: {
-            location: coordinates
+            location: [coordinates.latitude, coordinates.longitude, new Date().getTime()]
         }
     }, callback);
 }
@@ -547,18 +575,18 @@ function getRecomendations(id, callback) {
 										};
 									}
 									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
-									console.log(`DISTANCE: ${result2.distance}`);
+									//console.log(`DISTANCE: ${result2.distance}`);
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									var now = Math.round(new Date().getTime()/1000.0);
 									result2.age = Math.round((now - result2.birthdate) / 31536000);
 									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
-									console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
+									/*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
 									console.log(`LIKES: ${result2.likes / 30}`);
 									console.log(`BLOCKS: ${result2.blocks / 20}`);
 									console.log(`TAGS: ${result2.commonTags.length * 10}`);
 									console.log(`CATS: ${result2.commonCats.length * 5}`);
-									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`);
+									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
 									result2.rating =
 										Math.round((10000 / Math.max(result2.distance, 0.1)) * (
 										(result2.likes / 30) -
@@ -566,7 +594,7 @@ function getRecomendations(id, callback) {
 										(result2.commonTags.length * 10) +
 										(result2.commonCats.length * 5) +
 										(10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
-									console.log(`TOTAL: ${result2.rating}`);
+//									console.log(`TOTAL: ${result2.rating}`);
 									recommends.push(result2);
 								} else {
 									stop = true;
@@ -628,8 +656,8 @@ function like(id1, id2, callback) {
 	.exec(server)
 	.then((result) => {
 		find(id2, function(result2) {
-			console.log(require('util').inspect(result, { depth: null }));
-			if (typeof result2 !== false && result2.email !== undefined/* && typeof profilePic === 'string'*/) {
+//			console.log(require('util').inspect(result, { depth: null }));
+			if (typeof result2 !== false && result2.email !== undefined) {
 				var send;
 				var subject;
 				if (result[0].data[0].row[0] === 1) {
@@ -663,17 +691,44 @@ function like(id1, id2, callback) {
 	});
 }
 
-function countLikes(id1, id2, callback) {
+/**
+ * Get if ID1 likes ID2 and if ID2 likes ID1
+ * @method getLikes
+ * @param  {String}   id1      ID of user 1
+ * @param  {String}   id2      ID of user 2
+ * @param  {callback} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}}
+ *
+ * @callback callback
+ * @param    {Object} likes
+ */
+function getLikes(id1, id2, callback) {
+	console.log('Get likes');
 	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
 		id1: id1,
 		id2: id2
 	})
 	.exec(server)
 	.then((result) => {
-		console.log(require('util').inspect(result, { depth: null }));
-		console.log(result[0].data[0].row[0] + result[0].data[1].row[0]);
+		result = result[0].data[0].row;
+		callback({
+			id1id2: (result[0] === 1),
+			id2id1: (result[1] === 1)
+		});
 	}, (fail) => {
 		console.log(fail);
 		callback(fail);
 	});
 }
+
+/************************************************************
+ * count likes coun all incoming like to a user             *
+ ************************************************************/
+/*function countLikes(id, callback) {
+    console.log("count likes called");
+    apoc.query("", {},{})
+        .exec(server)
+        .then((result) => {
+        console.log(result);
+    });
+    
+}*/

@@ -1,7 +1,6 @@
 var express = require('express');
 var session = require('express-session');
 var user = require('./user');
-var mkdirp = require('mkdirp');
 var fs = require('fs');
 var path = require('path');
 var router = express.Router();
@@ -27,7 +26,7 @@ router.get('/partials/account/:id?', function (req, res) {
                 result.mine = true;
                 result.username = sess.user.username;
                 result.id = sess.user.id;
-                res.render('other_account', result);
+                res.render('account', result);
             });
         } else {
             if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
@@ -38,7 +37,7 @@ router.get('/partials/account/:id?', function (req, res) {
                         result.mine = false;
                         result.username = (sess.user !== undefined) ? sess.user.username : null;
                         result.id = (sess.user !== undefined) ? sess.user.id : null;
-                        res.render('other_account', result);
+                        res.render('account', result);
                     } else {
                         res.json('no user of that id');
                     }
@@ -96,13 +95,22 @@ router.post('/api/logout', function (req, res) {
     res.json(true);
 });
 
-router.post('/api/photo', function (req, res) {
-    console.log(req.body.uid);
+router.post('/api/add_img', function(req, res) {
+    sess = req.session.user;
     var dir = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
-    console.log(dir);
-    fs.writeFile(dir, req.body.data, {
-        encoding: 'base64'
-    }, function (result) {
+    console.log("Creating: " + dir);
+    fs.writeFile(dir, req.body.data, {encoding: 'base64'});
+    user.imgUpload(sess.username, req.body.uid, function (result) {
+        res.json(result);
+    });
+});
+
+router.post('/api/del_img', function(req, res) {
+    sess = req.session.user;
+    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    console.log("Removing: " + filepath);
+    fs.unlink(filepath);
+    user.imgPull(sess.username, req.body.uid, function (result) {
         res.json(result);
     });
 });
@@ -226,6 +234,17 @@ router.post('/api/like', (req, res) => {
         res.json('You have to be logged in to like someone');
     } else {
         user.like(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/get_likes', (req, res) => {
+	sess = req.session;
+	if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to get likes');
+    } else {
+        user.getLikes(sess.user.id, req.body.id, (result) => {
             res.json(result);
         });
     }
