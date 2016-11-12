@@ -25,7 +25,7 @@ router.get('/partials/account/:id?', function(req, res) {
                 result.mine = true;
                 result.username = sess.user.username;
                 result.id = sess.user.id;
-                res.render('other_account', result);
+                res.render('account', result);
             });
         } else {
             if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
@@ -36,7 +36,7 @@ router.get('/partials/account/:id?', function(req, res) {
                         result.mine = false;
                         result.username = (sess.user !== undefined) ? sess.user.username : null;
                         result.id = (sess.user !== undefined) ? sess.user.id : null;
-                        res.render('other_account', result);
+                        res.render('account', result);
                     } else {
                         res.json('no user of that id');
                     }
@@ -221,6 +221,17 @@ router.post('/api/like', (req, res) => {
         res.json('You have to be logged in to like someone');
     } else {
         user.like(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/get_likes', (req, res) => {
+	sess = req.session;
+	if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to get likes');
+    } else {
+        user.get_likes(sess.user.id, req.body.id, (result) => {
             res.json(result);
         });
     }
