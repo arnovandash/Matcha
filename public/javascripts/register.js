@@ -1,5 +1,5 @@
 app.controller('register__', function ($scope, $http, partial) {
-    $scope.validUsername = false;
+    //$scope.validUsername = false;
     $scope.myDate = new Date();
 
     $scope.minDate = new Date(
@@ -57,12 +57,14 @@ app.controller('register__', function ($scope, $http, partial) {
         console.log(send);
         $http.post('/api/register', send).success(function (data) {
             console.log(data);
+            var reset = $scope.reg;
+            angular.copy(null);
         }).error(function (data) {
             console.log('Error ' + data);
         });
     };
 
-    $scope.checkUsername = function () {
+    /*$scope.checkUsername = function () {
         if ($scope.reg.username !== undefined) {
             $http.post('/api/check_username', {
                 username: $scope.reg.username
@@ -89,6 +91,6 @@ app.controller('register__', function ($scope, $http, partial) {
         } else {
             console.log('No email');
         }
-    };
+    };*/
 });
 

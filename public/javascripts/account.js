@@ -19,9 +19,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         types: [],
         selectedTag: null,
         searchText: null,
+        mine: $routeParams.mine,
     };
     loadTags();
-
+console.log($scope.account);
     function getUser() {
         $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
@@ -123,7 +124,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 					.parent(document.getElementById('toaster'))
                     .textContent(message)
                     .position('top right')
-                    .hideDelay(3000)
+                    .hideDelay(4000)
                 );
 
             })

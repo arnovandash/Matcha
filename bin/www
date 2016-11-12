@@ -25,10 +25,20 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
+var io = require('socket.io')(server);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+io.on('connection', function(socket){
+    console.log('a user connected');
+    io.emit('server message', "hello all");
+    socket.on('chat message', function (msg) {
+        console.log(msg);
+        if (msg.to)
+            io.emit(msg.to,msg.msg);
+    })
+});
 /**
  * Normalize a port into a number, string, or false.
  */

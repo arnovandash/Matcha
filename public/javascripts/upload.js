@@ -11,7 +11,7 @@ app.controller('upload__', ['$scope', '$http', 'Upload', '$timeout', function ($
         }, function (evt) {
             file.progress = 100, parseInt(100.0 * evt.loaded / evt.total);
         });
-    }
+    };
 
     function makeid(length)
     {
