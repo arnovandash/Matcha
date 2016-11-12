@@ -181,10 +181,10 @@
 		<md-button class="md-raised" aria-label="like" ng-click="unlike()" ng-if="likes.id1id2">
 			<md-icon md-font-set="material-icons">favorite_border</md-icon>&nbsp Unlike
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="block()">
+		<md-button class="md-raised" aria-label="like" ng-click="block()" ng-if="!blocks.id1id2">
 			<md-icon md-font-set="material-icons">lock_outline</md-icon>&nbsp Block
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="unblock()">
+		<md-button class="md-raised" aria-label="like" ng-click="unblock()" ng-if="blocks.id1id2">
 			<md-icon md-font-set="material-icons">lock_open</md-icon>&nbsp Unblock
 		</md-button>
 		<md-button class="md-raised" aria-label="like" ng-click="chat()" ng-if="likes.id1id2 && likes.id2id1">

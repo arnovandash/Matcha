@@ -19,6 +19,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                     $sessionStorage.user = data;
                     getUser();
                     getLikes();
+					getBlocks();
                 }
             })
             .error(function(data) {
@@ -27,6 +28,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     } else {
         getUser();
         getLikes();
+		getBlocks();
     }
 
     function getLikes() {
@@ -36,6 +38,19 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             .success((data) => {
                 console.log(data);
                 $scope.likes = data;
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    }
+
+	function getBlocks() {
+        $http.post('/api/get_blocks', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                console.log(data);
+                $scope.blocks = data;
             })
             .error((data) => {
                 console.log(`Error: ${data}`);
@@ -282,7 +297,60 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             })
             .success((data) => {
                 if (data === true) {
+					$mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unliked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
                     $scope.likes.id1id2 = false;
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
+    };
+
+	$scope.block = () => {
+        $http.post('/api/block', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You blocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = true;
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
+
+	$scope.unblock = () => {
+        $http.post('/api/unblock', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+					$mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unblocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = false;
+
                 }
             })
             .error((error) => {

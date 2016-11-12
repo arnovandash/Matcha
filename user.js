@@ -543,7 +543,7 @@ function findMatches(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc';
     }
-    apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag.name) AS Types", {}, {
+    apoc.query("MATCH (a:Person {id: '`id`'})-[:GENDER]->(:Gender)<-[:SEEKING]-(b:Person), (a)-[:SEEKING]->(:Gender)<-[:GENDER]-(b) OPTIONAL MATCH (a)-[:TAG]->(t:Tag)<-[:TAG]-(b) OPTIONAL MATCH (a)-[]->(:Tag)-[]->(:Type)<-[]-(tag:Tag)-[]-(b) OPTIONAL MATCH (a)-[block:BLOCK]-(b) RETURN b.id AS Person, COLLECT(DISTINCT t.name) AS Tags, COLLECT(DISTINCT tag.name) AS Types, COUNT(block) AS Blocks", {}, {
             id: id
         })
         .exec(server)
@@ -555,11 +555,11 @@ function findMatches(id, callback) {
         });
 }
 
-/********************************************************************
- * Finds all the details for a recommended user for the provided ID *
- * @param  {String}   id       ID to find recomendations for        *
- * @param  {Function} callback [{Recommended user}]                 *
- ********************************************************************/
+/**
+ * Finds all the details for a recommended user for the provided ID
+ * @param  {String}   id       ID to find recomendations for
+ * @param  {Function} callback [{Recommended users}]
+ */
 function getRecomendations(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc';
@@ -585,34 +585,36 @@ function getRecomendations(id, callback) {
                         if (stop === false) {
                             get(row.row[0], (result2) => {
                                 if (typeof result2 === 'object') {
-                                    if (result2.location === undefined) {
-                                        result2.location = {
-                                            latitude: 0.0,
-                                            longitude: 0.0
-                                        };
-                                    }
-                                    result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
-                                    //console.log(`DISTANCE: ${result2.distance}`);
-                                    result2.commonTags = row.row[1];
-                                    result2.commonCats = row.row[2];
-                                    var now = Math.round(new Date().getTime() / 1000.0);
-                                    result2.age = Math.round((now - result2.birthdate) / 31536000);
-                                    result[0].age = Math.round((now - result[0].birthdate) / 31536000);
-                                    /*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
-                                    console.log(`LIKES: ${result2.likes / 30}`);
-                                    console.log(`BLOCKS: ${result2.blocks / 20}`);
-                                    console.log(`TAGS: ${result2.commonTags.length * 10}`);
-                                    console.log(`CATS: ${result2.commonCats.length * 5}`);
-                                    console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
-                                    result2.rating =
-                                        Math.round((10000 / Math.max(result2.distance, 0.1)) * (
-                                            (result2.likes / 30) -
-                                            (result2.blocks / 20) +
-                                            (result2.commonTags.length * 10) +
-                                            (result2.commonCats.length * 5) +
-                                            (10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
-                                    //									console.log(`TOTAL: ${result2.rating}`);
-                                    recommends.push(result2);
+									if (row.row[3] === 0) {
+										if (result2.location === undefined) {
+	                                        result2.location = {
+	                                            latitude: 0.0,
+	                                            longitude: 0.0
+	                                        };
+	                                    }
+	                                    result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
+	                                    //console.log(`DISTANCE: ${result2.distance}`);
+	                                    result2.commonTags = row.row[1];
+	                                    result2.commonCats = row.row[2];
+	                                    var now = Math.round(new Date().getTime() / 1000.0);
+	                                    result2.age = Math.round((now - result2.birthdate) / 31536000);
+	                                    result[0].age = Math.round((now - result[0].birthdate) / 31536000);
+	                                    /*console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
+	                                    console.log(`LIKES: ${result2.likes / 30}`);
+	                                    console.log(`BLOCKS: ${result2.blocks / 20}`);
+	                                    console.log(`TAGS: ${result2.commonTags.length * 10}`);
+	                                    console.log(`CATS: ${result2.commonCats.length * 5}`);
+	                                    console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`); */
+	                                    result2.rating =
+	                                        Math.round((10000 / Math.max(result2.distance, 0.1)) * (
+	                                            (result2.likes / 30) -
+	                                            (result2.blocks / 20) +
+	                                            (result2.commonTags.length * 10) +
+	                                            (result2.commonCats.length * 5) +
+	                                            (10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5))) * -1;
+	                                    //									console.log(`TOTAL: ${result2.rating}`);
+	                                    recommends.push(result2);
+									}
                                 } else {
                                     stop = true;
                                 }
