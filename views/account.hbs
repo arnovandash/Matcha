@@ -73,7 +73,7 @@
 		{{#if mine}}
 		<md-input-container>
 			<label>Birthdate</label>
-			<md-datepicker ng-model="account.birthdate"></md-datepicker>
+			<md-datepicker ng-model="account.birthdate" md-min-date="minDate" md-max-date="maxDate"></md-datepicker>
 		</md-input-container>
 		{{else}}
 		<div style="margin-bottom: 6px;">
@@ -168,26 +168,29 @@
 				<label>New password again</label>
 				<input type="password" ng-model="account.newPassword2" ng-pattern="account.newPassword">
 			</md-input-container>
-			<md-button class="md-raised md-primary" aria-label="register" ng-click="update()" ng-hide="!account.mine">Save</md-button>
+			<md-button class="md-raised md-primary" aria-label="register" ng-click="update()" ng-hide="account.mine">Save</md-button>
 		</form>
 		{{/if}}
 	</div>
 
 	{{#unless mine}}
+        <div layout="row" class="flex-wrap">
+            <label>Fame</label><md-progress-linear md-mode="determinate" value="\{{fameValue}}"></md-progress-linear>
+        </div>
 	<div layout="row" class="flex-wrap">
-		<md-button class="md-raised" aria-label="like" ng-click="like()">
+		<md-button class="md-raised" aria-label="like" ng-click="like()" ng-if="!likes.id1id2">
 			<md-icon md-font-set="material-icons">favorite</md-icon>&nbsp Like
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="unlike()">
+		<md-button class="md-raised" aria-label="like" ng-click="unlike()" ng-if="likes.id1id2">
 			<md-icon md-font-set="material-icons">favorite_border</md-icon>&nbsp Unlike
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="block()">
+		<md-button class="md-raised" aria-label="like" ng-click="block()" ng-if="!blocks.id1id2">
 			<md-icon md-font-set="material-icons">lock_outline</md-icon>&nbsp Block
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="unblock()">
+		<md-button class="md-raised" aria-label="like" ng-click="unblock()" ng-if="blocks.id1id2">
 			<md-icon md-font-set="material-icons">lock_open</md-icon>&nbsp Unblock
 		</md-button>
-		<md-button class="md-raised" aria-label="like" ng-click="chat()">
+		<md-button class="md-raised" aria-label="like" ng-click="chat()" ng-if="likes.id1id2 && likes.id2id1">
 			<md-icon md-font-set="material-icons">message</md-icon>&nbsp Chat
 		</md-button>
 	</div>

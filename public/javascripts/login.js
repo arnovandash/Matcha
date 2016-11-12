@@ -1,22 +1,28 @@
-app.controller('login__', ($http, $scope, $sessionStorage, partial, locate) => {
+app.controller('login__', ($http, $scope, $rootScope, $sessionStorage, $mdToast, partial, locate) => {
     $scope.login = () => {
         $http.post('/api/login', {
             username: $scope.login.username,
             password: $scope.login.password
         }).success((data) => {
-            console.log(data);
-            if (data == "Incorrect Username or Password" ) {
-                $scope.loginForm.$setValidity('invalid', false);
-            }else if (data == "You need to verify your email address before you can log in")
-            {
-                $scope.loginForm.$setValidity('verify', false);
-            }
-            else{
-                locate.getLocation(() => {
-                    $sessionStorage.user = data;
-                    partial.reload();
-                });
-            }
+
+			if (typeof data === 'object') {
+				locate.getLocation(() => {
+					$rootScope.cat = data.cat;
+					delete data.cat;
+		            $sessionStorage.user = data;
+					partial.reload();
+				});
+			} else {
+				$mdToast.show(
+                    $mdToast.simple()
+                    .parent(document.getElementById('toaster'))
+                    .textContent(data)
+                    .position('top right')
+                    .hideDelay(3000)
+                );
+				$sessionStorage.user = null;
+			}
+
         }).error((data) => {
             console.log(`Error ${data}`);
         });

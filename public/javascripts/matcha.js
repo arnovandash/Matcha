@@ -1,10 +1,19 @@
 app = angular.module('matcha', ['ngMaterial', 'ngMessages', 'ngRoute', 'ngStorage', 'ngFileUpload']);
 
 app.controller('matcha__', function($http, $scope, $sessionStorage, $rootScope) {
-	$rootScope.http = $http;
+	$rootScope.http = $http.pendingRequests;
     $http.post('/api/whoami')
         .success(function(data) {
-            $sessionStorage.user = data;
+			if (data === null) {
+				$sessionStorage.user = null;
+				if (window.location.pathname !== '/') {
+					window.location.replace('/');
+				}
+			} else {
+				$rootScope.cat = data.cat;
+				delete data.cat;
+	            $sessionStorage.user = data;
+			}
         })
         .error(function(data) {
             console.log(`Error: ${data}`);

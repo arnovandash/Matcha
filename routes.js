@@ -72,9 +72,9 @@ router.get('/partials/reset', function (req, res) {
     res.render('reset');
 });
 
-router.post('/api/login', function (req, res) {
-    user.login(req.body.username, req.body.password, function (result) {
-        req.session.user = (typeof result === 'object') ? result : null;
+router.post('/api/login', function(req, res) {
+    user.login(req.body.username, req.body.password, function(result) {
+        req.session.user = result;
         res.json(result);
     });
 });
@@ -84,6 +84,30 @@ router.post('/api/getChat/', function (request, response) {
     chat.getChat(request.body.to, request.body.from, function (result) {
         response.json(result);
     });
+});
+
+router.post('/api/count_likes', function (request, response) {
+    console.log(request.body);
+    sess = request.session;
+    if (sess.user === undefined || sess.user === null) {
+        response.json('You have to be logged in to view someone');
+    } else {
+        user.countLikes(request.body.id, (result) => {
+            response.json(result);
+        });
+    }
+});
+
+router.post('/api/count_blocks', function (request, response) {
+    console.log(request.body);
+    sess = request.session;
+    if (sess.user === undefined || sess.user === null) {
+        response.json('You have to be logged in to view someone');
+    } else {
+        user.countBlocks(request.body.id, (result) => {
+            response.json(result);
+        });
+    }
 });
 
 router.post('/api/whoami', function (req, res) {
@@ -239,12 +263,56 @@ router.post('/api/like', (req, res) => {
     }
 });
 
+router.post('/api/unlike', (req, res) => {
+	sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to unlike someone');
+    } else {
+        user.unlike(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
 router.post('/api/get_likes', (req, res) => {
 	sess = req.session;
 	if (sess.user === undefined || sess.user === null) {
         res.json('You have to be logged in to get likes');
     } else {
         user.getLikes(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/block', (req, res) => {
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to block someone');
+    } else {
+        user.block(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/unblock', (req, res) => {
+	sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to unblock someone');
+    } else {
+        user.unblock(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/get_blocks', (req, res) => {
+	sess = req.session;
+	if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to get blocks');
+    } else {
+        user.getBlocks(sess.user.id, req.body.id, (result) => {
             res.json(result);
         });
     }
