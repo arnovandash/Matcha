@@ -266,6 +266,17 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
         window.location.replace(`/chat/${$routeParams.id}`);
     };
 
+    $scope.deletePic = function (img_num) {
+         {
+            $http.post('/api/del_img', {
+                img_num: img_num,
+            }).success((result) => {
+                console.log(`Image deleted: ${result}`);;
+            });
+        }
+    }
+
+
     $scope.uploadPic = function (file) {
         Upload.base64DataUrl(file).then(function (image) {
             imgPost(image, function (result) {
