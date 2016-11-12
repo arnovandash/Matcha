@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <md-toolbar>
-	<div class="md-toolbar-tools">
-		<a href="/">
-			<img src="/images/matcha.png" class="home-icon" />
-		</a>
-		<span flex></span>
-		{{#if username}}
-		<div layout="row" ng-controller="logout__">
-			<md-button ng-click="go('/account')"><h3>{{ username }}</h3></md-button>
-			<md-button class="logout-button" aria-label="logout" ng-click="logout()">
-				<md-icon md-font-set="material-icons">power_setting_new</md-icon>
-			</md-button>
-		</div>
-		{{/if}}
-	</div>
+    <div class="md-toolbar-tools">
+        <a href="/">
+            <img src="/images/matcha.png" class="home-icon"/>
+        </a>
+        <span flex></span>
+        {{#if username}}
+            <div layout="row" ng-controller="logout__">
+                <md-button ng-href="/account">{{ username }}</md-button>
+                <md-button class="logout-button" aria-label="logout" ng-click="logout()">
+                    <md-icon md-font-set="material-icons">power_setting_new</md-icon>
+                </md-button>
+            </div>
+        {{/if}}
+    </div>
 </md-toolbar>

@@ -23,6 +23,14 @@
 
 	<div id="toaster" class="toaster"></div>
 
+	<div id="waiting" class="waiting" ng-if="http.length > 0">
+		<md-progress-circular ng-if="!cat" class="md-primary md-hue-1" md-mode="indeterminate" md-diameter="70"></md-progress-circular>
+		<div ng-if="cat">
+			<img src="images/loading.gif" />
+			<h4>Loading...</h4>
+		</div>
+	</div>
+
 	{{> scripts}}
 </body>
 

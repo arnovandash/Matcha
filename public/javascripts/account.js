@@ -1,50 +1,116 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
-    if ($routeParams.id === undefined && $sessionStorage.user.id === undefined) {
-        $http.post('/api/whoami')
-            .success(function(data) {
-                console.log(`WHOAMI: ${data}`);
-                $sessionStorage.user = data;
-                getUser();
-            })
-            .error(function(data) {
-                console.log(`Error: ${data}`);
-            });
-    } else {
-        getUser();
-    }
-
-    $scope.account = {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope) {
+	$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+	$scope.account = {
         selectedTags: [],
         tags: [],
         types: [],
         selectedTag: null,
         searchText: null,
     };
-    loadTags();
 
-    function getUser() {
-        $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
-        $http.post('/api/get_user', {
+    $scope.myDate = new Date();
+    var ctrl = this;
+
+    $scope.minDate = new Date(
+        $scope.myDate.getFullYear() - 100,
+        $scope.myDate.getMonth(),
+        $scope.myDate.getDate());
+
+    $scope.maxDate = new Date(
+        $scope.myDate.getFullYear() - 18,
+        $scope.myDate.getMonth(),
+        $scope.myDate.getDate());
+    getUser();
+    getLikes();
+    getBlocks();
+    setFame();
+
+function setFame(){
+    var like;
+    var dislike;
+    $http.post('/api/count_likes', {
+        id: $scope.userId
+    })
+        .success((data) => {
+            console.log(data);
+            like = data;
+            if (like === 0){$scope.fameValue = 0}
+            else {
+                $http.post('/api/count_blocks', {
+                    id: $scope.userId
+                })
+                    .success((data) => {
+                        console.log(data);
+                        dislike = data;
+                        $scope.fameValue = Math.ceil((like / (dislike + like)) * 100);
+                    })
+                    .error((data) => {
+                        console.log(`Error: ${data}`);
+                    });
+            }
+        })
+        .error((data) => {
+            console.log(`Error: ${data}`);
+        });
+}
+
+    function getLikes() {
+        $http.post('/api/get_likes', {
                 id: $scope.userId
             })
-            .success(function(data) {
+            .success((data) => {
                 console.log(data);
+                $scope.likes = data;
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    }
+
+    function getBlocks() {
+        $http.post('/api/get_blocks', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                console.log(data);
+                $scope.blocks = data;
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    }
+
+    function getUser() {
+        $http.post('/api/get_user', {
+            id: $scope.userId
+        })
+            .success(function(data) {
+                //                console.log(data);
                 if (data) {
-                    var account = $scope.account;
-                    account.firstname = data.firstname;
-                    account.lastname = data.lastname;
-                    account.username = data.username;
+                    data.birthdate = new Date(data.birthdate * 1000);
+                    var monthNames = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
+                    $scope.account = {
+                        firstname: data.firstname,
+                        lastname: data.lastname,
+                        username: data.username,
+                        email: data.email,
+                        bio: (data.bio !== undefined) ? data.bio : null,
+                        birthdate: data.birthdate,
+                        birthdateDateString: `${data.birthdate.getUTCDate()} ${monthNames[data.birthdate.getUTCMonth()]} ${data.birthdate.getUTCFullYear()}`,
+                        gender: data.gender,
+                        interestedMale: data.seeking.male,
+                        interestedFemale: data.seeking.female,
+                        interestedOther: data.seeking.other
+                    };
                     $scope.originalUsername = data.username;
-                    account.email = data.email;
-                    account.bio = (data.bio !== undefined) ? data.bio : null;
-                    account.birthdate = new Date(data.birthdate * 1000);
-                    account.gender = data.gender;
-                    account.interestedMale = data.seeking.male;
-                    account.interestedFemale = data.seeking.female;
-                    account.interestedOther = data.seeking.other;
                 } else {
                     window.location.replace('/');
                 }
+                loadTags();
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
@@ -65,8 +131,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 other: account.interestedOther
             },
             birthdate: {
-                day: account.birthdate.getUTCDate() + 1,
-                month: account.birthdate.getUTCMonth() + 1,
+                day: account.birthdate.getUTCDate(),
+                month: account.birthdate.getUTCMonth(),
                 year: account.birthdate.getUTCFullYear()
             },
             tags: account.selectedTags.map(function(tag) {
@@ -83,8 +149,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
             send.gender = 'O';
         }
         if (!send.seeking.male && !send.seeking.female && !send.seeking.other) {
-            console.log("Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this");
-            console.log("Damn Angus we were just joking about adding this!");
+            //console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
+            //console.log(`Damn Angus we were just joking about adding this!`);
             send.seeking = {
                 male: true,
                 female: true,
@@ -108,24 +174,23 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         console.log(send);
         console.log($scope.$error);
         $http.post('/api/modify', {
-                update: send
-            })
+            update: send
+        })
             .success(function(data) {
-                console.log(data);
-				var message = '';
-				if (data === true) {
-					message = 'Profile updated successfully!';
-				} else {
-					message = data;
-				}
-				$mdToast.show(
+                //                console.log(data);
+                var message = '';
+                if (data === true) {
+                    message = 'Profile updated successfully!';
+                } else {
+                    message = data;
+                }
+                $mdToast.show(
                     $mdToast.simple()
-					.parent(document.getElementById('toaster'))
-                    .textContent(message)
-                    .position('top right')
-                    .hideDelay(3000)
+                        .parent(document.getElementById('toaster'))
+                        .textContent(message)
+                        .position('top right')
+                        .hideDelay(3000)
                 );
-
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
@@ -133,7 +198,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     };
 
     $scope.transformChip = function(chip, ev) {
-        console.log($scope.account.selectedTags);
+        //        console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -193,8 +258,8 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
 
     function loadTags() {
         $http.post('/api/get_tags', {
-                id: $scope.userId
-            })
+            id: $scope.userId
+        })
             .success(function(data) {
                 $scope.account.tags = [];
                 if (typeof data === 'object') {
@@ -219,4 +284,102 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
                 $scope.account.tags = [];
             });
     }
+
+    $scope.like = () => {
+        $http.post('/api/like', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You liked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.likes.id1id2 = true;
+                    setFame();
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
+
+    $scope.chat = () => {
+        window.location.replace(`/chat/${$routeParams.id}`);
+    };
+
+    $scope.unlike = () => {
+        $http.post('/api/unlike', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unliked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.likes.id1id2 = false;
+                    setFame();
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
+    };
+
+    $scope.block = () => {
+        $http.post('/api/block', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You blocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = true;
+                    setFame();
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
+
+    $scope.unblock = () => {
+        $http.post('/api/unblock', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unblocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = false;
+                    setFame();
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
+    };
 });

@@ -13,6 +13,11 @@ a {
     text-decoration: inherit;
 }
 
+.flex-wrap {
+	display: flex;
+	flex-wrap: wrap;
+}
+
 .login-form {
     padding: 50px;
     border-radius: 5px;
@@ -111,8 +116,10 @@ a {
     min-width: 3rem;
     padding: 0 6px;
     text-align: center;
+	vertical-align: middle;
     float: right;
     margin-left: 3px;
+	line-height: 1.2rem;
 }
 
 .blue {
@@ -134,25 +141,30 @@ a {
 }
 
 .thumb {
-    width: 48px;
-    height: 48px;
-    float: none;
-    position: relative;
-    top: 7px;
+	width: 48px;
+	height: 48px;
+	float: none;
+	position: relative;
+	top: 7px;
 }
 
-form .progress {
-    line-height: 15px;
+.waiting {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 10001;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgb(64, 64, 64);
+	background-color: rgba(64, 64, 64, 0.25);
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-.progress {
-    display: inline-block;
-    width: 100px;
-    border: 3px groove #CCC;
-}
-
-.progress div {
-    font-size: smaller;
-    background: orange;
-    width: 0;
+.waiting div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
 }
