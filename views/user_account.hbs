@@ -1,26 +1,25 @@
-<!DOCTYPE html>
-{{> toolbar}}
+<!DOCTYPE html> {{> toolbar}}
 
 <md-content class="profile-page" layout-padding layout-wrap layout="column">
-	<h2>{{ username }}</h2>
-	<div layout="row">
-		<div class="profile-pic-main">
-			<img ng-if="account.profilePic" src="images/{{person.profilePic}}.png" />
-			<img ng-if="!account.profilePic && account.gender == 'M'" src="images/no_pic_male_black_512.png" />
-			<img ng-if="!account.profilePic && account.gender == 'F'" src="images/no_pic_female_black_512.png" />
-			<img ng-if="!account.profilePic && account.gender == 'O'" src="images/no_pic_other_black_512.png" />
-		</div>
-		<div layout="column">
-			<md-input-container>
-				<label>Firstname</label>
-				<input ng-model="account.firstname" {{#unless mine}} disabled {{/unless}} />
-			</md-input-container>
-			<md-input-container>
-				<label>Lastname</label>
-				<input ng-model="account.lastname" {{#unless mine}} disabled {{/unless}} />
-			</md-input-container>
-		</div>
-	</div>
+    <h2>{{ username }}</h2>
+    <div layout="row">
+        <div class="profile-pic-main">
+            <img ng-if="account.profilePic" src="images/{{person.profilePic}}.png"/>
+            <img ng-if="!account.profilePic && account.gender == 'M'" src="images/no_pic_male_black_512.png"/>
+            <img ng-if="!account.profilePic && account.gender == 'F'" src="images/no_pic_female_black_512.png"/>
+            <img ng-if="!account.profilePic && account.gender == 'O'" src="images/no_pic_other_black_512.png"/>
+        </div>
+        <div layout="column">
+            <md-input-container>
+                <label>Firstname</label>
+                <input ng-model="account.firstname" {{#unless mine}} disabled {{/unless}} />
+            </md-input-container>
+            <md-input-container>
+                <label>Lastname</label>
+                <input ng-model="account.lastname" {{#unless mine}} disabled {{/unless}} />
+            </md-input-container>
+        </div>
+    </div>
     <div>
         <!--
         <form myForm="upload" ng_controller="upload__">
@@ -35,96 +34,113 @@
 -->
 
         <form myForm="upload" ng_controller="upload__">
-        <input type="file" ngf-select ng-model="picFile" name="file"
-               accept="image/*" ngf-max-size="1MB" required
-               ngf-model-invalid="errorFile">
-        <i ng-show="myForm.file.$error.required">*required</i><br>
-        <i ng-show="myForm.file.$error.maxSize">File too large
-            \{{errorFile.size / 1000000|number:1}}MB: max 1MB</i>
-        <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
+            <input type="file" ngf-select ng-model="picFile" name="file" accept="image/*" ngf-max-size="1MB" required
+                   ngf-model-invalid="errorFile">
+            <i ng-show="myForm.file.$error.required">*required</i><br>
+            <i ng-show="myForm.file.$error.maxSize">File too large
+                \{{errorFile.size / 1000000|number:1}}MB: max 1MB</i>
+            <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" class="thumb">
             <br>
-            <md-button class="md-raised md-primary"
-                       ng-click="picFile = null" ng-show="picFile">Remove</md-button>
-            <md-button class="md-raised md-primary"
-                       ng-show="picFile" ng-click="uploadPic(picFile)">Submit</md-button>
-        <span class="progress" ng-show="picFile.progress >= 0">
-        <div style="width:\{{picFile.progress}}%"
-             ng-bind="picFile.progress + '%'"></div>
+            <md-button class="md-raised md-primary" ng-click="picFile = null" ng-show="picFile">Remove</md-button>
+            <md-button class="md-raised md-primary" ng-show="picFile" ng-click="uploadPic(picFile)">Submit</md-button>
+            <span class="progress" ng-show="picFile.progress >= 0">
+        <!--<div style="width:\{{picFile.progress}}%" ng-bind="picFile.progress + '%'">
+        </div>-->
       </span>
-        <span ng-show="picFile.result">Upload Successful</span>
-        <span class="err" ng-show="errorMsg">\{{errorMsg}}</span>
+            <span ng-show="picFile.result">Upload Successful</span>
+            <span class="err" ng-show="errorMsg">\{{errorMsg}}</span>
         </form>
 
     </div>
-	<div layout="row" layout-wrap>
-		<md-input-container>
-			<label>Email address</label>
-			<input ng-model="account.email" {{#unless mine}} disabled {{/unless}} />
-		</md-input-container>
-	</div>
-	<div layout="column">
-		<md-input-container>
-			<label>Bio</label>
-			<textarea ng-model="account.bio" md-maxlength="150" maxlength="150" {{#unless mine}} disabled {{/unless}}></textarea>
-		</md-input-container>
-		<md-input-container>
-			<label>Birthdate</label>
-			<md-datepicker ng-model="account.birthdate" {{#unless mine}} disabled {{/unless}}></md-datepicker>
-		</md-input-container>
-		<div>
-			<label>Gender</label>
-			<md-radio-group ng-model="account.gender" {{#unless mine}} disabled {{/unless}}>
-				<md-radio-button value="M">Male</md-radio-button>
-				<md-radio-button value="F">Female</md-radio-button>
-				<md-radio-button value="O">Uncategorised mail</md-radio-button>
-			</md-radio-group>
-		</div>
-		<div>
-			<label>Looking for</label>
-			<div layout="row">
-				<md-checkbox ng-model="account.interestedMale" {{#unless mine}} disabled {{/unless}}>Male</md-checkbox>
-				<md-checkbox ng-model="account.interestedFemale" {{#unless mine}} disabled {{/unless}}>Female</md-checkbox>
-				<md-checkbox ng-model="account.interestedOther" {{#unless mine}} disabled {{/unless}}>Uncategorised mail</md-checkbox>
-			</div>
-		</div>
+    <div layout="row" layout-wrap>
+        <md-input-container>
+            <label>Email address</label>
+            <input ng-model="account.email" {{#unless mine}} disabled {{/unless}} />
+        </md-input-container>
+    </div>
+    <div layout="column">
+        <md-input-container>
+            <label>Bio</label>
+            <textarea ng-model="account.bio" md-maxlength="150" maxlength="150" {{#unless mine}}
+                      disabled {{/unless}}></textarea>
+        </md-input-container>
+        <md-input-container>
+            <label>Birthdate</label>
+            <md-datepicker ng-model="account.birthdate" {{#unless mine}} disabled {{/unless}}></md-datepicker>
+        </md-input-container>
+        <div>
+            <label>Gender</label>
+            <md-radio-group ng-model="account.gender" {{#unless mine}} disabled {{/unless}}>
+                <md-radio-button value="M">Male</md-radio-button>
+                <md-radio-button value="F">Female</md-radio-button>
+                <md-radio-button value="O">Uncategorised mail</md-radio-button>
+            </md-radio-group>
+        </div>
+        <div>
+            <label>Looking for</label>
+            <div layout="row">
+                <md-checkbox ng-model="account.interestedMale" {{#unless mine}} disabled {{/unless}}>Male</md-checkbox>
+                <md-checkbox ng-model="account.interestedFemale" {{#unless mine}} disabled {{/unless}}>Female
+                </md-checkbox>
+                <md-checkbox ng-model="account.interestedOther" {{#unless mine}} disabled {{/unless}}>Uncategorised mail
+                </md-checkbox>
+            </div>
+        </div>
 
-		<div layout="row">
-			<md-input-container flex>
-				<label>Intrests</label>
-				<md-chips ng-model="account.selectedTags" md-autocomplete-snap md-transform-chip="transformChip($chip, $event)" md-require-match="false" id="chips">
-					<md-autocomplete md-selected-item="account.selectedTag" md-search-text="account.searchText" md-items="item in querySearch(account.searchText)" md-item-text="item.name" {{#if mine}} placeholder="Search for a tag" {{/if}} {{#unless mine}} disabled {{/unless}}>
-						<span md-highlight-text="account.searchText">\{{item.name}} :: \{{item.type}}</span>
-					</md-autocomplete>
-					<md-chip-template>
-						<span>
-		          <b>\{{$chip.name}}</b>
-		          <em>(\{{$chip.type}})</em>
-		        </span>
-					</md-chip-template>
-				</md-chips>
-			</md-input-container>
-		</div>
+        {{#if mine}}
+            <md-input-container flex>
+                <label>Intrests</label>
+                <md-chips ng-model="account.selectedTags" md-autocomplete-snap
+                          md-transform-chip="transformChip($chip, $event)"
+                          md-require-match="false" id="chips">
+                    <md-autocomplete md-selected-item="account.selectedTag" md-search-text="account.searchText"
+                                     md-items="item in querySearch(account.searchText)" md-item-text="item.name"
+                                     `placeholder="Search for a tag">
+                        <span md-highlight-text="account.searchText">\{{item.name}} :: \{{item.type}}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+					<span>
+						<b>\{{$chip.name}}</b>
+						<em>(\{{$chip.type}})</em>
+					</span>
+                    </md-chip-template>
+                </md-chips>
+            </md-input-container>
+        {{else}}
+            <md-chips>
+                <md-chip ng-repeat="account.selectedTags as chip">
+				<span>
+					<b>\{{chip.name}}</b>
+					<em>(\{{chip.type}})</em>
+				</span>
+                </md-chip>
+            </md-chips>
+        {{/if}}
 
-		<form name="updateChanges" flex layout="column">
-			<md-input-container>
-				<label>Username</label>
-				<input ng-model="account.username" valid-username="" required name="userName" {{#unless mine}} disabled {{/unless}} />
-			</md-input-container>
-			{{#if mine}}
-			<md-input-container>
-				<label>Old password</label>
-				<input type="password" ng-model="account.oldPassword" required>
-			</md-input-container>
-			<md-input-container>
-				<label>New password</label>
-				<input type="password" ng-model="account.newPassword">
-			</md-input-container>
-			<md-input-container>
-				<label>New password again</label>
-				<input type="password" ng-model="account.newPassword2" ng-pattern="account.newPassword">
-			</md-input-container>
-			<md-button class="md-raised md-primary" aria-label="update" ng-click="update()" ng-hide="!account.mine">Save</md-button>
-			{{/if}}
-		</form>
-	</div>
+        <form name="updateChanges" flex layout="column">
+            <md-input-container>
+                <label>Username</label>
+                <input ng-model="account.username" valid-username="" required name="userName" {{#unless mine}}
+                       disabled {{/unless}} />
+            </md-input-container>
+            {{#if mine}}
+                <md-input-container>
+                    <label>Old password</label>
+                    <input type="password" ng-model="account.oldPassword" required>
+                </md-input-container>
+                <md-input-container>
+                    <label>New password</label>
+                    <input type="password" ng-model="account.newPassword">
+                </md-input-container>
+                <md-input-container>
+                    <label>New password again</label>
+                    <input type="password" ng-model="account.newPassword2" ng-pattern="account.newPassword">
+                </md-input-container>
+                <md-button class="md-raised md-primary" aria-label="register" ng-click="update()"
+                           ng-hide="\{{!account.mine}}">
+                    Save
+                </md-button>
+            {{/if}}
+        </form>
+    </div>
 </md-content>

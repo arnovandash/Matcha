@@ -3,7 +3,7 @@
 <md-content layout-padding layout-wrap layout="column">
     <h3>Login</h3>
     <div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
-        <form layout="row" layout-sm="column" ng-controller="login__">
+        <form layout="row" layout-sm="column" ng-controller="login__" name="loginForm">
             <md-input-container>
                 <label>Username</label>
                 <input type="text" ng-model="login.username">
@@ -11,6 +11,14 @@
             <md-input-container>
                 <label>Password</label>
                 <input type="password" ng-model="login.password">
+                <div ng-show="loginForm.$error.invalid">invalid username or password.</div>
+                <div ng-show="loginForm.$error.verify">You need to confirm your acount from the email we sent you</div>
+                <!--<div ng-messages="loginForm.$error" role="alert">
+                    stuff
+                    <div ng-message-exp="'invalid'">
+                        invalid username or password.
+                    </div>
+                </div>-->
             </md-input-container>
             <md-button type="submit" class="md-raised md-primary" style="margin: auto auto" aria-label="login"
                        ng-click="login()">Login
@@ -25,7 +33,7 @@
 <md-content layout-padding layout-wrap layout="column">
     <h3>Register</h3>
     <div layout="column" class="login-form" md-theme="loginDark" md-colors="{backgroundColor: 'background'}">
-        <form layout-wrap layout="column" ng-controller="register__" name="registerForm">
+        <form layout-wrap layout="column" ng-controller="register__" name="registerForm" id="registerForm">
             <md-input-container>
                 <label>Firstname</label>
                 <input type="text" ng-model="reg.firstname" required>
@@ -36,7 +44,8 @@
             </md-input-container>
             <md-input-container>
                 <label>Email</label>
-                <input type="email" ng-model="reg.email" required name="email" valid-email="" ng-model-options="{ updateOn: 'blur' }">
+                <input type="email" ng-model="reg.email" required name="email" valid-email=""
+                       ng-model-options="{ updateOn: 'blur' }">
                 <div ng-messages="registerForm.email.$error" role="alert">
                     <div ng-message-exp="'required'">
                         Your need an email address.
@@ -44,9 +53,9 @@
                     <div ng-message-exp="'freeEmail'">
                         This Email is already in use.
                     </div>
-					<div ng-message-exp="'email'">
-						Not a valid email address.
-					</div>
+                    <div ng-message-exp="'email'">
+                        Not a valid email address.
+                    </div>
                 </div>
             </md-input-container>
             <md-input-container>

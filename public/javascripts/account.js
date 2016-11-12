@@ -1,51 +1,63 @@
 app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
-    if ($routeParams.id === undefined && $sessionStorage.user.id === undefined) {
-        $http.post('/api/whoami')
-            .success(function(data) {
-                console.log(`WHOAMI: ${data}`);
-                $sessionStorage.user = data;
-                getUser();
-            })
-            .error(function(data) {
-                console.log(`Error: ${data}`);
-            });
-    } else {
-        getUser();
-    }
-
     $scope.account = {
         selectedTags: [],
         tags: [],
         types: [],
         selectedTag: null,
         searchText: null,
-        mine: $routeParams.mine,
     };
-    loadTags();
-console.log($scope.account);
+
+    if ($sessionStorage.user === null) {
+        $http.post('/api/whoami')
+            .success(function(data) {
+                console.log(data);
+                if (data === null) {
+                    window.location.replace('/');
+                } else {
+                    $sessionStorage.user = data;
+                    getUser();
+                }
+            })
+            .error(function(data) {
+                console.log(`Error: ${data}`);
+            });
+    } else {
+        console.log('over here!');
+        getUser();
+    }
+
     function getUser() {
         $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
-                id: $scope.userId
-            })
+            id: $scope.userId
+        })
             .success(function(data) {
                 console.log(data);
                 if (data) {
-                    var account = $scope.account;
-                    account.firstname = data.firstname;
-                    account.lastname = data.lastname;
-                    account.username = data.username;
+                    data.birthdate = new Date(data.birthdate * 1000);
+                    var monthNames = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
+                    $scope.account = {
+                        firstname: data.firstname,
+                        lastname: data.lastname,
+                        username: data.username,
+                        email: data.email,
+                        bio: (data.bio !== undefined) ? data.bio : null,
+                        birthdate: data.birthdate,
+                        birthdateDateString: `${data.birthdate.getUTCDate()} ${monthNames[data.birthdate.getUTCMonth()]} ${data.birthdate.getUTCFullYear()}`,
+                        gender: data.gender,
+                        interestedMale: data.seeking.male,
+                        interestedFemale: data.seeking.female,
+                        interestedOther: data.seeking.other
+                    };
                     $scope.originalUsername = data.username;
-                    account.email = data.email;
-                    account.bio = (data.bio !== undefined) ? data.bio : null;
-                    account.birthdate = new Date(data.birthdate * 1000);
-                    account.gender = data.gender;
-                    account.interestedMale = data.seeking.male;
-                    account.interestedFemale = data.seeking.female;
-                    account.interestedOther = data.seeking.other;
                 } else {
                     window.location.replace('/');
                 }
+                loadTags();
             })
             .error(function(data) {
                 console.log(`Error: ${data}`);
@@ -84,8 +96,8 @@ console.log($scope.account);
             send.gender = 'O';
         }
         if (!send.seeking.male && !send.seeking.female && !send.seeking.other) {
-            console.log("Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this");
-            console.log("Damn Angus we were just joking about adding this!");
+            console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
+            console.log(`Damn Angus we were just joking about adding this!`);
             send.seeking = {
                 male: true,
                 female: true,
@@ -109,22 +121,22 @@ console.log($scope.account);
         console.log(send);
         console.log($scope.$error);
         $http.post('/api/modify', {
-                update: send
-            })
+            update: send
+        })
             .success(function(data) {
                 console.log(data);
-				var message = '';
-				if (data === true) {
-					message = 'Profile updated successfully!';
-				} else {
-					message = data;
-				}
-				$mdToast.show(
+                var message = '';
+                if (data === true) {
+                    message = 'Profile updated successfully!';
+                } else {
+                    message = data;
+                }
+                $mdToast.show(
                     $mdToast.simple()
-					.parent(document.getElementById('toaster'))
-                    .textContent(message)
-                    .position('top right')
-                    .hideDelay(4000)
+                        .parent(document.getElementById('toaster'))
+                        .textContent(message)
+                        .position('top right')
+                        .hideDelay(3000)
                 );
 
             })
@@ -194,8 +206,8 @@ console.log($scope.account);
 
     function loadTags() {
         $http.post('/api/get_tags', {
-                id: $scope.userId
-            })
+            id: $scope.userId
+        })
             .success(function(data) {
                 $scope.account.tags = [];
                 if (typeof data === 'object') {
@@ -220,4 +232,24 @@ console.log($scope.account);
                 $scope.account.tags = [];
             });
     }
+
+    $scope.like = () => {
+        $http.post('/api/like', {
+            id: $routeParams.id
+        })
+            .success((data) => {
+                if (data === true) {
+                    console.log(`You liked ${$scope.account.username}`);
+                } else {
+                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
+
+    $scope.chat = () => {
+        window.location.replace(`/chat/${$routeParams.id}`);
+    };
 });

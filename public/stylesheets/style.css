@@ -111,8 +111,10 @@ a {
     min-width: 3rem;
     padding: 0 6px;
     text-align: center;
+	vertical-align: middle;
     float: right;
     margin-left: 3px;
+	line-height: 1.2rem;
 }
 
 .blue {
