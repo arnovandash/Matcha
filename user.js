@@ -628,15 +628,6 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
-<<<<<<< HEAD
-	var x1 = pos1[0] * Math.PI / 180;
-	var y1 = pos1[1] * Math.PI / 180;
-	var x2 = pos2[0] * Math.PI / 180;
-	var y2 = pos2[1] * Math.PI / 180;
-	var x = (y2-y1) * Math.cos((x1+x2)/2);
-	var y = (y2-y1);
-	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
-=======
 	var toRadians = Math.PI / 180;
 	var x1 = pos1[0] * toRadians;
 	var y1 = pos1[1] * toRadians;
@@ -645,7 +636,6 @@ function getDistance(pos1, pos2) {
 	var x = (y2-y1) * Math.cos((x1+x2)/2);
 	var y = (y2-y1);
 	return (Math.sqrt(x*x + y*y) * 6371000); // 6371000 is the radius of the Earth in meters
->>>>>>> master
 }
 
 /************************************************************
@@ -662,18 +652,6 @@ function like(id1, id2, callback) {
 	})
 	.exec(server)
 	.then((result) => {
-<<<<<<< HEAD
-		console.log(result);
-		find(id2, (result) => {
-			if (typeof result === 'object') {
-				var send = `<body>
-						<h2>You got a like on your Matcha profile</h2>
-						<h4>Please click the link below to view the person's account who liked you</h4>
-						<a href="localhost:8080/account/${id1}">View</a>
-					</body>`;
-				email.send(result.email, 'You got a new like', send, (result) => {
-					callback(result);
-=======
 		find(id2, function(result2) {
 			console.log(require('util').inspect(result, { depth: null }));
 			if (typeof result2 !== false && result2.email !== undefined/* && typeof profilePic === 'string'*/) {
@@ -699,7 +677,6 @@ function like(id1, id2, callback) {
 
 				email.send(result2.email, subject, send, (result3) => {
 					callback(result3);
->>>>>>> master
 				});
 			} else {
 				callback('Cannot find user id');
