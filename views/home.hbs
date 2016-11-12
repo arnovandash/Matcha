@@ -5,10 +5,13 @@
 
 	{{{{angular}}}}
 	<div class="recomend-container">
-		<article id="5820b638a3c99a7e6a7955f5" ng-repeat="person in recomendations" class="recomend" style="background-color: rgb(103,58,183); order: {{person.rating}}">
+		<article ng-repeat="person in recomendations" id="{{person.id}}" class="recomend" style="background-color: rgb(103,58,183); order: {{-1 * person.rating}}">
 			<header>
-				<span><strong>{{person.username}}</strong> ({{person.firstname}} {{person.lastname}})</span>
+				<a ng-href="/account/{{person.id}}">
+					<span><strong>{{person.username}}</strong> ({{person.firstname}} {{person.lastname}})</span>
+				</a>
 			</header>
+
 			<img ng-if="person.profilePic" src="images/{{person.profilePic}}.png" />
 			<img ng-if="!person.profilePic && person.gender == 'M'" src="images/no_pic_male_black_512.png" />
 			<img ng-if="!person.profilePic && person.gender == 'F'" src="images/no_pic_female_black_512.png" />

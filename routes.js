@@ -16,33 +16,32 @@ router.get('/partials/home', function(req, res) {
 });
 
 router.get('/partials/account/:id?', function(req, res) {
-    console.log("going to account");
-    console.log(req.params.id);
-	sess = req.session;
-    if (req.params.id === undefined) {
-        if (sess.user === undefined || sess.user === null) {
-            res.send("Error: You need to be logged in");
-        } else {
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json("You need to be logged in");
+    } else {
+        if (req.params.id === undefined || req.params.id === sess.user.id) {
             user.find(sess.user.id, function(result) {
                 result.mine = true;
-				result.username = sess.user.username;
-				result.id = sess.user.id;
-                res.render('user_account', result);
+                result.username = sess.user.username;
+                result.id = sess.user.id;
+                res.render('other_account', result);
             });
-        }
-    } else {
-        if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
-            res.send("Error: no user of that id");
         } else {
-            user.find(req.params.id, function(result) {
-                if (result) {
-                    result.mine = false;
-					result.user = sess.user;
-                    res.render('user_account', result);
-                } else {
-                    res.json('no user of that id');
-                }
-            });
+            if (!req.params.id.match(/[0-9A-Fa-f]{24}/)) {
+                res.send("Error: no user of that id");
+            } else {
+                user.find(req.params.id, function(result) {
+                    if (result !== false && result.email !== undefined) {
+                        result.mine = false;
+                        result.username = (sess.user !== undefined) ? sess.user.username : null;
+                        result.id = (sess.user !== undefined) ? sess.user.id : null;
+                        res.render('other_account', result);
+                    } else {
+                        res.json('no user of that id');
+                    }
+                });
+            }
         }
     }
 });
@@ -75,7 +74,7 @@ router.post('/api/login', function(req, res) {
 });
 
 router.post('/api/whoami', function(req, res) {
-    res.json(req.session.user);
+    res.json((typeof req.session.user === 'object') ? req.session.user : null);
 });
 
 router.post('/api/logout', function(req, res) {
@@ -157,18 +156,18 @@ router.post('/api/reset', function(req, res) {
 
 router.post('/api/set_location', function(req, res) {
     sess = req.session;
-	if (sess.user !== undefined && sess.user !== null) {
-		var r = req.body;
-	    var location = {
-	        latitude: r.latitude,
-	        longitude: r.longitude
-	    };
-	    user.setLocation(location, sess.user.username, function(result) {
-	        res.json(result);
-	    });
-	} else {
-		res.json(false);
-	}
+    if (sess.user !== undefined && sess.user !== null) {
+        var r = req.body;
+        var location = {
+            latitude: r.latitude,
+            longitude: r.longitude
+        };
+        user.setLocation(location, sess.user.username, function(result) {
+            res.json(result);
+        });
+    } else {
+        res.json(false);
+    }
 });
 
 router.post('/api/get_user', function(req, res) {
@@ -200,20 +199,31 @@ router.post('/api/modify', function(req, res) {
 });
 
 router.post('/api/get_tags', function(req, res) {
-	user.getTags(req.body.id, function(result) {
-		res.json(result);
-	});
+    user.getTags(req.body.id, function(result) {
+        res.json(result);
+    });
 });
 
 router.post('/api/get_recomendations', function(req, res) {
-	sess = req.session;
-	if (sess.user === undefined || sess.user === null) {
-		res.json('you have to log in to get recomendations');
-	} else {
-		user.getRecomendations(sess.user.id, function(result) {
-			res.json(result);
-		});
-	}
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('you have to log in to get recomendations');
+    } else {
+        user.getRecomendations(sess.user.id, function(result) {
+            res.json(result);
+        });
+    }
+});
+
+router.post('/api/like', (req, res) => {
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to like someone');
+    } else {
+        user.like(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
 });
 
 /********************************************************

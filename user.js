@@ -1,5 +1,7 @@
 module.exports = {
-    add: add,
+	imgUpload: imgUpload,
+    imgPull: imgPull,
+	add: add,
     modify: modify,
     listAll: users,
     login: login,
@@ -14,8 +16,7 @@ module.exports = {
     getTags: getTags,
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
-    imgUpload: imgUpload,
-    imgPull: imgPull
+	like: like
 };
 
 var apoc = require('apoc');
@@ -50,8 +51,7 @@ function testInput(input, callback) {
         typeof input.seeking.female !== 'boolean' ||
         typeof input.seeking.other !== 'boolean') {
         callback('field of incorrect type');
-        console.log('Input error');
-        console.log(input);
+		console.log(require('util').inspect(`Input error: ${input}`, { depth: null }));
         return true;
     }
     return false;
@@ -239,9 +239,6 @@ function modify(update, callback) {
                         })
                         .exec(server)
                         .then(function(result2) {
-                            console.log(require('util').inspect(result2, {
-                                depth: null
-                            }));
                             callback(true);
                             return false;
                         }, function(fail2) {
@@ -282,7 +279,7 @@ function users() {
  **************************************************************************************/
 function login(username, password, callback) {
     mongo.find('users', {
-        username: new RegExp(username, 'i')
+        username: new RegExp(`^${username}$`, 'i')
     }, function(result) {
         if (result.length === 1) {
             if (result[0].token.email === null) {
@@ -314,7 +311,8 @@ function find(id, callback) {
     mongo.find('users', {
         _id: new ObjectId(id)
     }, function(result) {
-        if (result.length === 1) {
+		result = result[0];
+        if (result._id !== undefined) {
             callback({
                 id: result._id,
                 username: result.username,
@@ -368,7 +366,6 @@ function get(id, callback) {
                                 user.seeking.other = true;
                         }
                     });
-					console.log(`USER: ${util.inspect(user, {depth: null})}`);
                     callback(user);
                 }, function(fail) {
                     console.log(fail);
@@ -506,7 +503,7 @@ function getTags(id, callback) {
     if (id === undefined || id === null) {
         id = '123abc'; // ID that does not exist
     }
-    apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) WITH COLLECT(m) AS m MATCH (t:Tag) RETURN COLLECT(t), m", {}, {
+    apoc.query("MATCH (:Person {id: '`id`'})-[:TAG]->(m:Tag) OPTIONAL MATCH (t:Tag) RETURN COLLECT(DISTINCT t), COLLECT(DISTINCT m)", {}, {
             id: id
         })
         .exec(server)
@@ -574,13 +571,31 @@ function getRecomendations(id, callback) {
 											longitude: 0.0
 										};
 									}
+<<<<<<< HEAD
 									result2.distance = getDistance([lat, long], result2.location);
+=======
+									result2.distance = getDistance([lat, long], [result2.location.latitude, result2.location.longitude]);
+									console.log(`DISTANCE: ${result2.distance}`);
+>>>>>>> master
 									result2.commonTags = row.row[1];
 									result2.commonCats = row.row[2];
 									var now = Math.round(new Date().getTime()/1000.0);
 									result2.age = Math.round((now - result2.birthdate) / 31536000);
 									result[0].age = Math.round((now - result[0].birthdate) / 31536000);
-									result2.rating = Math.round((5000 / (result2.distance + 0.01)) + (result2.likes / 3) - (result2.blocks) + (result2.commonTags.length * 10) + (result2.commonCats.length * 3) - (Math.abs((result[0].age / 2 + 7) - result2.age) * 100)) * -1;
+									console.log(`DISTANCE: ${10000 / Math.max(result2.distance, 0.1)}`);
+									console.log(`LIKES: ${result2.likes / 30}`);
+									console.log(`BLOCKS: ${result2.blocks / 20}`);
+									console.log(`TAGS: ${result2.commonTags.length * 10}`);
+									console.log(`CATS: ${result2.commonCats.length * 5}`);
+									console.log(`AGE: ${10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5}`);
+									result2.rating =
+										Math.round((10000 / Math.max(result2.distance, 0.1)) * (
+										(result2.likes / 30) -
+										(result2.blocks / 20) +
+										(result2.commonTags.length * 10) +
+										(result2.commonCats.length * 5) +
+										(10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
+									console.log(`TOTAL: ${result2.rating}`);
 									recommends.push(result2);
 								} else {
 									stop = true;
@@ -617,6 +632,7 @@ function getRecomendations(id, callback) {
  * @return {Float}      Distance in Meters                             *
  ***********************************************************************/
 function getDistance(pos1, pos2) {
+<<<<<<< HEAD
 	var x1 = pos1[0] * Math.PI / 180;
 	var y1 = pos1[1] * Math.PI / 180;
 	var x2 = pos2[0] * Math.PI / 180;
@@ -624,6 +640,16 @@ function getDistance(pos1, pos2) {
 	var x = (y2-y1) * Math.cos((x1+x2)/2);
 	var y = (y2-y1);
 	return (Math.sqrt(x*x + y*y) * 6371e3); // 6371e3 is the radius of the Earth in meters
+=======
+	var toRadians = Math.PI / 180;
+	var x1 = pos1[0] * toRadians;
+	var y1 = pos1[1] * toRadians;
+	var x2 = pos2[0] * toRadians;
+	var y2 = pos2[1] * toRadians;
+	var x = (y2-y1) * Math.cos((x1+x2)/2);
+	var y = (y2-y1);
+	return (Math.sqrt(x*x + y*y) * 6371000); // 6371000 is the radius of the Earth in meters
+>>>>>>> master
 }
 
 /************************************************************
@@ -633,12 +659,14 @@ function getDistance(pos1, pos2) {
  * @param  {Function} callback Called when database returns *
  ************************************************************/
 function like(id1, id2, callback) {
-	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'} MERGE (a)-[:LIKES]->(b))", {}, {
+	console.log(`ID1: ${id1} ID2: ${id2}`);
+	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (b)-[l:LIKES]->(a)  MERGE (a)-[:LIKES]->(b) RETURN COUNT(l)", {}, {
 		id1: id1,
 		id2: id2
 	})
-	.execute(server)
+	.exec(server)
 	.then((result) => {
+<<<<<<< HEAD
 		console.log(result);
 		find(id2, (result) => {
 			if (typeof result === 'object') {
@@ -649,11 +677,53 @@ function like(id1, id2, callback) {
 					</body>`;
 				email.send(result.email, 'You got a new like', send, (result) => {
 					callback(result);
+=======
+		find(id2, function(result2) {
+			console.log(require('util').inspect(result, { depth: null }));
+			if (typeof result2 !== false && result2.email !== undefined/* && typeof profilePic === 'string'*/) {
+				var send;
+				var subject;
+				if (result[0].data[0].row[0] === 1) {
+					send =
+						`<body>
+							<h2>You've got a connection on Matcha!!!</h2>
+							<h4>Please click the link below to view the person's account who made a connection with you</h4>
+							<a href="http://localhost:8080/account/${id1}">View</a>
+						</body>`;
+					subject = 'You got a connection on Matcha!!!';
+				} else {
+					send =
+						`<body>
+							<h2>You got a like on your Matcha profile</h2>
+							<h4>Please click the link below to view the person's account who liked you</h4>
+							<a href="http://localhost:8080/account/${id1}">View</a>
+						</body>`;
+					subject = 'you got a new like';
+				}
+
+				email.send(result2.email, subject, send, (result3) => {
+					callback(result3);
+>>>>>>> master
 				});
 			} else {
 				callback('Cannot find user id');
 			}
 		});
+	}, (fail) => {
+		console.log(fail);
+		callback(fail);
+	});
+}
+
+function countLikes(id1, id2, callback) {
+	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
+		id1: id1,
+		id2: id2
+	})
+	.exec(server)
+	.then((result) => {
+		console.log(require('util').inspect(result, { depth: null }));
+		console.log(result[0].data[0].row[0] + result[0].data[1].row[0]);
 	}, (fail) => {
 		console.log(fail);
 		callback(fail);
