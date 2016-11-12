@@ -17,7 +17,7 @@ module.exports = {
 	findMatches: findMatches,
 	getRecomendations: getRecomendations,
 	like: like,
-	getLikes: getLikes()
+	getLikes: getLikes
 };
 
 var apoc = require('apoc');
@@ -593,7 +593,10 @@ function getRecomendations(id, callback) {
 										(result2.commonCats.length * 5) +
 										(10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5)));
 									console.log(`TOTAL: ${result2.rating}`);
-									recommends.push(result2);
+//									getLikes(id, row.row[0], (likes) => {
+//										result2.likes = likes;
+										recommends.push(result2);
+//									});
 								} else {
 									stop = true;
 								}
@@ -689,13 +692,13 @@ function like(id1, id2, callback) {
 	});
 }
 
-/******************************************************************************/
-/* Get if ID1 likes ID2 and if ID2 likes ID1                                  */
-/* @method getLikes                                                           */
-/* @param  {String}   id1      ID of user 1                                   */
-/* @param  {String}   id2      ID of user 2                                   */
-/* @param  {Function} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}} */
-/******************************************************************************/
+/**
+ * Get if ID1 likes ID2 and if ID2 likes ID1
+ * @method getLikes
+ * @param  {String}   id1      ID of user 1
+ * @param  {String}   id2      ID of user 2
+ * @param  {fn(likes: Object)} callback Returns {id1id2: {Boolean}, id2id1: {Boolean}}
+ */
 function getLikes(id1, id2, callback) {
 	apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) OPTIONAL MATCH (a)-[al:LIKES]->(b) OPTIONAL MATCH (b)-[bl:LIKES]->(a) RETURN COUNT(al) AS aLikes, COUNT(bl) AS bLikes", {}, {
 		id1: id1,
