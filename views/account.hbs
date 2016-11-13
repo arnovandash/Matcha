@@ -188,6 +188,7 @@
 				<label>New password again</label>
 				<input type="password" ng-model="account.newPassword2" ng-pattern="account.newPassword">
 			</md-input-container>
+            <md-button style="width: 128px;" class="md-raised md-primary" ng-click="locateMe()" ng-hide="account.mine">Get Location</md-button>
 			<md-button class="md-raised md-primary" aria-label="register" ng-click="update()" ng-hide="account.mine">Save</md-button>
 		</form>
 		{{/if}}

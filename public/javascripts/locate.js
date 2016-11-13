@@ -48,7 +48,8 @@ app.service('locate', function($http) {
             latitude: lat,
             longitude: lng
         }).success(function(data) {
-			callback();
+            if (callback !== undefined)
+			    callback();
 //            console.log(data);
         }).error(function(data) {
 //            console.log('Error ' + data);
