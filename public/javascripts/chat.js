@@ -1,7 +1,24 @@
-app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams, $location, $filter) {
+app.service('chatHistory', function ($http, $q) {
+    var def = $q.defer();
+
+    this.getMeseges = function (userFromID, userToID) {
+        $http.post('/api/getChat', {to: userToID, from: userFromID})
+            .success(function (data) {
+                console.log('get chat');
+                def.resolve(data);
+
+            })
+            .error(function (data) {
+                console.log(`Error: ${data}`);
+                def.reject(data);
+            });
+        return (def.promise);
+    }
+});
+app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams, $location, chatHistory, $filter) {
 
     var socket;
-    var userid;
+    $scope.userid;
     if ($sessionStorage.user === null)
         $location.path("/");
     else if ($sessionStorage.user.id === undefined) {
@@ -15,62 +32,41 @@ app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams,
                 console.log(`Error: ${data}`);
             });
     }
-    userid = $sessionStorage.user.id;
-    console.log(userid);
+    $scope.userid = $sessionStorage.user.id;
+    console.log($scope.userid);
     console.log($routeParams.id);
-    if (userid === undefined)
+    console.log($sessionStorage.user);
+    if ($scope.userid === undefined)
         $location.path("/");
     else if ($routeParams.id === undefined)
         $location.path("/");
     else {
         socket = io();
-        $scope.records = new Array();
-        var meseges = new Array();
-        $http.post('/api/getChat', {to: $routeParams.id, from: userid})
-            .success(function (data) {
-                console.log('get chat');
-                var msgsent = angular.fromJson(data);
-                for (var i = 0; i < msgsent.length; i++) {
-                    //console.log(msgsent[i]);
-                   meseges.push(msgsent[i]);
-                }
-                console.log(msgsent);
-            })
-            .error(function (data) {
-                console.log(`Error: ${data}`);
-            });
-        $http.post('/api/getChat', {to:userid , from: $routeParams.id})
-            .success(function (data) {
-                console.log('get chat');
-                var msgsent = angular.fromJson(data);
-                for (var i = 0; i < msgsent.length; i++) {
-                    //console.log(msgsent[i]);
-                    meseges.push(msgsent[i]);
-                }
-                console.log(msgsent);
 
-                meseges = $filter('orderBy')(meseges, 'time');
-                console.log(meseges);
-                for (var i = 0; i < meseges.length; i++){
-                    $scope.records.push(meseges[i].msg);
-                }
-            })
-            .error(function (data) {
-                console.log(`Error: ${data}`);
-            });
-
+        chatHistory.getMeseges($scope.userid, $routeParams.id).then(function (data) {
+            $scope.records = data;
+            console.log("scope.recordes");
+            console.log($scope.records);
+            $scope.records = $filter('orderBy')($scope.records, $scope.records.time);
+        });
 
 
         $scope.send = function () {
             if ($scope.newMsg) {
                 var send = {
-                    'from': userid,
+                    'from': $scope.userid,
                     'to': $routeParams.id,
-                    'msg': $scope.newMsg
+                    'msg': $scope.newMsg,
+                    'fromUsername': $sessionStorage.user.username,
                 };
                 socket.emit('chat message', send);
             }
-            $scope.records.push($scope.newMsg);
+            $scope.records.push({
+                'from': $scope.userid,
+                'to': $routeParams.id,
+                'msg': $scope.newMsg,
+                'fromUsername': $sessionStorage.user.username,
+            });
             $scope.newMsg = "";
 
         };
@@ -82,7 +78,7 @@ app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams,
             $scope.$apply();
         });
 
-        socket.on(userid, function (msg) {
+        socket.on($scope.userid, function (msg) {
             console.log(msg);
             $scope.records.push(msg);
             console.log($scope.records);
