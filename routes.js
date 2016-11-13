@@ -110,6 +110,18 @@ router.post('/api/count_blocks', function (request, response) {
     }
 });
 
+router.post('/api/count_users', function (request, response) {
+    console.log(request.body);
+    sess = request.session;
+    if (sess.user === undefined || sess.user === null) {
+        response.json('You have to be logged in to view someone');
+    } else {
+        user.countAllUsers((result) => {
+            response.json(result);
+        });
+    }
+});
+
 router.post('/api/whoami', function (req, res) {
     res.json((typeof req.session.user === 'object') ? req.session.user : null);
 });
