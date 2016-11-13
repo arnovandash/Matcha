@@ -21,6 +21,7 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
         $scope.myDate.getFullYear() - 18,
         $scope.myDate.getMonth(),
         $scope.myDate.getDate());
+
     getUser();
     getLikes();
     getBlocks();

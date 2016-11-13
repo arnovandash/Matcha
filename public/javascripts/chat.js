@@ -13,29 +13,16 @@ app.service('chatHistory', function ($http, $q) {
                 def.reject(data);
             });
         return (def.promise);
-    }
+    };
 });
+
 app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams, $location, chatHistory, $filter) {
 
     var socket;
-    $scope.userid;
-    if ($sessionStorage.user === null)
-        $location.path("/");
-    else if ($sessionStorage.user.id === undefined) {
-        $http.post('/api/whoami')
-            .success(function (data) {
-                console.log(`WHOAMI: ${data}`);
-                $sessionStorage.user = data;
-                console.log($sessionStorage.user);
-            })
-            .error(function (data) {
-                console.log(`Error: ${data}`);
-            });
-    }
     $scope.userid = $sessionStorage.user.id;
-    console.log($scope.userid);
-    console.log($routeParams.id);
-    console.log($sessionStorage.user);
+//    console.log($scope.userid);
+//    console.log($routeParams.id);
+//    console.log($sessionStorage.user);
     if ($scope.userid === undefined)
         $location.path("/");
     else if ($routeParams.id === undefined)
@@ -54,35 +41,38 @@ app.controller('chat__', function ($scope, $http, $sessionStorage, $routeParams,
         $scope.send = function () {
             if ($scope.newMsg) {
                 var send = {
-                    'from': $scope.userid,
-                    'to': $routeParams.id,
-                    'msg': $scope.newMsg,
-                    'fromUsername': $sessionStorage.user.username,
+                    from: $scope.userid,
+                    to: $routeParams.id,
+                    msg: $scope.newMsg,
+                    fromUsername: $sessionStorage.user.username
                 };
+				console.log('Sending: ');
+				console.log(send);
                 socket.emit('chat message', send);
             }
             $scope.records.push({
-                'from': $scope.userid,
-                'to': $routeParams.id,
-                'msg': $scope.newMsg,
-                'fromUsername': $sessionStorage.user.username,
+                from: $scope.userid,
+                to: $routeParams.id,
+                msg: $scope.newMsg,
+                fromUsername: $sessionStorage.user.username
             });
             $scope.newMsg = "";
 
         };
 
-        socket.on('server message', function (msg) {
-            console.log(msg);
-            $scope.records.push(msg);
+        socket.on('server message', function (message) {
+            console.log(message);
+            $scope.records.push(message);
             console.log($scope.records);
             $scope.$apply();
         });
 
-        socket.on($scope.userid, function (msg) {
-            console.log(msg);
-            $scope.records.push(msg);
-            console.log($scope.records);
+        socket.on($scope.userid, function (message) {
+			console.log('New message');
+			console.log(message);
+            $scope.records.push(message);
+//            console.log($scope.records);
             $scope.$apply();
-        })
+        });
     }
 });
