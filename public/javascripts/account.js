@@ -1,4 +1,4 @@
-app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope, Upload) {
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope, Upload, locate) {
 	$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
 	$scope.account = {
 
@@ -26,6 +26,10 @@ app.controller('account__', function($scope, $http, $sessionStorage, $routeParam
     getBlocks();
     setFame();
     setCharacter();
+
+    $scope.locateMe = function() {
+        locate.getLocation();
+    };
 
     function setCharacter() {
         var like;
