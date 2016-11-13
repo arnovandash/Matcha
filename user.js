@@ -587,7 +587,7 @@ function getRecomendations(id, callback) {
 
             findMatches(id, (result1) => {
                 var indexes = result1.length;
-                if (typeof result1 === 'object') {
+				if (typeof result1 === 'object' && result1.length > 0) {
                     result1.forEach((row, index) => {
                         if (stop === false) {
                             get(row.row[0], (result2) => {
