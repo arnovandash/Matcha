@@ -95,8 +95,12 @@ a {
 }
 
 .recomend>div {
+	background-color: #FFF;
 	width: 360px;
 	height: 360px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .recomend>div>img {
@@ -203,4 +207,12 @@ a {
     max-height: 100%;
     width: auto;
     height: auto;
+}
+
+.fromMe {
+    text-align: right;
+}
+.messageUsername{
+    font: italic bold 14px/30px Georgia, serif;
+    font-size: smaller;
 }

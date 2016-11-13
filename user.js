@@ -16,6 +16,7 @@ module.exports = {
     getTags: getTags,
     countLikes: countLikes,
     countBlocks:countBlocks,
+    countAllUsers: countAllUsers,
     findMatches: findMatches,
     getRecomendations: getRecomendations,
     like: like,
@@ -797,7 +798,7 @@ function countLikes(id, callback) {
         .exec(server)
         .then((result) => {
             result = result[0].data[0].row[0];
-        console.log(result);
+        //console.log(result);
             callback(result);
     }, (fail) => {
             console.log(fail);
@@ -815,10 +816,28 @@ function countBlocks(id, callback) {
         .exec(server)
         .then((result) => {
             result = result[0].data[0].row[0];
-            console.log(result);
+            //console.log(result);
             callback(result);
         }, (fail) => {
             console.log(fail);
+            callback(fail);
+        });
+}
+
+/*************************************************************
+ * count all users                                           *
+ ************************************************************/
+function countAllUsers(callback) {
+    console.log("count all users called");
+    apoc.query("match (p:Person) return count(p) as count", {},{})
+        .exec(server)
+        .then((result) => {
+            //console.log(result);
+            result = result[0].data[0].row[0] - 1;
+            //console.log(result);
+            callback(result);
+        }, (fail) => {
+            //console.log(fail);
             callback(fail);
         });
 }

@@ -13,7 +13,7 @@ function saveMessege(msg) {
 }
 
 function getChat(to, from, callback) {
-    mongo.find('chat', {to:to, from:from}, function (result) {
+    mongo.find('chat',{$or: [{to:to, from:from},{to:from, from:to}]} ,function (result) {
         console.log(result);
         callback(result);
     });

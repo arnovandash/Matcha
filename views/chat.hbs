@@ -1,8 +1,12 @@
 {{> toolbar}}
 <md-content layout-padding layout-wrap>
-    <div>
-        <h2>chat history</h2>
-        <div ng-repeat="n in records track by $index">\{{n}}</div>
+    <h2>chat history</h2>
+    <md-content layout-padding layout="column">
+        <div ng-repeat="n in records track by $index" ng-class="{fromMe: n.from === userid}" flex>
+            <span class="messageUsername"><i>\{{n.fromUsername}} </i></span>\{{n.msg}}
+        </div>
+    </md-content>
+
     </div>
     <form name="chatForm">
         <md-input-container>
