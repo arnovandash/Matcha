@@ -32,7 +32,6 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
             id: $scope.userId
         })
             .success(function (data) {
-                console.log(data);
                 if (data) {
                     data.birthdate = new Date(data.birthdate * 1000);
                     var monthNames = [
@@ -40,7 +39,6 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                         'May', 'June', 'July', 'August',
                         'September', 'October', 'November', 'December'
                     ];
-                    console.log(data);
                     $scope.account = {
                         firstname: data.firstname,
                         lastname: data.lastname,
@@ -56,7 +54,6 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                     };
                     $scope.originalUsername = data.username;
                     $scope.numImages = data.image_num;
-                    $scope.imgArray = data.images;
                     if (data.images) {
                         $scope.img1 = (data.images[0] === undefined) ? null : "uploads/" + data.images[0] + ".png";
                         $scope.img2 = (data.images[1] === undefined) ? null : "uploads/" + data.images[1] + ".png";
@@ -267,16 +264,23 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
         window.location.replace(`/chat/${$routeParams.id}`);
     };
 
-    $scope.deletePic = function (img_num) {
-         {
-             console.log($scope.imgArray);
-            $http.post('/api/del_img', {
-                uid: $scope.imgArray[img_num],
-            }).success((result) => {
-                console.log(`Image deleted: ${result}`);;
+    $scope.deletePic = function (img_num, callback) {
+        $http.post('/api/del_img', {
+                img_num: img_num
+            }).success((data) => {
+                callback(data);
             });
         }
-    }
+        /*
+        $http.post('/api/del_img', {
+                img_num: img_num,
+            }).success((result) => {
+                console.log(`Image deleted: ${result}`);
+            }).error((result) => {
+                cosole
+        });
+             //$scope.numImages--;
+        */
 
 
     $scope.uploadPic = function (file) {

@@ -67,19 +67,29 @@ function imgUpload(username, uid, callback) {
                 {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
         }
         else {
-            console.log("Image not sent to db");
+            console.log("Error! Image not loaded into DB!");
             callback(false);
         }
     });
 }
 
-function imgPull(username, uid, callback) {
+function imgPull(username, img_num, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
         if (result[0].image_num > 0 || result[0].image_num === null || result[0].image_num === undefined) {
-            mongo.update('users', {username: username},
-                {$inc: {image_num: -1}, $pull: {images: uid}}, callback);
+            //var modifier = { $inc: {}, $unset: {}, $pull: {} };
+            var modifier = { $inc: {}, $unset: {}, $pull: {} };
+            modifier.$inc['image_num'] = -1;
+            modifier.$unset['images.' + img_num] = 1;
+            modifier.$pull['images'] = null;
+            //console.log(image_val);
+            mongo.update('users', {username: username}, modifier);
+               // {$inc: {image_num: -1}, $unset: {image_val: 1}, $pull: {images: null}}, callback);
+        }
+        else {
+            console.log("Error! Image not removed from DB!");
+            callback(false);
         }
     });
 }

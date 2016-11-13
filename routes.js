@@ -94,10 +94,10 @@ router.post('/api/add_img', function(req, res) {
 
 router.post('/api/del_img', function(req, res) {
     sess = req.session.user;
-    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
-    console.log("Removing: " + filepath);
-    fs.unlink(filepath);
-    user.imgPull(sess.username, req.body.uid, function (result) {
+//    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+//    console.log("Removing: " + filepath);
+//    fs.unlink(filepath);
+    user.imgPull(sess.username, req.body.img_num, function (result) {
         res.json(result);
     });
 });
