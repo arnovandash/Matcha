@@ -79,9 +79,9 @@ app.controller('register__', function ($scope, $http, partial, $mdToast) {
             $mdToast.show(
                 $mdToast.simple()
                     .parent(document.getElementById('toaster'))
-                    .textContent("Successfully registered")
+                    .textContent("Successfully registered please check you email for confirmation")
                     .position('top right')
-                    .hideDelay(3000)
+                    .hideDelay(4500)
             );
             angular.copy(null);
         }).error(function (data) {
