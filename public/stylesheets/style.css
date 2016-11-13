@@ -172,3 +172,7 @@ a {
 .fromMe {
     text-align: right;
 }
+.messageUsername{
+    font: italic bold 14px/30px Georgia, serif;
+    font-size: smaller;
+}
