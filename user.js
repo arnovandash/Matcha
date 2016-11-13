@@ -69,37 +69,28 @@ function imgUpload(username, uid, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num < 5 || result[0].image_num === null) {
-            mongo.update('users', {
-                username: username
-            }, {
-                $inc: {
-                    image_num: 1
-                },
-                $addToSet: {
-                    images: uid
-                }
-            }, callback);
-        } else
+        if (result[0].image_num < 5 || result[0].image_num === null || result[0].image_num === undefined) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: 1}, $addToSet : {images : uid}}, callback);
+        }
+        else {
+            console.log("Error! Image not loaded into DB!");
             callback(false);
+        }
     });
 }
 
-function imgPull(username, uid, callback) {
+function imgPull(username, imgName, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
-        if (result[0].image_num > 0 || result[0].image_num === null) {
-            mongo.update('users', {
-                username: username
-            }, {
-                $inc: {
-                    image_num: -1
-                },
-                $pull: {
-                    images: uid
-                }
-            }, callback);
+        if (result[0].image_num > 0 || result[0].image_num === null || result[0].image_num === undefined) {
+            mongo.update('users', {username: username},
+                {$inc: {image_num: -1}, $pull : {images : imgName}}, callback);
+        }
+        else {
+            console.log("Error! Image not removed from DB!");
+            callback(false);
         }
     });
 }
@@ -628,6 +619,7 @@ function getRecomendations(id, callback) {
 	                                            (result2.commonCats.length * 5) +
 	                                            (10 / Math.max(Math.abs((result[0].age / 2 + 7) - result2.age), 0.75) * 5))) * -1;
 	                                    //									console.log(`TOTAL: ${result2.rating}`);
+	                                    result2.profilePic = (result2.images !== undefined && result2.images.length > 0) ? result2.images[0] : null;
 	                                    recommends.push(result2);
 									}
                                 } else {

@@ -3,9 +3,9 @@ var session = require('express-session');
 var user = require('./user');
 var fs = require('fs');
 var path = require('path');
+var chat = require('./chat');
 var router = express.Router();
 var sess;
-var chat = require('./chat');
 
 router.get('/partials/home', function (req, res) {
     sess = req.session;
@@ -131,13 +131,15 @@ router.post('/api/add_img', function(req, res) {
 
 router.post('/api/del_img', function(req, res) {
     sess = req.session.user;
-    var filepath = path.join(__dirname, 'public', 'uploads', req.body.uid + '.png');
+    var r = req.body;
+    var filepath = path.join(__dirname, 'public', 'uploads', r.image + '.png');
     console.log("Removing: " + filepath);
     fs.unlink(filepath);
-    user.imgPull(sess.username, req.body.uid, function (result) {
+    user.imgPull(sess.username, r.image, function (result) {
         res.json(result);
     });
 });
+
 
 /**************************************************************
  * Returns true if username is free, false if username exists *
