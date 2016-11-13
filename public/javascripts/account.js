@@ -422,4 +422,28 @@ app.controller('account__', function ($scope, $http, $sessionStorage, $routePara
                 console.log(`Error: ${error}`);
             });
     };
+
+	$scope.fake = () => {
+        $http.post('/api/fake', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You reported +  ${$scope.account.username} as fake`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+					window.location.replace('/');
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
 });

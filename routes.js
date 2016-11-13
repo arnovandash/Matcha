@@ -330,6 +330,17 @@ router.post('/api/get_blocks', (req, res) => {
     }
 });
 
+router.post('/api/fake', (req, res) => {
+    sess = req.session;
+    if (sess.user === undefined || sess.user === null) {
+        res.json('You have to be logged in to report someone as fake');
+    } else {
+        user.fake(sess.user.id, req.body.id, (result) => {
+            res.json(result);
+        });
+    }
+});
+
 /********************************************************
  * Has to be last route. Do not put any code under this *
  ********************************************************/

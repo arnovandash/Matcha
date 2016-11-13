@@ -24,7 +24,8 @@ module.exports = {
     getLikes: getLikes,
 	block: block,
 	unblock: unblock,
-	getBlocks: getBlocks
+	getBlocks: getBlocks,
+	fake: fake
 };
 
 var apoc = require('apoc');
@@ -965,6 +966,43 @@ function getBlocks(id1, id2, callback) {
             });
         }, (fail) => {
             console.log(fail.message);
+            callback(fail);
+        });
+}
+
+/**
+ * Creates a FAKE replationship between ID1 and ID2
+ * @method fake
+ * @param  {String}   id1      User ID doing the Reporting Fake
+ * @param  {String}   id2      User ID being Reported Fake
+ * @param  {Function} callback Called when database returns
+ */
+function fake(id1, id2, callback) {
+    apoc.query("MATCH (a:Person {id: '`id1`'}) MATCH (b:Person {id: '`id2`'}) MERGE (a)-[fake:FAKE]->(b) RETURN fake", {}, {
+            id1: id1,
+            id2: id2
+        })
+        .exec(server)
+        .then((result) => {
+            find(id2, function(result2) {
+                //			console.log(require('util').inspect(result, { depth: null }));
+                if (typeof result2 !== false && result2.email !== undefined) {
+                    var send =
+                        `<body>
+							<h2>You got reported as fake on Matcha!!!</h2>
+							<h4>Please click the link below to view your account</h4>
+							<a href="http://localhost:8080/account/">View</a>
+						</body>`;
+
+                    email.send(result2.email, 'You got reported as fake on Matcha!!!', send, (result3) => {
+                        callback(result3);
+                    });
+                } else {
+                    callback('Cannot find user id');
+                }
+            });
+        }, (fail) => {
+            console.log(fail);
             callback(fail);
         });
 }
