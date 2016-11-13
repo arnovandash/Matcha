@@ -23,7 +23,8 @@ module.exports = {
     getLikes: getLikes,
 	block: block,
 	unblock: unblock,
-	getBlocks: getBlocks
+	getBlocks: getBlocks,
+	fake: fake
 };
 
 var apoc = require('apoc');
@@ -952,7 +953,7 @@ function getBlocks(id1, id2, callback) {
 
 /**
  * Creates a FAKE replationship between ID1 and ID2
- * @method block
+ * @method fake
  * @param  {String}   id1      User ID doing the Reporting Fake
  * @param  {String}   id2      User ID being Reported Fake
  * @param  {Function} callback Called when database returns
@@ -968,7 +969,7 @@ function fake(id1, id2, callback) {
                 //			console.log(require('util').inspect(result, { depth: null }));
                 if (typeof result2 !== false && result2.email !== undefined) {
                     var send =
-                            `<body>
+                        `<body>
 							<h2>You got reported as fake on Matcha!!!</h2>
 							<h4>Please click the link below to view your account</h4>
 							<a href="http://localhost:8080/account/">View</a>
