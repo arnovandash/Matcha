@@ -2,9 +2,11 @@
 <md-content layout-padding layout-wrap>
     <h2>chat history</h2>
     <md-content layout-padding layout="column">
-        <div ng-repeat="n in records track by $index" ng-class="{fromMe: n.from === userid}" flex>
-            <span class="messageUsername"><i>\{{n.fromUsername}} </i></span>\{{n.msg}}
-        </div>
+		<div style="max-width: 500px">
+			<div ng-repeat="n in records track by $index" ng-class="{fromMe: n.from === userid}" flex>
+	            <span class="messageUsername"><strong>\{{n.fromUsername}}</strong> </span>\{{n.msg}}
+	        </div>
+		</div>
     </md-content>
 
     </div>
@@ -13,6 +15,6 @@
             <lable>messege</lable>
             <input type="text" autocorrect="off" id="chatBox" ng-model="newMsg" aria-label="Send box">
         </md-input-container>
-        <md-button ng-click="send()" aria-label="Send message">send</md-button>
+        <md-button type="submit" ng-click="send()" aria-label="Send message">send</md-button>
     </form>
 </md-content>
