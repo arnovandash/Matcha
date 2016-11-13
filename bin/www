@@ -38,9 +38,9 @@ io.on('connection', function(socket){
         console.log(msg);
         if (msg.to && msg.from) {
             chat.saveMessege(msg);
-            io.emit(msg.to, msg.msg);
+            io.emit(msg.to, msg);
         }
-    })
+    });
 });
 /**
  * Normalize a port into a number, string, or false.
