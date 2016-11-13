@@ -73,19 +73,13 @@ function imgUpload(username, uid, callback) {
     });
 }
 
-function imgPull(username, img_num, callback) {
+function imgPull(username, imgName, callback) {
     mongo.find('users', {
         username: username
     }, function(result) {
         if (result[0].image_num > 0 || result[0].image_num === null || result[0].image_num === undefined) {
-            //var modifier = { $inc: {}, $unset: {}, $pull: {} };
-            var modifier = { $inc: {}, $unset: {}, $pull: {} };
-            modifier.$inc['image_num'] = -1;
-            modifier.$unset['images.' + img_num] = 1;
-            modifier.$pull['images'] = null;
-            //console.log(image_val);
-            mongo.update('users', {username: username}, modifier);
-               // {$inc: {image_num: -1}, $unset: {image_val: 1}, $pull: {images: null}}, callback);
+            mongo.update('users', {username: username},
+                {$inc: {image_num: -1}, $pull : {images : imgName}}, callback);
         }
         else {
             console.log("Error! Image not removed from DB!");

@@ -55,6 +55,7 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                     $scope.originalUsername = data.username;
                     $scope.numImages = data.image_num;
                     if (data.images) {
+                        $scope.imgArray = data.images.slice(0);
                         $scope.img1 = (data.images[0] === undefined) ? null : "uploads/" + data.images[0] + ".png";
                         $scope.img2 = (data.images[1] === undefined) ? null : "uploads/" + data.images[1] + ".png";
                         $scope.img3 = (data.images[2] === undefined) ? null : "uploads/" + data.images[2] + ".png";
@@ -265,49 +266,27 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
     };
 
     $scope.deletePic = function (img_num, callback) {
-        $http.post('/api/del_img', {
-                img_num: img_num
-            }).success((data) => {
-                callback(data);
-            });
-        }
-        /*
-        $http.post('/api/del_img', {
-                img_num: img_num,
+        if ($scope.imgArray[img_num] !== undefined) {
+            $http.post('/api/del_img', {
+                image: $scope.imgArray[img_num]
             }).success((result) => {
                 console.log(`Image deleted: ${result}`);
-            }).error((result) => {
-                cosole
-        });
-             //$scope.numImages--;
-        */
-
+                $scope.numImages--;
+                getUser();
+                callback;
+                galleryRefresh({
+                    uid: null
+                })
+            });
+        }
+    };
 
     $scope.uploadPic = function (file) {
         Upload.base64DataUrl(file).then(function (image) {
             imgPost(image, function (result) {
                 console.log(`Image Upload Status: ${result.data}`);
                 console.log(`Image Upload Status: ${result.uid}`);
-                if (result.data == true) {
-                    switch ($scope.numImages) {
-                        case 0:
-                            $scope.img1 = "uploads/" + result.uid + ".png";
-                            break;
-                        case 1:
-                            $scope.img2 = "uploads/" + result.uid + ".png";
-                            break;
-                        case 2:
-                            $scope.img3 = "uploads/" + result.uid + ".png";
-                            break;
-                        case 3:
-                            $scope.img4 = "uploads/" + result.uid + ".png";
-                            break;
-                        case 4:
-                            $scope.img5 = "uploads/" + result.uid + ".png";
-                            break;
-                    }
-                    $scope.numImages++;
-                }
+                galleryRefresh(result);
             });
         });
     };
@@ -321,16 +300,40 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
     }
 
     function imgPost(data, callback) {
-        var img = data.replace(/^data:image\/\w+;base64,/, "");
-        var uid = makeid(16);
-        $http.post('/api/add_img', {
-            uid: uid,
-            data: img
-        }).success((data) => {
-            callback({
+        if ($scope.numImages < 5 || $scope.numImages === undefined) {
+            var img = data.replace(/^data:image\/\w+;base64,/, "");
+            var uid = makeid(16);
+            $http.post('/api/add_img', {
                 uid: uid,
-                data: data
+                data: img
+            }).success((data) => {
+                getUser();
+                callback({
+                    uid: uid,
+                    data: data
+                });
             });
-        });
+        }
+    }
+
+    function galleryRefresh(data) {
+        switch ($scope.numImages) {
+            case 0:
+                $scope.img1 = data.uid ? "uploads/" + data.uid + ".png" : " ";
+                break;
+            case 1:
+                $scope.img2 = data.uid ? "uploads/" + data.uid + ".png" : " ";
+                break;
+            case 2:
+                $scope.img3 = data.uid ? "uploads/" + data.uid + ".png" : " ";
+                break;
+            case 3:
+                $scope.img4 = data.uid ? "uploads/" + data.uid + ".png" : " ";
+                break;
+            case 4:
+                $scope.img5 = data.uid ? "uploads/" + data.uid + ".png" : " ";
+                break;
+        }
+        $scope.numImages++;
     }
 });
