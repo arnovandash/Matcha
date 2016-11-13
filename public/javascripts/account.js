@@ -1,5 +1,7 @@
-app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast) {
-    $scope.account = {
+
+app.controller('account__', function($scope, $http, $sessionStorage, $routeParams, $timeout, $q, $mdDialog, $mdToast, $rootScope, Upload) {
+	$scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
+	$scope.account = {
         selectedTags: [],
         tags: [],
         types: [],
@@ -7,31 +9,85 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
         searchText: null,
     };
 
-    if ($sessionStorage.user === null) {
-        $http.post('/api/whoami')
-            .success(function (data) {
-                console.log(data);
-                if (data === null) {
-                    window.location.replace('/');
-                } else {
-                    $sessionStorage.user = data;
-                    getUser();
-                }
+    $scope.myDate = new Date();
+    var ctrl = this;
+
+    $scope.minDate = new Date(
+        $scope.myDate.getFullYear() - 100,
+        $scope.myDate.getMonth(),
+        $scope.myDate.getDate());
+
+    $scope.maxDate = new Date(
+        $scope.myDate.getFullYear() - 18,
+        $scope.myDate.getMonth(),
+        $scope.myDate.getDate());
+    getUser();
+    getLikes();
+    getBlocks();
+    setFame();
+
+function setFame(){
+    var like;
+    var dislike;
+    $http.post('/api/count_likes', {
+        id: $scope.userId
+    })
+        .success((data) => {
+            console.log(data);
+            like = data;
+            if (like === 0) {
+				$scope.fameValue = 0;
+			} else {
+                $http.post('/api/count_blocks', {
+                    id: $scope.userId
+                })
+                    .success((data) => {
+                        console.log(data);
+                        dislike = data;
+                        $scope.fameValue = Math.ceil((like / (dislike + like)) * 100);
+                    })
+                    .error((data) => {
+                        console.log(`Error: ${data}`);
+                    });
+            }
+        })
+        .error((data) => {
+            console.log(`Error: ${data}`);
+        });
+}
+
+    function getLikes() {
+        $http.post('/api/get_likes', {
+                id: $scope.userId
             })
-            .error(function (data) {
+            .success((data) => {
+                console.log(data);
+                $scope.likes = data;
+            })
+            .error((data) => {
                 console.log(`Error: ${data}`);
             });
-    } else {
-        console.log('over here!');
-        getUser();
+    }
+
+    function getBlocks() {
+        $http.post('/api/get_blocks', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                console.log(data);
+                $scope.blocks = data;
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
     }
 
     function getUser() {
-        $scope.userId = ($routeParams.id !== undefined) ? $routeParams.id : $sessionStorage.user.id;
         $http.post('/api/get_user', {
             id: $scope.userId
         })
-            .success(function (data) {
+            .success(function(data) {
+                //                console.log(data);
                 if (data) {
                     data.birthdate = new Date(data.birthdate * 1000);
                     var monthNames = [
@@ -90,8 +146,8 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                 other: account.interestedOther
             },
             birthdate: {
-                day: account.birthdate.getUTCDate() + 1,
-                month: account.birthdate.getUTCMonth() + 1,
+                day: account.birthdate.getUTCDate(),
+                month: account.birthdate.getUTCMonth(),
                 year: account.birthdate.getUTCFullYear()
             },
             tags: account.selectedTags.map(function (tag) {
@@ -108,8 +164,8 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
             send.gender = 'O';
         }
         if (!send.seeking.male && !send.seeking.female && !send.seeking.other) {
-            console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
-            console.log(`Damn Angus we were just joking about adding this!`);
+            //console.log(`Don't worry, it's just a phase, but you'll probably end up gay.Please be sure to update your profile when you realise this`);
+            //console.log(`Damn Angus we were just joking about adding this!`);
             send.seeking = {
                 male: true,
                 female: true,
@@ -135,8 +191,8 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
         $http.post('/api/modify', {
             update: send
         })
-            .success(function (data) {
-                console.log(data);
+            .success(function(data) {
+                //                console.log(data);
                 var message = '';
                 if (data === true) {
                     message = 'Profile updated successfully!';
@@ -150,15 +206,14 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                         .position('top right')
                         .hideDelay(3000)
                 );
-
             })
             .error(function (data) {
                 console.log(`Error: ${data}`);
             });
     };
 
-    $scope.transformChip = function (chip, ev) {
-        console.log($scope.account.selectedTags);
+    $scope.transformChip = function(chip, ev) {
+        //        console.log($scope.account.selectedTags);
         if (angular.isObject(chip)) {
             return chip;
         }
@@ -247,13 +302,22 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
 
     $scope.like = () => {
         $http.post('/api/like', {
-            id: $routeParams.id
-        })
+                id: $routeParams.id
+            })
             .success((data) => {
                 if (data === true) {
-                    console.log(`You liked ${$scope.account.username}`);
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You liked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.likes.id1id2 = true;
+                    setFame();
                 } else {
-                    console.log(data);
+                    //                    console.log(data);
                 }
             })
             .error((data) => {
@@ -273,10 +337,10 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
                 console.log(`Image deleted: ${result}`);
                 $scope.numImages--;
                 getUser();
-                callback;
+                callback();
                 galleryRefresh({
                     uid: null
-                })
+                });
             });
         }
     };
@@ -336,4 +400,97 @@ app.controller('account__', function ($scope, $http, Upload, $sessionStorage, $r
         }
         $scope.numImages++;
     }
+
+    $scope.unlike = () => {
+        $http.post('/api/unlike', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unliked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.likes.id1id2 = false;
+                    setFame();
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
+    };
+
+    $scope.block = () => {
+        $http.post('/api/block', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You blocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = true;
+                    setFame();
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
+
+    $scope.unblock = () => {
+        $http.post('/api/unblock', {
+                id: $scope.userId
+            })
+            .success((data) => {
+                if (data === true) {
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You unblocked ${$scope.account.username}`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+                    $scope.blocks.id1id2 = false;
+                    setFame();
+                }
+            })
+            .error((error) => {
+                console.log(`Error: ${error}`);
+            });
+    };
+
+	$scope.fake = () => {
+        $http.post('/api/fake', {
+                id: $routeParams.id
+            })
+            .success((data) => {
+                if (data === true) {
+                    //					console.log(`You liked ${$scope.account.username}`);
+                    $mdToast.show(
+                        $mdToast.simple()
+                        .parent(document.getElementById('toaster'))
+                        .textContent(`You reported +  ${$scope.account.username} as fake`)
+                        .position('top right')
+                        .hideDelay(3000)
+                    );
+					window.location.replace('/');
+                } else {
+                    //                    console.log(data);
+                }
+            })
+            .error((data) => {
+                console.log(`Error: ${data}`);
+            });
+    };
 });

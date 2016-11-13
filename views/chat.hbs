@@ -1,0 +1,14 @@
+{{> toolbar}}
+<md-content layout-padding layout-wrap>
+    <div>
+        <h2>chat history</h2>
+        <div ng-repeat="n in records track by $index">\{{n}}</div>
+    </div>
+    <form name="chatForm">
+        <md-input-container>
+            <lable>messege</lable>
+            <input type="text" autocorrect="off" id="chatBox" ng-model="newMsg" aria-label="Send box">
+        </md-input-container>
+        <md-button ng-click="send()" aria-label="Send message">send</md-button>
+    </form>
+</md-content>

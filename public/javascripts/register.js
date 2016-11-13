@@ -1,6 +1,7 @@
-app.controller('register__', function ($scope, $http, partial) {
-    $scope.validUsername = false;
+app.controller('register__', function ($scope, $http, partial, $mdToast) {
+    //$scope.validUsername = false;
     $scope.myDate = new Date();
+    var ctrl = this;
 
     $scope.minDate = new Date(
         $scope.myDate.getFullYear() - 100,
@@ -11,6 +12,21 @@ app.controller('register__', function ($scope, $http, partial) {
         $scope.myDate.getFullYear() - 18,
         $scope.myDate.getMonth(),
         $scope.myDate.getDate());
+
+    var reset = {
+        username: "",
+        firstname: "",
+        lastname:"",
+        gender:"",
+        interestedMale: false,
+        interestedFemale: false,
+        interestedOther: false,
+        birthdate: undefined,
+        email: "",
+        email2: "",
+        password:"",
+        password2:""
+    };
 
     $scope.register = function () {
         var reg = $scope.reg;
@@ -54,15 +70,26 @@ app.controller('register__', function ($scope, $http, partial) {
                 send.lookingFor.other = false;
             }
         }
-        console.log(send);
+
         $http.post('/api/register', send).success(function (data) {
             console.log(data);
+            $scope.reg = angular.copy(reset);
+            $scope.registerForm.$setPristine();
+            $scope.registerForm.$setUntouched();
+            $mdToast.show(
+                $mdToast.simple()
+                    .parent(document.getElementById('toaster'))
+                    .textContent("Successfully registered please check you email for confirmation")
+                    .position('top right')
+                    .hideDelay(4500)
+            );
+            angular.copy(null);
         }).error(function (data) {
             console.log('Error ' + data);
         });
     };
 
-    $scope.checkUsername = function () {
+    /*$scope.checkUsername = function () {
         if ($scope.reg.username !== undefined) {
             $http.post('/api/check_username', {
                 username: $scope.reg.username
@@ -89,6 +116,6 @@ app.controller('register__', function ($scope, $http, partial) {
         } else {
             console.log('No email');
         }
-    };
+    };*/
 });
 

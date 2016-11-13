@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+
 {{> toolbar}}
 <md-content layout-padding layout-wrap>
     <h1>Welcome {{ username }}</h1>
 
 	{{{{angular}}}}
 	<div class="recomend-container">
-		<article ng-repeat="person in recomendations" id="{{person.id}}" class="recomend" style="background-color: rgb(103,58,183); order: {{-1 * person.rating}}">
+		<article ng-repeat="person in recomendations" id="{{person.id}}" class="recomend" style="background-color: rgb(103,58,183); order: {{person.rating}}">
 			<header>
 				<a ng-href="/account/{{person.id}}">
 					<span><strong>{{person.username}}</strong> ({{person.firstname}} {{person.lastname}})</span>

@@ -43,6 +43,7 @@ app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets'
 app.use('/material', express.static(path.join(__dirname, 'public/material')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/socket.io', express.static(path.join(__dirname, 'node_modules/socket.io-client')));
 app.use('/', routes);
 
 //user.add('yolo2', 'Yolo', 'Swaggins', 'O', '010', 1477660696, 'yoloswaggins@mailinator.com', 'asdf');
