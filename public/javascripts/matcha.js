@@ -6,7 +6,7 @@ app.controller('matcha__', function($http, $scope, $sessionStorage, $rootScope) 
         .success(function(data) {
 			if (data === null) {
 				$sessionStorage.user = null;
-				if (window.location.pathname !== '/') {
+				if (window.location.pathname !== '/' && !window.location.pathname.match(/\/confirm\/.*?/i) && !window.location.pathname.match(/\/reset\/.*?/i)) {
 					window.location.replace('/');
 				}
 			} else {
